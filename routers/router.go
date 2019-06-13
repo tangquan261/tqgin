@@ -2,7 +2,7 @@ package routers
 
 import (
 	"fmt"
-	"tqTestGin/controllers"
+	"tqgin/controllers"
 
 	"github.com/gin-gonic/gin"
 )

@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"tqTestGin/routers"
+	_ "tqgin/models"
+	"tqgin/routers"
 
 	"github.com/astaxie/beego/config"
 	"github.com/gin-gonic/gin"
@@ -28,5 +29,5 @@ func main() {
 
 	routers.Router(router)
 
-	router.Run(":8081")
+	router.Run(":" + tqConfig.String("httpport"))
 }
