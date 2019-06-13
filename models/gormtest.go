@@ -12,6 +12,7 @@ type Animal struct {
 }
 
 func Gromtest() {
+
 	fmt.Println("gorm test")
 	DB.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&Animal{})
 

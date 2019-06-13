@@ -9,19 +9,20 @@ import (
 
 	"github.com/astaxie/beego/config"
 	"github.com/gin-gonic/gin"
-	//tqlog "github.com/sirupsen/logrus"
+	"github.com/segmentio/ksuid"
+	tqlog "github.com/sirupsen/logrus"
 )
 
 func init() {
 	// Log as JSON instead of the default ASCII formatter.
-	// tqlog.SetFormatter(&tqlog.JSONFormatter{})
+	tqlog.SetFormatter(&tqlog.JSONFormatter{})
 
-	// // Output to stdout instead of the default stderr
-	// // Can be any io.Writer, see below for File example
-	// tqlog.SetOutput(os.Stdout)
+	// Output to stdout instead of the default stderr
+	// Can be any io.Writer, see below for File example
+	//tqlog.SetOutput(os.Stdout)
 
-	// // Only log the warning severity or above.
-	// tqlog.SetLevel(tqlog.WarnLevel)
+	// Only log the warning severity or above.
+	tqlog.SetLevel(tqlog.WarnLevel)
 }
 
 var (
@@ -30,6 +31,9 @@ var (
 )
 
 func main() {
+	uid := ksuid.New()
+
+	fmt.Println(uid.String())
 
 	var err error
 	Tqconfig, err = config.NewConfig("ini", "./conf/app.conf")

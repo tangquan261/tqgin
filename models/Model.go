@@ -13,8 +13,6 @@ var (
 
 func init() {
 
-	db.DB().SetMaxIdleConns(10)
-	db.DB().SetMaxOpenConns(100)
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
 		return "tq_" + defaultTableName
 	}
@@ -26,10 +24,11 @@ func init() {
 		panic(err)
 	}
 
+	DB.DB().SetMaxIdleConns(10)
+	DB.DB().SetMaxOpenConns(100)
 	DB.LogMode(true)
 	DB.SingularTable(true)
 	DB.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&Account{}, &UserInfo{})
 
-	Gromtest()
 	fmt.Println("db init success")
 }
