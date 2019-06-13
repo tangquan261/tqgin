@@ -9,8 +9,10 @@ import (
 
 func Router(router *gin.Engine) {
 
-	fmt.Println("router init...")
+	fmt.Println("router init begin ...")
 
 	new(controllers.LoginController).RegisterRouter(router)
+
+	fmt.Println("router init success...")
 
 }

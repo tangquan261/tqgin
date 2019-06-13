@@ -6,6 +6,7 @@
 package controllers
 
 import (
+	"fmt"
 	"strconv"
 	"tqgin/common"
 	"tqgin/models"
@@ -70,6 +71,7 @@ func (c *LoginController) register(con *gin.Context) {
 
 	account.LoginType = int8(loginType)
 
+	fmt.Println(account.AccountID, account.Password, account.LoginType)
 	if len(account.AccountID) < 11 {
 		status = 1
 		msg = "账号错误"
@@ -81,7 +83,16 @@ func (c *LoginController) register(con *gin.Context) {
 		status, retAccount = models.Register(&account)
 
 		if status == 0 {
-			msg = "注册成功"
+
+			user := models.GetDefaultUserinfo(retAccount.PlayerID, strconv.FormatInt(retAccount.PlayerID, 10), 0)
+
+			bret := models.CreateUser(&user)
+			if bret {
+				msg = "注册成功"
+				status = 0
+			} else {
+				msg = "创建用户信息失败"
+			}
 		} else {
 			msg = "注册失败，已经注册过"
 		}

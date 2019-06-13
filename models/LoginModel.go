@@ -9,21 +9,6 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-var (
-	DB *gorm.DB
-)
-
-func init() {
-	var err error
-	DB, err = gorm.Open("mysql", "root:tangquan@/dbtest?charset=utf8&parseTime=True&loc=Local")
-
-	if nil != err {
-		panic(err)
-	}
-	//DB.SingularTable(true)
-	DB.AutoMigrate(&Account{})
-}
-
 const (
 	LoginType_Phone  = 1
 	LoginType_QQ     = 2
@@ -34,7 +19,7 @@ type Account struct {
 	gorm.Model
 	AccountID string `gorm:"primary_key"`
 	Password  string
-	PlayerID  int64
+	PlayerID  int64 `gorm:"not null"`
 	LoginType int8
 	LoginTime time.Time
 	//屏蔽时间
@@ -49,7 +34,7 @@ func LoginAccount(accountID string) *Account {
 
 	err := DB.Find(&account, "account_id = ?", accountID).GetErrors()
 
-	if err != nil {
+	if len(err) > 0 {
 		log.Println(err, accountID)
 	}
 
