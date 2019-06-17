@@ -28,7 +28,9 @@ func init() {
 	DB.DB().SetMaxOpenConns(100)
 	DB.LogMode(true)
 	DB.SingularTable(true)
-	DB.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&Account{}, &UserInfo{})
+	DB.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
+		&Account{}, &UserInfo{}, &RoomInfo{}, &RoomPowerMemberInfo{},
+		&RoomTags{}, &HotRoomInfo{}, &SupportRoom{})
 
 	fmt.Println("db init success")
 }

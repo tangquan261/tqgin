@@ -12,9 +12,9 @@ type Animal struct {
 }
 
 func Gromtest() {
-
+	return
 	fmt.Println("gorm test")
-	DB.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&Animal{})
+	//DB.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&Animal{})
 
 	var animal Animal
 	animal.ID = 11
@@ -25,7 +25,7 @@ func Gromtest() {
 	//var animal Animal
 	animal.Age = 1
 	animal.Name = "11"
-	DB.Create(&animal)
+	//DB.Create(&animal)
 
 	err := DB.First(&animal, "id = ?", animal.ID).Error
 

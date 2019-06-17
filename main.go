@@ -7,10 +7,12 @@ import (
 	"tqgin/models"
 	"tqgin/routers"
 
-	"github.com/astaxie/beego/config"
+	"tqgin/config"
+
 	"github.com/gin-gonic/gin"
 	"github.com/segmentio/ksuid"
 	tqlog "github.com/sirupsen/logrus"
+	//"github.com/unrolled/secure"
 )
 
 func init() {
@@ -26,8 +28,7 @@ func init() {
 }
 
 var (
-	router   *gin.Engine
-	Tqconfig config.Configer
+	router *gin.Engine
 )
 
 func main() {
@@ -35,21 +36,32 @@ func main() {
 
 	fmt.Println(uid.String())
 
-	var err error
-	Tqconfig, err = config.NewConfig("ini", "./conf/app.conf")
-
-	if err != nil {
-		//log.Fatal(err)
-	}
-	//fmt.Println(Tqconfig)
-
 	gin.SetMode(gin.ReleaseMode)
 	router = gin.Default()
 
 	routers.Router(router)
 
+	router.Use(TlsHandler())
 	fmt.Println("server start.....")
-	router.Run(Tqconfig.String("httpIP") + ":" + Tqconfig.String("httpport"))
+	//router.RunTLS(config.Tqconfig.String("httpIP")+":"+config.Tqconfig.String("httpport"), "miban.pem", "miban.key")
 
+	router.Run(config.Tqconfig.String("httpIP") + ":" + config.Tqconfig.String("httpport"))
 	defer models.DB.Close()
+}
+
+func TlsHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// secureMiddleware := secure.New(secure.Options{
+		// 	SSLRedirect: true,
+		// 	SSLHost:     "localhost:8089",
+		// })
+		// err := secureMiddleware.Process(c.Writer, c.Request)
+
+		// // If there was an error, do not continue.
+		// if err != nil {
+		// 	return
+		// }
+
+		c.Next()
+	}
 }

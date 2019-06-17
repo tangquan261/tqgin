@@ -60,3 +60,17 @@ func SaveUser(user *UserInfo, newUser *UserInfo) bool {
 		return true
 	}
 }
+
+func GetUser(playerID int64) *UserInfo {
+
+	var user UserInfo
+	user.PlayerID = playerID
+	err := DB.First(&user).Error
+
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	return &user
+}

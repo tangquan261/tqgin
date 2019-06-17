@@ -37,7 +37,7 @@ func (c *LoginController) login(con *gin.Context) {
 
 	var status int
 	var msg string
-
+	var data *models.UserInfo
 	if account.AccountID == "" {
 		//不存在，去注册
 		status = 1
@@ -52,10 +52,11 @@ func (c *LoginController) login(con *gin.Context) {
 			//密码正确
 			status = 0
 			msg = "登录成功"
+			data = models.GetUser(account.PlayerID)
 		}
 	}
 
-	tqgin.Result(con, status, nil, msg)
+	tqgin.Result(con, status, gin.H{"userinfo": data}, msg)
 }
 
 func (c *LoginController) register(con *gin.Context) {
@@ -69,6 +70,9 @@ func (c *LoginController) register(con *gin.Context) {
 	account.Password = con.PostForm("password")
 	loginType, _ := strconv.Atoi(con.PostForm("loginType"))
 
+	nickName := con.PostForm("nickname")
+	sex, _ := strconv.Atoi(con.PostForm("sex"))
+
 	account.LoginType = int8(loginType)
 
 	fmt.Println(account.AccountID, account.Password, account.LoginType)
@@ -78,13 +82,16 @@ func (c *LoginController) register(con *gin.Context) {
 	} else if len(account.Password) < 6 {
 		status = 2
 		msg = "密码不能太短"
+	} else if len(nickName) <= 0 {
+		status = 2
+		msg = "昵称不能为空"
 	} else {
 
 		status, retAccount = models.Register(&account)
 
 		if status == 0 {
 
-			user := models.GetDefaultUserinfo(retAccount.PlayerID, strconv.FormatInt(retAccount.PlayerID, 10), 0)
+			user := models.GetDefaultUserinfo(retAccount.PlayerID, nickName, int8(sex))
 
 			bret := models.CreateUser(&user)
 			if bret {
