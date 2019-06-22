@@ -30,7 +30,7 @@ func (this *RoomManagerController) RegisterRouter(router *gin.Engine) {
 //开启房间
 func (r *RoomManagerController) OpenRoom(c *gin.Context) {
 
-	PlayerID := strconv.Atoi(c.PostForm("playerID"))
+	PlayerID, _ := strconv.Atoi(c.PostForm("playerID"))
 	name := c.PostForm("roomName")
 	tags := c.PostForm("tags")
 	disc := c.PostForm("disc")
