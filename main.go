@@ -2,7 +2,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 
 	"tqgin/models"
 	"tqgin/routers"
@@ -13,6 +15,10 @@ import (
 	"github.com/segmentio/ksuid"
 	tqlog "github.com/sirupsen/logrus"
 	//"github.com/unrolled/secure"
+
+	"proto"
+
+	"google.golang.org/grpc"
 )
 
 func init() {
@@ -32,6 +38,23 @@ var (
 )
 
 func main() {
+
+	conn, err := grpc.Dial("localhost:5262", grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+
+	defer conn.Close()
+
+	client := proto.NewHelloClient(conn)
+
+	request, err := client.SayHello(context.Background(), &proto.HelloRequest{Name: "tq"})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(request.Message)
+
 	uid := ksuid.New()
 
 	fmt.Println(uid.String())
@@ -41,27 +64,9 @@ func main() {
 
 	routers.Router(router)
 
-	router.Use(TlsHandler())
 	fmt.Println("server start.....")
 	//router.RunTLS(config.Tqconfig.String("httpIP")+":"+config.Tqconfig.String("httpport"), "miban.pem", "miban.key")
 
 	router.Run(config.Tqconfig.String("httpIP") + ":" + config.Tqconfig.String("httpport"))
 	defer models.DB.Close()
-}
-
-func TlsHandler() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// secureMiddleware := secure.New(secure.Options{
-		// 	SSLRedirect: true,
-		// 	SSLHost:     "localhost:8089",
-		// })
-		// err := secureMiddleware.Process(c.Writer, c.Request)
-
-		// // If there was an error, do not continue.
-		// if err != nil {
-		// 	return
-		// }
-
-		c.Next()
-	}
 }
