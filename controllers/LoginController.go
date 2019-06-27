@@ -62,8 +62,9 @@ func (c *LoginController) login(con *gin.Context) {
 
 	var retLogin login.ReplyLogin
 
-	retLogin.Code = 1
+	retLogin.Code2 = "22"
 	retLogin.Errinfo = "没有暖用"
+	retLogin.Code1 = 2
 
 	//var data *models.UserInfo
 	if account.AccountID == "" {
