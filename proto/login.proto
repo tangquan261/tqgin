@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package login;
+
+// 登陆请求
+message ApplyLogin{
+	//登陆账户
+    string account = 1;	
+    	//登陆密码
+    string password = 2;
+    
+    enum LoginType {
+    MOBILE = 0;
+    HOME = 1;
+    WORK = 2;
+  }
+
+    LoginType   type   = 3;	//登陆类型
+}
+
+//登陆请求返回
+message ReplyLogin {
+    string errinfo = 1;
+    int32  code   = 2;
+}

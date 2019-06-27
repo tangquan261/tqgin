@@ -18,7 +18,7 @@ func (this *Controller) RegisterRouter(router *gin.Engine) {
 }
 
 func (this *Controller) AjaxData(ctx *gin.Context) {
-	ResultOk(ctx, this.Data)
+	//ResultOk(ctx, this.Data)
 }
 func (this *Controller) Redirect(ctx *gin.Context, uri string) {
 	ctx.Redirect(302, uri)

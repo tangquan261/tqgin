@@ -5,6 +5,7 @@
 package controllers
 
 import (
+	"fmt"
 	//"fmt"
 	//	"strconv"
 	"tqgin/common"
@@ -30,7 +31,8 @@ func (s *SquartController) applyTagsList(con *gin.Context) {
 
 	tags := models.GetTagList()
 
-	tqgin.Result(con, status, gin.H{"tags": tags}, "")
+	fmt.Println(status, tags)
+	//tqgin.Result(con, status, gin.H{"tags": tags}, "")
 }
 
 func (s *SquartController) applyRoomList(con *gin.Context) {
@@ -43,6 +45,6 @@ func (s *SquartController) applyRoomList(con *gin.Context) {
 	} else {
 		status = 1
 	}
-
-	tqgin.Result(con, status, gin.H{"rooms": data}, "")
+	fmt.Println(status, data)
+	//tqgin.Result(con, status, gin.H{"rooms": data}, "")
 }

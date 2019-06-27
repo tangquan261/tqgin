@@ -2,9 +2,9 @@
 package main
 
 import (
-	"context"
+	//"context"
 	"fmt"
-	"log"
+	//"log"
 
 	"tqgin/models"
 	"tqgin/routers"
@@ -15,10 +15,8 @@ import (
 	"github.com/segmentio/ksuid"
 	tqlog "github.com/sirupsen/logrus"
 	//"github.com/unrolled/secure"
-
-	"proto"
-
-	"google.golang.org/grpc"
+	//"proto"
+	//"google.golang.org/grpc"
 )
 
 func init() {
@@ -39,32 +37,32 @@ var (
 
 func main() {
 
-	conn, err := grpc.Dial("localhost:5262", grpc.WithInsecure())
-	if err != nil {
-		panic(err)
-	}
+	// conn, err := grpc.Dial("localhost:5262", grpc.WithInsecure())
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	defer conn.Close()
+	// defer conn.Close()
 
-	client := proto.NewHelloClient(conn)
+	// client := proto.NewHelloClient(conn)
 
-	request, err := client.SayHello(context.Background(), &proto.HelloRequest{Name: "tq"})
-	if err != nil {
-		log.Fatal(err)
-	}
+	// request, err := client.SayHello(context.Background(), &proto.HelloRequest{Name: "tq"})
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	fmt.Println(request.Message)
+	// fmt.Println(request.Message)
 
 	uid := ksuid.New()
 
 	fmt.Println(uid.String())
 
-	gin.SetMode(gin.ReleaseMode)
+	//gin.SetMode(gin.ReleaseMode)
 	router = gin.Default()
 
 	routers.Router(router)
 
-	fmt.Println("server start.....")
+	fmt.Println("server start.....", config.Tqconfig.String("httpIP")+":"+config.Tqconfig.String("httpport"))
 	//router.RunTLS(config.Tqconfig.String("httpIP")+":"+config.Tqconfig.String("httpport"), "miban.pem", "miban.key")
 
 	router.Run(config.Tqconfig.String("httpIP") + ":" + config.Tqconfig.String("httpport"))

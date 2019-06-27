@@ -6,12 +6,18 @@
 package controllers
 
 import (
+	//"encoding/json"
 	"fmt"
+
+	//"net/http"
 	"strconv"
 	"tqgin/common"
 	"tqgin/models"
+	"tqgin/proto"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/golang/protobuf/proto"
 )
 
 var nindex int
@@ -29,15 +35,42 @@ func (this *LoginController) RegisterRouter(router *gin.Engine) {
 
 func (c *LoginController) login(con *gin.Context) {
 
-	accountID := con.PostForm("accountid")
+	var logindata login.ApplyLogin
 
+	bytes, _ := con.GetRawData()
+
+	fmt.Printf("data: %v\n", string(bytes))
+	tempbytes := bytes[1:]
+
+	fmt.Println(string(tempbytes))
+
+	proto.Unmarshal(tempbytes, &logindata)
+
+	fmt.Println(logindata.Account)
+
+	tempdata := con.PostForm("data")
+	fmt.Println("tempdata", tempdata)
+	con.MustBindWith(&logindata, binding.ProtoBuf)
+	fmt.Println(logindata.Account)
+
+	cookie, err := con.Cookie("token")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(cookie)
+
+	accountID := con.PostForm("accountid")
 	pwd := con.PostForm("password")
+
+	if len(accountID) < 0 {
+		return
+	}
 
 	account := models.LoginAccount(accountID)
 
 	var status int
 	var msg string
-	var data *models.UserInfo
+	//var data *models.UserInfo
 	if account.AccountID == "" {
 		//不存在，去注册
 		status = 1
@@ -52,11 +85,12 @@ func (c *LoginController) login(con *gin.Context) {
 			//密码正确
 			status = 0
 			msg = "登录成功"
-			data = models.GetUser(account.PlayerID)
+			//data = models.GetUser(account.PlayerID)
 		}
 	}
 
-	tqgin.Result(con, status, gin.H{"userinfo": data}, msg)
+	fmt.Println(status, msg)
+	tqgin.Result(con, status, &logindata, msg)
 }
 
 func (c *LoginController) register(con *gin.Context) {
@@ -104,8 +138,8 @@ func (c *LoginController) register(con *gin.Context) {
 			msg = "注册失败，已经注册过"
 		}
 	}
-
-	tqgin.Result(con, status, retAccount, msg)
+	fmt.Println(msg, status)
+	//tqgin.Result(con, status, retAccount, msg)
 }
 
 func (c *LoginController) changePassWord(con *gin.Context) {

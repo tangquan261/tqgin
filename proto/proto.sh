@@ -1,0 +1,1 @@
+protoc --go_out=./ --objc_out=./ios   *.proto
