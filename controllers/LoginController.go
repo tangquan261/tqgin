@@ -16,7 +16,7 @@ import (
 	"tqgin/proto"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
+	//"github.com/gin-gonic/gin/binding"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -37,39 +37,34 @@ func (c *LoginController) login(con *gin.Context) {
 
 	var logindata login.ApplyLogin
 
-	bytes, _ := con.GetRawData()
+	data := con.PostForm("data")
 
-	fmt.Printf("data: %v\n", string(bytes))
-	tempbytes := bytes[1:]
+	err := proto.Unmarshal([]byte(data), &logindata)
 
-	fmt.Println(string(tempbytes))
-
-	proto.Unmarshal(tempbytes, &logindata)
-
-	fmt.Println(logindata.Account)
-
-	tempdata := con.PostForm("data")
-	fmt.Println("tempdata", tempdata)
-	con.MustBindWith(&logindata, binding.ProtoBuf)
-	fmt.Println(logindata.Account)
+	fmt.Println("apply login: %v", logindata)
 
 	cookie, err := con.Cookie("token")
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(cookie)
+	fmt.Println("cookie:", cookie)
 
-	accountID := con.PostForm("accountid")
-	pwd := con.PostForm("password")
+	if len(logindata.Account) <= 0 || len(logindata.Password) <= 0 {
 
-	if len(accountID) < 0 {
+		tqgin.Result(con, 1, nil, "账号，密码不能为空")
 		return
 	}
 
-	account := models.LoginAccount(accountID)
+	account := models.LoginAccount(logindata.Account)
 
 	var status int
 	var msg string
+
+	var retLogin login.ReplyLogin
+
+	retLogin.Code = 1
+	retLogin.Errinfo = "没有暖用"
+
 	//var data *models.UserInfo
 	if account.AccountID == "" {
 		//不存在，去注册
@@ -77,7 +72,7 @@ func (c *LoginController) login(con *gin.Context) {
 		msg = "不存在，去注册"
 	} else {
 
-		if account.Password != pwd {
+		if account.Password != logindata.Password {
 			//密码错误
 			status = 2
 			msg = "密码错误"
@@ -89,8 +84,7 @@ func (c *LoginController) login(con *gin.Context) {
 		}
 	}
 
-	fmt.Println(status, msg)
-	tqgin.Result(con, status, &logindata, msg)
+	tqgin.Result(con, status, &retLogin, msg)
 }
 
 func (c *LoginController) register(con *gin.Context) {
