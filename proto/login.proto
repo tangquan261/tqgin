@@ -2,24 +2,48 @@ syntax = "proto3";
 
 package login;
 
+//注册，登录的账号类型
+ enum LoginType {
+    MOBILE_LOGIN = 0;//手机注册
+    QQ_LOGIN = 1;//QQ注册
+    WEIXIN_LOGIN = 2;//微信注册
+  }
+
+enum SexType{
+		Sex_male = 0;
+		Sex_female = 1;
+}
 // 登陆请求
 message ApplyLogin{
 	//登陆账户
     string account = 1;	
     	//登陆密码
     string password = 2;
-    
-    enum LoginType {
-    MOBILE = 0;
-    HOME = 1;
-    WORK = 2;
-  }
-
     LoginType   type   = 3;	//登陆类型
 }
 
-//登陆请求返回
+//请求登录后的信息
+message ApplyLoginInfo{
+	//登陆账户
+}
+
+//登陆请求返回,登录请求信息的返回,注册返回的对象
 message ReplyLogin {
-    string errinfo = 1;
-    int32  code   = 2;
+    int64 	playerID	= 1;
+	string 	playerName 	= 2;
+	int64 	Diamond 	= 3;
+	int64 	Gold		= 4;
+	int64 	Cash 		= 5;
+	int64 	RoomID 		= 6;
+
+	SexType	Sex 		= 7;
+	string  token		= 8;
+}
+
+message RegisterInfo{
+    string account = 1;	//登陆账户
+    string password = 2;//登陆密码
+	LoginType type = 3;
+	string nickNmae= 4;
+	SexType sexType = 5;
 }

@@ -1,18 +1,15 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
+	"tqgin/proto"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-)
-
-const (
-	LoginType_Phone  = 1
-	LoginType_QQ     = 2
-	LoginType_WeChat = 3
 )
 
 type Account struct {
@@ -20,12 +17,15 @@ type Account struct {
 	AccountID string `gorm:"primary_key"`
 	Password  string
 	PlayerID  int64 `gorm:"not null"`
-	LoginType int8
+	LoginType login.LoginType
 	LoginTime time.Time
 	//屏蔽时间
 	ForbidTime int64
 	//屏蔽原因
 	ForbidMsg string
+	//登录验证tocken码
+	Tocken        string
+	TockenTimeOut time.Time
 }
 
 func LoginAccount(accountID string) *Account {
@@ -41,7 +41,20 @@ func LoginAccount(accountID string) *Account {
 	return &account
 }
 
-func Register(account *Account) (status int, retAccount *Account) {
+func LoginAccountByPlayerID(PlayerID int64) *Account {
+
+	var account Account
+
+	err := DB.Find(&account, "player_id = ?", PlayerID).GetErrors()
+
+	if len(err) > 0 {
+		log.Println(err, PlayerID)
+	}
+
+	return &account
+}
+
+func Register(account *Account) (status int) {
 
 	var accountCurrent Account
 
@@ -60,14 +73,22 @@ func Register(account *Account) (status int, retAccount *Account) {
 			account.PlayerID = accountCurrent.PlayerID + 1
 		}
 		account.LoginTime = time.Now()
-		retAccount = account
+
 		DB.Create(account)
 
 	} else {
 		status = 1
-		retAccount = nil
 	}
 	return
+}
+
+func AccountSaveTocken(account *Account) error {
+
+	if account.AccountID == "" {
+		return errors.New("AccountID is nil")
+	}
+
+	return DB.Model(account).Update(Account{Tocken: account.Tocken, TockenTimeOut: account.TockenTimeOut}).Error
 }
 
 func AccountChangePwd(account *Account, newPassword string) int {

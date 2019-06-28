@@ -1,10 +1,10 @@
 package tqgin
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-
-	"fmt"
 
 	"strings"
 )

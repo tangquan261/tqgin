@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	//"time"
+	"tqgin/proto"
 
 	"github.com/jinzhu/gorm"
 )
@@ -16,10 +17,10 @@ type UserInfo struct {
 	Gold       int64
 	Cash       int64
 	RoomID     int64
-	Sex        int8 //1女，2男，0未知
+	Sex        login.SexType //1女，2男，0未知
 }
 
-func GetDefaultUserinfo(PlayerID int64, Name string, Sex int8) UserInfo {
+func GetDefaultUserinfo(PlayerID int64, Name string, Sex login.SexType) UserInfo {
 
 	var user UserInfo
 	user.PlayerID = PlayerID
@@ -65,7 +66,8 @@ func GetUser(playerID int64) *UserInfo {
 
 	var user UserInfo
 	user.PlayerID = playerID
-	err := DB.First(&user).Error
+
+	err := DB.Find(&user, "player_id = ?", playerID).Error
 
 	if err != nil {
 		fmt.Println(err)

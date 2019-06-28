@@ -7,13 +7,15 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 
-	// "strconv"
 	"tqgin/common"
-	// "tqgin/models"
+	"tqgin/models"
+	"tqgin/proto"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang/protobuf/proto"
 )
 
 type RoomManagerController struct {
@@ -28,13 +30,37 @@ func (this *RoomManagerController) RegisterRouter(router *gin.Engine) {
 }
 
 //开启房间
-func (r *RoomManagerController) OpenRoom(c *gin.Context) {
+func (r *RoomManagerController) OpenRoom(con *gin.Context) {
 
-	PlayerID, _ := strconv.Atoi(c.PostForm("playerID"))
-	name := c.PostForm("roomName")
-	tags := c.PostForm("tags")
-	disc := c.PostForm("disc")
-	fmt.Println(PlayerID, name, tags, disc)
+	var createRoominfo login.ApplyCreateRoom
+
+	data := con.PostForm("data")
+
+	err := proto.Unmarshal([]byte(data), &createRoominfo)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	playerIDstr, _ := con.Cookie("playerid")
+	//token, _ := con.Cookie("token")
+
+	playerID, _ := strconv.ParseInt(playerIDstr, 10, 64)
+
+	var roominfo models.RoomInfo
+	roominfo.RoomName = createRoominfo.RoomName
+	roominfo.RoomID = playerID
+	roominfo.MasterID = playerID
+	roominfo.RoomTagName = createRoominfo.RoomTags
+
+	err = models.CreateRoom(&roominfo)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println("请求创建房间成功", createRoominfo, roominfo)
+
+	tqgin.Result(con, 0, &createRoominfo, "请求创建房间")
+
 }
 
 //关闭房间

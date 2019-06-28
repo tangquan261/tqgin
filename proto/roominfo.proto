@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package login;
+
+enum roomType{
+	roomType_NOAML = 0;
+	roomType_SECOND = 1;
+}
+
+message ApplyCreateRoom{
+    string 		roomName = 1;	//房间名字
+    string 		roomTags = 2;	//房间分类tag
+    roomType   roomtype   = 4;	//房间类型
+}
+
+

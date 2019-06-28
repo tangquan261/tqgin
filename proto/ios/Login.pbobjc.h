@@ -29,27 +29,54 @@ CF_EXTERN_C_BEGIN
 
 NS_ASSUME_NONNULL_BEGIN
 
-#pragma mark - Enum ApplyLogin_LoginType
+#pragma mark - Enum LoginType
 
-typedef GPB_ENUM(ApplyLogin_LoginType) {
+/** 注册，登录的账号类型 */
+typedef GPB_ENUM(LoginType) {
   /**
    * Value used if any message's field encounters a value that is not defined
    * by this enum. The message will also have C functions to get/set the rawValue
    * of the field.
    **/
-  ApplyLogin_LoginType_GPBUnrecognizedEnumeratorValue = kGPBUnrecognizedEnumeratorValue,
-  ApplyLogin_LoginType_Mobile = 0,
-  ApplyLogin_LoginType_Home = 1,
-  ApplyLogin_LoginType_Work = 2,
+  LoginType_GPBUnrecognizedEnumeratorValue = kGPBUnrecognizedEnumeratorValue,
+  /** 手机注册 */
+  LoginType_MobileLogin = 0,
+
+  /** QQ注册 */
+  LoginType_QqLogin = 1,
+
+  /** 微信注册 */
+  LoginType_WeixinLogin = 2,
 };
 
-GPBEnumDescriptor *ApplyLogin_LoginType_EnumDescriptor(void);
+GPBEnumDescriptor *LoginType_EnumDescriptor(void);
 
 /**
  * Checks to see if the given value is defined by the enum or was not known at
  * the time this source was generated.
  **/
-BOOL ApplyLogin_LoginType_IsValidValue(int32_t value);
+BOOL LoginType_IsValidValue(int32_t value);
+
+#pragma mark - Enum SexType
+
+typedef GPB_ENUM(SexType) {
+  /**
+   * Value used if any message's field encounters a value that is not defined
+   * by this enum. The message will also have C functions to get/set the rawValue
+   * of the field.
+   **/
+  SexType_GPBUnrecognizedEnumeratorValue = kGPBUnrecognizedEnumeratorValue,
+  SexType_SexMale = 0,
+  SexType_SexFemale = 1,
+};
+
+GPBEnumDescriptor *SexType_EnumDescriptor(void);
+
+/**
+ * Checks to see if the given value is defined by the enum or was not known at
+ * the time this source was generated.
+ **/
+BOOL SexType_IsValidValue(int32_t value);
 
 #pragma mark - LoginRoot
 
@@ -86,7 +113,7 @@ typedef GPB_ENUM(ApplyLogin_FieldNumber) {
 @property(nonatomic, readwrite, copy, null_resettable) NSString *password;
 
 /** 登陆类型 */
-@property(nonatomic, readwrite) ApplyLogin_LoginType type;
+@property(nonatomic, readwrite) LoginType type;
 
 @end
 
@@ -102,23 +129,112 @@ int32_t ApplyLogin_Type_RawValue(ApplyLogin *message);
  **/
 void SetApplyLogin_Type_RawValue(ApplyLogin *message, int32_t value);
 
+#pragma mark - ApplyLoginInfo
+
+/**
+ * 请求登录后的信息
+ **/
+@interface ApplyLoginInfo : GPBMessage
+
+@end
+
 #pragma mark - ReplyLogin
 
 typedef GPB_ENUM(ReplyLogin_FieldNumber) {
-  ReplyLogin_FieldNumber_Errinfo = 1,
-  ReplyLogin_FieldNumber_Code = 2,
+  ReplyLogin_FieldNumber_PlayerId = 1,
+  ReplyLogin_FieldNumber_PlayerName = 2,
+  ReplyLogin_FieldNumber_Diamond = 3,
+  ReplyLogin_FieldNumber_Gold = 4,
+  ReplyLogin_FieldNumber_Cash = 5,
+  ReplyLogin_FieldNumber_RoomId = 6,
+  ReplyLogin_FieldNumber_Sex = 7,
+  ReplyLogin_FieldNumber_Token = 8,
 };
 
 /**
- * 登陆请求返回
+ * 登陆请求返回,登录请求信息的返回,注册返回的对象
  **/
 @interface ReplyLogin : GPBMessage
 
-@property(nonatomic, readwrite, copy, null_resettable) NSString *errinfo;
+@property(nonatomic, readwrite) int64_t playerId;
 
-@property(nonatomic, readwrite) int32_t code;
+@property(nonatomic, readwrite, copy, null_resettable) NSString *playerName;
+
+@property(nonatomic, readwrite) int64_t diamond;
+
+@property(nonatomic, readwrite) int64_t gold;
+
+@property(nonatomic, readwrite) int64_t cash;
+
+@property(nonatomic, readwrite) int64_t roomId;
+
+@property(nonatomic, readwrite) SexType sex;
+
+@property(nonatomic, readwrite, copy, null_resettable) NSString *token;
 
 @end
+
+/**
+ * Fetches the raw value of a @c ReplyLogin's @c sex property, even
+ * if the value was not defined by the enum at the time the code was generated.
+ **/
+int32_t ReplyLogin_Sex_RawValue(ReplyLogin *message);
+/**
+ * Sets the raw value of an @c ReplyLogin's @c sex property, allowing
+ * it to be set to a value that was not defined by the enum at the time the code
+ * was generated.
+ **/
+void SetReplyLogin_Sex_RawValue(ReplyLogin *message, int32_t value);
+
+#pragma mark - RegisterInfo
+
+typedef GPB_ENUM(RegisterInfo_FieldNumber) {
+  RegisterInfo_FieldNumber_Account = 1,
+  RegisterInfo_FieldNumber_Password = 2,
+  RegisterInfo_FieldNumber_Type = 3,
+  RegisterInfo_FieldNumber_NickNmae = 4,
+  RegisterInfo_FieldNumber_SexType = 5,
+};
+
+@interface RegisterInfo : GPBMessage
+
+/** 登陆账户 */
+@property(nonatomic, readwrite, copy, null_resettable) NSString *account;
+
+/** 登陆密码 */
+@property(nonatomic, readwrite, copy, null_resettable) NSString *password;
+
+@property(nonatomic, readwrite) LoginType type;
+
+@property(nonatomic, readwrite, copy, null_resettable) NSString *nickNmae;
+
+@property(nonatomic, readwrite) SexType sexType;
+
+@end
+
+/**
+ * Fetches the raw value of a @c RegisterInfo's @c type property, even
+ * if the value was not defined by the enum at the time the code was generated.
+ **/
+int32_t RegisterInfo_Type_RawValue(RegisterInfo *message);
+/**
+ * Sets the raw value of an @c RegisterInfo's @c type property, allowing
+ * it to be set to a value that was not defined by the enum at the time the code
+ * was generated.
+ **/
+void SetRegisterInfo_Type_RawValue(RegisterInfo *message, int32_t value);
+
+/**
+ * Fetches the raw value of a @c RegisterInfo's @c sexType property, even
+ * if the value was not defined by the enum at the time the code was generated.
+ **/
+int32_t RegisterInfo_SexType_RawValue(RegisterInfo *message);
+/**
+ * Sets the raw value of an @c RegisterInfo's @c sexType property, allowing
+ * it to be set to a value that was not defined by the enum at the time the code
+ * was generated.
+ **/
+void SetRegisterInfo_SexType_RawValue(RegisterInfo *message, int32_t value);
 
 NS_ASSUME_NONNULL_END
 

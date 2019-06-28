@@ -41,7 +41,7 @@ func (s *SquartController) applyRoomList(con *gin.Context) {
 	var data []*models.HotRoomInfo
 	if len(TagName) > 0 {
 		status = 0
-		data = models.GetHotRoomsByTag(TagName)
+		//data = models.GetHotRoomsByTag(TagName)
 	} else {
 		status = 1
 	}
