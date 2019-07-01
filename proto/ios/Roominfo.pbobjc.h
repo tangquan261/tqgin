@@ -27,6 +27,8 @@
 
 CF_EXTERN_C_BEGIN
 
+@class RoomUserInfo;
+
 NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Enum roomType
@@ -70,7 +72,6 @@ BOOL roomType_IsValidValue(int32_t value);
 typedef GPB_ENUM(ApplyCreateRoom_FieldNumber) {
   ApplyCreateRoom_FieldNumber_RoomName = 1,
   ApplyCreateRoom_FieldNumber_RoomTags = 2,
-  ApplyCreateRoom_FieldNumber_RoomIcon = 3,
   ApplyCreateRoom_FieldNumber_Roomtype = 4,
 };
 
@@ -81,9 +82,6 @@ typedef GPB_ENUM(ApplyCreateRoom_FieldNumber) {
 
 /** 房间分类tag */
 @property(nonatomic, readwrite, copy, null_resettable) NSString *roomTags;
-
-/** 房间头像地址 */
-@property(nonatomic, readwrite, copy, null_resettable) NSString *roomIcon;
 
 /** 房间类型 */
 @property(nonatomic, readwrite) roomType roomtype;
@@ -101,6 +99,35 @@ int32_t ApplyCreateRoom_Roomtype_RawValue(ApplyCreateRoom *message);
  * was generated.
  **/
 void SetApplyCreateRoom_Roomtype_RawValue(ApplyCreateRoom *message, int32_t value);
+
+#pragma mark - applyEnterRoom
+
+typedef GPB_ENUM(applyEnterRoom_FieldNumber) {
+  applyEnterRoom_FieldNumber_RoomId = 1,
+  applyEnterRoom_FieldNumber_RoomName = 2,
+  applyEnterRoom_FieldNumber_UrmIcon = 3,
+  applyEnterRoom_FieldNumber_MasterId = 4,
+  applyEnterRoom_FieldNumber_RoomUserInfoArray = 5,
+};
+
+/**
+ * com.road.ddt.proto.command.RankInfoRes rankInfoRes = 52;
+ **/
+@interface applyEnterRoom : GPBMessage
+
+@property(nonatomic, readwrite) int64_t roomId;
+
+@property(nonatomic, readwrite, copy, null_resettable) NSString *roomName;
+
+@property(nonatomic, readwrite, copy, null_resettable) NSString *urmIcon;
+
+@property(nonatomic, readwrite) int64_t masterId;
+
+@property(nonatomic, readwrite, strong, null_resettable) NSMutableArray<RoomUserInfo*> *roomUserInfoArray;
+/** The number of items in @c roomUserInfoArray without causing the array to be created. */
+@property(nonatomic, readonly) NSUInteger roomUserInfoArray_Count;
+
+@end
 
 NS_ASSUME_NONNULL_END
 

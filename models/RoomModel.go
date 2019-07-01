@@ -8,11 +8,6 @@ import (
 	//	"github.com/jinzhu/gorm"
 )
 
-type RoomTags struct {
-	ID      int64 `gorm:"primary_key"`
-	TagName string
-}
-
 type RoomInfo struct {
 	RoomID        int64 `gorm:"primary_key"`
 	MasterID      int64
@@ -45,21 +40,13 @@ type SupportRoom struct {
 	Msg       string
 }
 
-func GetTagList() []*RoomTags {
-
-	var tags []*RoomTags
-	DB.Find(&tags)
-
-	return tags
-}
-
 func CreateRoom(room *RoomInfo) error {
 
 	err := DB.Save(room).Error
 
 	if err == nil {
 
-		roomPower := GetPowerRoom(room.MasterID, room.RoomID)
+		//roomPower := GetPowerRoom(room.MasterID, room.RoomID)
 
 		var roomPower RoomPowerMemberInfo
 		roomPower.PlayerID = room.MasterID
@@ -113,4 +100,14 @@ func GetPowerRoom(playerID int64, roomID int64) (RoomPowerMemberInfo, error) {
 	err := DB.Where("room_id = ?  AND player_id = ?", roomID, playerID).Find(&power).Error
 
 	return power, err
+}
+
+func GetRoomInfo(RoomID int64) (RoomInfo, error) {
+
+	var roominfo RoomInfo
+
+	err := DB.Where("room_id = ?", RoomID).Find(&roominfo).Error
+
+	return roominfo, err
+
 }

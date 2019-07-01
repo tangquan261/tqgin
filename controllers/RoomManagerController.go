@@ -27,6 +27,7 @@ func (this *RoomManagerController) RegisterRouter(router *gin.Engine) {
 	temp.POST("openRoom", this.OpenRoom)
 	temp.POST("closeRoom", this.closeRoom)
 	temp.POST("changeRoomName", this.ChangeRoomName)
+	temp.POST("applyEnterRoom", this.applyEnterRoom)
 }
 
 //开启房间
@@ -64,11 +65,30 @@ func (r *RoomManagerController) OpenRoom(con *gin.Context) {
 }
 
 //关闭房间
-func (r *RoomManagerController) closeRoom(c *gin.Context) {
+func (r *RoomManagerController) closeRoom(con *gin.Context) {
 
 }
 
 //关闭房间
-func (r *RoomManagerController) ChangeRoomName(c *gin.Context) {
+func (r *RoomManagerController) ChangeRoomName(con *gin.Context) {
 
+}
+
+func (r *RoomManagerController) applyEnterRoom(con *gin.Context) {
+
+	roomIDstr := con.PostForm("roomID")
+
+	if len(roomIDstr) > 0 {
+
+		roomID, err := strconv.Atoi(roomIDstr)
+
+		if err != nil {
+			fmt.Println("applyEnterRoom atoi", err)
+		}
+
+		room, err := models.GetRoomInfo(int64(roomID))
+
+	}
+
+	//tqgin.ResultOk(con)
 }

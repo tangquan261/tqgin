@@ -16,6 +16,7 @@
 #import <stdatomic.h>
 
 #import "Roominfo.pbobjc.h"
+#import "Userinfo.pbobjc.h"
 // @@protoc_insertion_point(imports)
 
 #pragma clang diagnostic push
@@ -25,8 +26,8 @@
 
 @implementation RoominfoRoot
 
-// No extensions in the file and no imports, so no need to generate
-// +extensionRegistry.
+// No extensions in the file and none of the imports (direct or indirect)
+// defined extensions, so no need to generate +extensionRegistry.
 
 @end
 
@@ -87,7 +88,6 @@ BOOL roomType_IsValidValue(int32_t value__) {
 
 @dynamic roomName;
 @dynamic roomTags;
-@dynamic roomIcon;
 @dynamic roomtype;
 
 typedef struct ApplyCreateRoom__storage_ {
@@ -95,7 +95,6 @@ typedef struct ApplyCreateRoom__storage_ {
   roomType roomtype;
   NSString *roomName;
   NSString *roomTags;
-  NSString *roomIcon;
 } ApplyCreateRoom__storage_;
 
 // This method is threadsafe because it is initially called
@@ -123,19 +122,10 @@ typedef struct ApplyCreateRoom__storage_ {
         .dataType = GPBDataTypeString,
       },
       {
-        .name = "roomIcon",
-        .dataTypeSpecific.className = NULL,
-        .number = ApplyCreateRoom_FieldNumber_RoomIcon,
-        .hasIndex = 2,
-        .offset = (uint32_t)offsetof(ApplyCreateRoom__storage_, roomIcon),
-        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom),
-        .dataType = GPBDataTypeString,
-      },
-      {
         .name = "roomtype",
         .dataTypeSpecific.enumDescFunc = roomType_EnumDescriptor,
         .number = ApplyCreateRoom_FieldNumber_Roomtype,
-        .hasIndex = 3,
+        .hasIndex = 2,
         .offset = (uint32_t)offsetof(ApplyCreateRoom__storage_, roomtype),
         .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldHasEnumDescriptor),
         .dataType = GPBDataTypeEnum,
@@ -151,7 +141,7 @@ typedef struct ApplyCreateRoom__storage_ {
                                          flags:GPBDescriptorInitializationFlag_None];
 #if !GPBOBJC_SKIP_MESSAGE_TEXTFORMAT_EXTRAS
     static const char *extraTextFormatInfo =
-        "\003\001\010\000\002\010\000\003\010\000";
+        "\002\001\010\000\002\010\000";
     [localDescriptor setupExtraTextInfo:extraTextFormatInfo];
 #endif  // !GPBOBJC_SKIP_MESSAGE_TEXTFORMAT_EXTRAS
     NSAssert(descriptor == nil, @"Startup recursed!");
@@ -173,6 +163,98 @@ void SetApplyCreateRoom_Roomtype_RawValue(ApplyCreateRoom *message, int32_t valu
   GPBFieldDescriptor *field = [descriptor fieldWithNumber:ApplyCreateRoom_FieldNumber_Roomtype];
   GPBSetInt32IvarWithFieldInternal(message, field, value, descriptor.file.syntax);
 }
+
+#pragma mark - applyEnterRoom
+
+@implementation applyEnterRoom
+
+@dynamic roomId;
+@dynamic roomName;
+@dynamic urmIcon;
+@dynamic masterId;
+@dynamic roomUserInfoArray, roomUserInfoArray_Count;
+
+typedef struct applyEnterRoom__storage_ {
+  uint32_t _has_storage_[1];
+  NSString *roomName;
+  NSString *urmIcon;
+  NSMutableArray *roomUserInfoArray;
+  int64_t roomId;
+  int64_t masterId;
+} applyEnterRoom__storage_;
+
+// This method is threadsafe because it is initially called
+// in +initialize for each subclass.
++ (GPBDescriptor *)descriptor {
+  static GPBDescriptor *descriptor = nil;
+  if (!descriptor) {
+    static GPBMessageFieldDescription fields[] = {
+      {
+        .name = "roomId",
+        .dataTypeSpecific.className = NULL,
+        .number = applyEnterRoom_FieldNumber_RoomId,
+        .hasIndex = 0,
+        .offset = (uint32_t)offsetof(applyEnterRoom__storage_, roomId),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom),
+        .dataType = GPBDataTypeInt64,
+      },
+      {
+        .name = "roomName",
+        .dataTypeSpecific.className = NULL,
+        .number = applyEnterRoom_FieldNumber_RoomName,
+        .hasIndex = 1,
+        .offset = (uint32_t)offsetof(applyEnterRoom__storage_, roomName),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom),
+        .dataType = GPBDataTypeString,
+      },
+      {
+        .name = "urmIcon",
+        .dataTypeSpecific.className = NULL,
+        .number = applyEnterRoom_FieldNumber_UrmIcon,
+        .hasIndex = 2,
+        .offset = (uint32_t)offsetof(applyEnterRoom__storage_, urmIcon),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom),
+        .dataType = GPBDataTypeString,
+      },
+      {
+        .name = "masterId",
+        .dataTypeSpecific.className = NULL,
+        .number = applyEnterRoom_FieldNumber_MasterId,
+        .hasIndex = 3,
+        .offset = (uint32_t)offsetof(applyEnterRoom__storage_, masterId),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom),
+        .dataType = GPBDataTypeInt64,
+      },
+      {
+        .name = "roomUserInfoArray",
+        .dataTypeSpecific.className = GPBStringifySymbol(RoomUserInfo),
+        .number = applyEnterRoom_FieldNumber_RoomUserInfoArray,
+        .hasIndex = GPBNoHasBit,
+        .offset = (uint32_t)offsetof(applyEnterRoom__storage_, roomUserInfoArray),
+        .flags = (GPBFieldFlags)(GPBFieldRepeated | GPBFieldTextFormatNameCustom),
+        .dataType = GPBDataTypeMessage,
+      },
+    };
+    GPBDescriptor *localDescriptor =
+        [GPBDescriptor allocDescriptorForClass:[applyEnterRoom class]
+                                     rootClass:[RoominfoRoot class]
+                                          file:RoominfoRoot_FileDescriptor()
+                                        fields:fields
+                                    fieldCount:(uint32_t)(sizeof(fields) / sizeof(GPBMessageFieldDescription))
+                                   storageSize:sizeof(applyEnterRoom__storage_)
+                                         flags:GPBDescriptorInitializationFlag_None];
+#if !GPBOBJC_SKIP_MESSAGE_TEXTFORMAT_EXTRAS
+    static const char *extraTextFormatInfo =
+        "\005\001\005A\000\002\010\000\003\007\000\004\007A\000\005\000RoomUserInfo\000";
+    [localDescriptor setupExtraTextInfo:extraTextFormatInfo];
+#endif  // !GPBOBJC_SKIP_MESSAGE_TEXTFORMAT_EXTRAS
+    NSAssert(descriptor == nil, @"Startup recursed!");
+    descriptor = localDescriptor;
+  }
+  return descriptor;
+}
+
+@end
 
 
 #pragma clang diagnostic pop

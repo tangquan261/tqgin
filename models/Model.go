@@ -30,7 +30,7 @@ func init() {
 	DB.SingularTable(true)
 	DB.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 		&Account{}, &UserInfo{}, &RoomInfo{}, &RoomPowerMemberInfo{},
-		&RoomTags{}, &HotRoomInfo{}, &SupportRoom{})
+		&RoomTags{}, &HotRoomInfo{}, &SupportRoom{}, &BannerInfo{})
 
 	fmt.Println("db init success")
 }

@@ -8,7 +8,6 @@ import (
 )
 
 func Result(ctx *gin.Context, code int, data proto.Message, msg string) {
-
 	protodata, _ := proto.Marshal(data)
 	ctx.JSON(http.StatusOK, gin.H{"code": code, "data": protodata, "msg": msg})
 }
@@ -17,10 +16,7 @@ func ResultOk(ctx *gin.Context, data proto.Message) {
 	protodata, _ := proto.Marshal(data)
 	ctx.JSON(http.StatusOK, gin.H{"code": http.StatusOK, "data": protodata, "msg": ""})
 }
-func ResultList(ctx *gin.Context, data proto.Message, total int64) {
-	protodata, _ := proto.Marshal(data)
-	ctx.JSON(http.StatusOK, gin.H{"code": http.StatusOK, "rows": protodata, "msg": "", "total": total})
-}
+
 func ResultOkMsg(ctx *gin.Context, data proto.Message, msg string) {
 	protodata, _ := proto.Marshal(data)
 	ctx.JSON(http.StatusOK, gin.H{"code": http.StatusOK, "data": protodata, "msg": msg})
