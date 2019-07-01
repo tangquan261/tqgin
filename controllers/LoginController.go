@@ -116,7 +116,7 @@ func (c *LoginController) register(con *gin.Context) {
 	var msg string
 
 	var retLogin login.ReplyLogin
-
+	fmt.Println(registerData)
 	if len(registerData.Account) < 11 {
 		status = 1
 		msg = "账号错误"

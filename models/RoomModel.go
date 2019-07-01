@@ -59,26 +59,30 @@ func CreateRoom(room *RoomInfo) error {
 
 	if err == nil {
 
-		roomPower := GetPowerRoom(room.MasterID, room.RoomID)
+		_, notFound := GetPowerRoom(room.MasterID, room.RoomID)
+		if notFound {
+			//没有找到该数据
+			var roomPower RoomPowerMemberInfo
+			roomPower.PlayerID = room.MasterID
+			roomPower.RoomId = room.RoomID
+			roomPower.RoomPower = 1
+			DB.Save(&roomPower)
+		}
 
-		var roomPower RoomPowerMemberInfo
-		roomPower.PlayerID = room.MasterID
-		roomPower.RoomId = room.RoomID
-		roomPower.RoomPower = 1
-		DB.Save(&roomPower)
-
-		_, err := GetHotRoom(room.RoomID)
-		if err == nil {
-			newhotRoom := HotRoomInfo{RoomID: room.RoomID, RoomTagName: room.RoomTagName, RoomHot: 100, BeginTime: time.Now()}
-			addHotRoom(&newhotRoom)
-		} else {
+		_, notFound = GetHotRoom(room.RoomID)
+		if notFound {
+			//没有在热门中找到
 			count := getHotRoomCountByTag(room.RoomTagName)
 			if count < 100 {
+				//改类型的热门数量小于100
 				newhotRoom := HotRoomInfo{RoomID: room.RoomID, RoomTagName: room.RoomTagName, RoomHot: 100, BeginTime: time.Now()}
 				addHotRoom(&newhotRoom)
 			}
+		} else {
+			//在热门中找到
+			//newhotRoom := HotRoomInfo{RoomID: room.RoomID, RoomTagName: room.RoomTagName, RoomHot: 100, BeginTime: time.Now()}
+			//addHotRoom(&newhotRoom)
 		}
-
 	}
 	fmt.Println("创建房间的返回", err)
 	return err
@@ -100,17 +104,14 @@ func getHotRoomCountByTag(tagName string) int {
 	return count
 }
 
-func GetHotRoom(roomID int64) (HotRoomInfo, error) {
-
+func GetHotRoom(roomID int64) (HotRoomInfo, bool) {
 	var hotRoom HotRoomInfo
-
-	err := DB.Where("room_id = ?", roomID).Find(&hotRoom).Error
-	return hotRoom, err
+	notFound := DB.Where("room_id = ?", roomID).Find(&hotRoom).RecordNotFound()
+	return hotRoom, notFound
 }
 
-func GetPowerRoom(playerID int64, roomID int64) (RoomPowerMemberInfo, error) {
+func GetPowerRoom(playerID int64, roomID int64) (RoomPowerMemberInfo, bool) {
 	var power RoomPowerMemberInfo
-	err := DB.Where("room_id = ?  AND player_id = ?", roomID, playerID).Find(&power).Error
-
-	return power, err
+	notFound := DB.Where("room_id = ?  AND player_id = ?", roomID, playerID).Find(&power).RecordNotFound()
+	return power, notFound
 }
