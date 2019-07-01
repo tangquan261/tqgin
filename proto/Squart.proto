@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package login;
+
+
+message TagInfo{
+    int64 		ID = 1;
+    string 		TagName = 2;	//房间分类tag
+
+}
+
+message TagsInfo {  
+  repeated TagInfo TagInfo = 1;  
+}  
+
+//热门房间
+message HotRoomInfo{
+	int64 RoomID = 1;
+	string RoomTagName = 2;
+	int64 RoomHot = 3;
+}
+
+message HotRooms{
+	repeated HotRoomInfo HotRoomInfo = 1;  
+}
+
+
+message BannerInfo{
+	int32 bannerId = 1;
+	int32 target_type = 2;
+	int64 start_time = 3;
+	int64 end_time = 4;
+	string bg_img = 5;
+	string click_url = 6;
+}
+
+message Banners{
+	repeated BannerInfo BannerInfo = 1;
+}

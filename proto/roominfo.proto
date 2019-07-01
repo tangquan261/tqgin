@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "userinfo.proto";
+
 package login;
 
 enum roomType{
@@ -13,4 +15,11 @@ message ApplyCreateRoom{
     roomType   roomtype   = 4;	//房间类型
 }
 
-
+message applyEnterRoom{
+	int64 roomID	 = 1;
+	string roomName = 2;
+	string urmIcon = 3;
+	int64 masterID = 4;
+	
+	repeated RoomUserInfo RoomUserInfo = 5;	
+}

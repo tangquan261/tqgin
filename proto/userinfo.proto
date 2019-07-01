@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package login;
+
+
+message userInfo{
+    int64 		playerID = 1;
+    string 		playerName = 2;
+	int32		sex = 3;
+	string      playerIcon = 4;
+	int32 		titleID = 5;
+	string		titleName = 6;
+	int32		age = 7;
+	int32 		Auth = 8;//1是已经认证 
+	string 		sign = 9;//签名			
+}
+
+message RoomUserInfo{
+	userInfo userInfo = 1;
+}
+
+message OneUserinfo{
+	userInfo userInfo = 1;
+}
