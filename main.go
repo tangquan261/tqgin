@@ -14,10 +14,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/segmentio/ksuid"
 	tqlog "github.com/sirupsen/logrus"
-	//"github.com/unrolled/secure"
-	//"proto"
-	//"google.golang.org/grpc"
-	//	"tqgin/proto"
 )
 
 func init() {

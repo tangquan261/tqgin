@@ -9,11 +9,6 @@ import (
 	//	"github.com/jinzhu/gorm"
 )
 
-type RoomTags struct {
-	ID      int64 `gorm:"primary_key"`
-	TagName string
-}
-
 type BannerInfo struct {
 	BannerID    int32 `gorm:"primary_key"`
 	Target_type int32
@@ -21,17 +16,6 @@ type BannerInfo struct {
 	End_time    time.Time
 	Bg_img      string
 	Click_url   string
-}
-
-func GetTagList() []RoomTags {
-
-	var tags []RoomTags
-	err := DB.Find(&tags).Error
-
-	if err != nil {
-		fmt.Println("GetTagList err:", err)
-	}
-	return tags
 }
 
 func GetHotRoomsByTag(tagName string) []HotRoomInfo {

@@ -83,10 +83,10 @@ func (r *RoomManagerController) applyEnterRoom(con *gin.Context) {
 		roomID, err := strconv.Atoi(roomIDstr)
 
 		if err != nil {
-			fmt.Println("applyEnterRoom atoi", err)
+			fmt.Println("applyEnterRoom atoi", err, roomID)
 		}
 
-		room, err := models.GetRoomInfo(int64(roomID))
+		//room, err := models.GetRoomInfo(int64(roomID))
 
 	}
 
