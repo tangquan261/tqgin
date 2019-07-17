@@ -8,7 +8,6 @@ import (
 )
 
 func Router(router *gin.Engine) {
-
 	fmt.Println("router init begin ...")
 	loginModel(router)
 	UserInfoModel(router)

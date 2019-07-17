@@ -6,13 +6,13 @@ import (
 	"fmt"
 	//"log"
 
+	"tqgin/config"
 	"tqgin/models"
 	"tqgin/routers"
 
-	"tqgin/config"
-
 	"github.com/gin-gonic/gin"
-	"github.com/segmentio/ksuid"
+
+	//"github.com/segmentio/ksuid"
 	tqlog "github.com/sirupsen/logrus"
 )
 
@@ -50,9 +50,9 @@ func main() {
 
 	// fmt.Println(request.Message)
 
-	uid := ksuid.New()
+	// uid := ksuid.New()
 
-	fmt.Println(uid.String())
+	// fmt.Println(uid.String())
 
 	//gin.SetMode(gin.ReleaseMode)
 	router = gin.Default()

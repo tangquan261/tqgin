@@ -9,22 +9,13 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
-
-	//"encoding/json"
-	//"fmt"
-
-	//"net/http"
-	//"strconv"
 	"tqgin/common"
 	"tqgin/models"
 	"tqgin/proto"
 
 	"github.com/gin-gonic/gin"
-	//"github.com/gin-gonic/gin/binding"
-	"github.com/golang/protobuf/proto"
 )
 
 var nindex int
@@ -43,22 +34,18 @@ func (this *LoginController) RegisterRouter(router *gin.Engine) {
 
 func (c *LoginController) login(con *gin.Context) {
 
-	var logindata login.ApplyLogin
+	Account := con.PostForm("Account")
+	Password := con.PostForm("Password")
+	Type, _ := strconv.Atoi(con.PostForm("Type"))
 
-	data := con.PostForm("data")
+	fmt.Println("login data:", Account, Password, Type)
 
-	err := proto.Unmarshal([]byte(data), &logindata)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	if len(logindata.Account) <= 0 || len(logindata.Password) <= 0 {
-
+	if len(Account) <= 0 || len(Password) <= 0 {
 		tqgin.Result(con, 1, nil, "账号，密码不能为空")
 		return
 	}
 
-	account := models.LoginAccount(logindata.Account)
+	account := models.LoginAccount(Account)
 
 	var status int
 	var msg string
@@ -70,8 +57,7 @@ func (c *LoginController) login(con *gin.Context) {
 		status = 1
 		msg = "不存在，去注册"
 	} else {
-		fmt.Println("passwod", account.Password, "----", logindata.Password, logindata.Account)
-		if account.Password != logindata.Password {
+		if account.Password != Password {
 			//密码错误
 			status = 2
 			msg = "密码错误"
@@ -103,39 +89,38 @@ func (c *LoginController) login(con *gin.Context) {
 
 func (c *LoginController) register(con *gin.Context) {
 
-	var registerData login.RegisterInfo
+	Account := con.PostForm("Account")
+	Password := con.PostForm("Password")
+	Type, _ := strconv.Atoi(con.PostForm("Type"))
+	NickName := con.PostForm("NickName")
+	SexType, _ := strconv.Atoi(con.PostForm("SexType"))
 
-	data := con.PostForm("data")
-
-	err := proto.Unmarshal([]byte(data), &registerData)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	fmt.Println("register data:", Account, Password, Type, NickName, SexType)
 
 	var status int
 	var msg string
 
 	var retLogin login.ReplyLogin
-	fmt.Println(registerData)
-	if len(registerData.Account) < 11 {
+
+	if len(Account) < 11 {
 		status = 1
 		msg = "账号错误"
-	} else if len(registerData.Password) < 6 {
+	} else if len(Password) < 6 {
 		status = 2
 		msg = "密码不能太短"
-	} else if len(registerData.NickNmae) <= 0 {
+	} else if len(NickName) <= 0 {
 		status = 3
 		msg = "昵称不能为空"
-	} else if registerData.SexType < login.SexType_Sex_male && registerData.SexType >= login.SexType_Sex_female {
+	} else if login.SexType(SexType) < login.SexType_Sex_male && login.SexType(SexType) >= login.SexType_Sex_female {
 		status = 4
 		msg = "性别错误"
 	} else {
 
 		var account models.Account
 
-		account.AccountID = registerData.Account
-		account.Password = registerData.Password
-		account.LoginType = registerData.Type
+		account.AccountID = Account
+		account.Password = Password
+		account.LoginType = login.LoginType(Type)
 		account.LoginTime = time.Now()
 		md5string := createloginTocken(account.AccountID, account.Password)
 		account.Tocken = md5string
@@ -145,7 +130,7 @@ func (c *LoginController) register(con *gin.Context) {
 
 		if status == 0 {
 
-			user := models.GetDefaultUserinfo(account.PlayerID, registerData.NickNmae, registerData.SexType)
+			user := models.GetDefaultUserinfo(account.PlayerID, NickName, login.SexType(SexType))
 
 			bret := models.CreateUser(&user)
 			if bret {
