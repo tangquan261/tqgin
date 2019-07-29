@@ -18,7 +18,7 @@ type CycleController struct {
 	tqgin.Controller
 }
 
-func (this *CycleController) RegisterRouter(router *gin.Engine) {
+func (this *CycleController) RegisterRouter(router *gin.RouterGroup) {
 	temp := router.Group("/cycle")
 	temp.POST("create", this.CommitArt)
 

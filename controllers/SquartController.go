@@ -17,7 +17,7 @@ type SquartController struct {
 	tqgin.Controller
 }
 
-func (this *SquartController) RegisterRouter(router *gin.Engine) {
+func (this *SquartController) RegisterRouter(router *gin.RouterGroup) {
 	temp := router.Group("/squart")
 	temp.GET("applyTagsList", this.applyTagsList)
 	temp.POST("applyRoomList", this.applyRoomList)

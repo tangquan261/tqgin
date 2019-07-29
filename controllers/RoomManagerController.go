@@ -22,7 +22,7 @@ type RoomManagerController struct {
 	tqgin.Controller
 }
 
-func (this *RoomManagerController) RegisterRouter(router *gin.Engine) {
+func (this *RoomManagerController) RegisterRouter(router *gin.RouterGroup) {
 	temp := router.Group("/roomManager")
 	temp.POST("openRoom", this.OpenRoom)
 	temp.POST("closeRoom", this.closeRoom)
