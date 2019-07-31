@@ -2,17 +2,22 @@
 package main
 
 import (
-	//"context"
-	"fmt"
-	//"log"
+	"log"
+	"time"
 
+	//"log"
+	//"syscall"
 	"tqgin/config"
 	"tqgin/models"
+
+	//"tqgin/pkg/qrcode"
 	"tqgin/routers"
 
+	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 
 	//"github.com/segmentio/ksuid"
+	//"github.com/boombuler/barcode/qr"
 	tqlog "github.com/sirupsen/logrus"
 )
 
@@ -34,34 +39,22 @@ var (
 
 func main() {
 
-	// conn, err := grpc.Dial("localhost:5262", grpc.WithInsecure())
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// defer conn.Close()
-
-	// client := proto.NewHelloClient(conn)
-
-	// request, err := client.SayHello(context.Background(), &proto.HelloRequest{Name: "tq"})
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// fmt.Println(request.Message)
-
-	// uid := ksuid.New()
-
-	// fmt.Println(uid.String())
+	// imageRrcode := qrcode.NewQrCode("www.baidu.com", 100, 100, qr.H, qr.Unicode)
+	// imageRrcode.Encode(qrcode.GetQrCodeFullPath())
 
 	//gin.SetMode(gin.ReleaseMode)
 	router = gin.Default()
 
 	routers.Router(router)
 
-	fmt.Println("server start.....", config.Tqconfig.String("httpIP")+":"+config.Tqconfig.String("httpport"))
-	//router.RunTLS(config.Tqconfig.String("httpIP")+":"+config.Tqconfig.String("httpport"), "miban.pem", "miban.key")
+	endless.DefaultMaxHeaderBytes = 1 << 20
+	endless.DefaultReadTimeOut = 30 * time.Second
+	endless.DefaultWriteTimeOut = 30 * time.Second
+	server := endless.NewServer(config.Tqconfig.String("httpIP")+":"+config.Tqconfig.String("httpport"), router)
 
-	router.Run(config.Tqconfig.String("httpIP") + ":" + config.Tqconfig.String("httpport"))
+	err := server.ListenAndServe()
+	if err != nil {
+		log.Println("err:%v", err)
+	}
 	defer models.DB.Close()
 }

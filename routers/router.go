@@ -2,16 +2,31 @@ package routers
 
 import (
 	"fmt"
+	"net/http"
 	"tqgin/controllers"
 
 	"tqgin/middleware/jwt"
 
+	"tqgin/pkg/qrcode"
+	"tqgin/pkg/upload"
+
 	"github.com/gin-gonic/gin"
+	"github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 func Router(router *gin.Engine) {
 
 	fmt.Println("router init begin ...")
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+
+	router.StaticFS("/qrcode", http.Dir(qrcode.GetQrCodeFullPath()))
+	router.StaticFS("/upload/images", http.Dir(upload.GetImageFullPath()))
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	new(controllers.UploadController).RegisterRouter(router)
+
 	authModel(router)
 
 	apiv1 := router.Group("/api/v1")
@@ -22,6 +37,7 @@ func Router(router *gin.Engine) {
 		rankInfoModel(apiv1)
 		roomInfoModel(apiv1)
 	}
+
 	fmt.Println("router init success...")
 }
 

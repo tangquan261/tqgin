@@ -26,7 +26,7 @@ type LoginController struct {
 
 func (this *LoginController) RegisterRouter(router *gin.Engine) {
 	temp := router.Group("/account")
-	temp.POST("login", this.login)
+	temp.GET("login", this.login)
 	temp.POST("register", this.register)
 	temp.POST("loginInfo", this.loginInfo)
 	temp.POST("changePassWord", this.changePassWord)

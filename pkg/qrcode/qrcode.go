@@ -3,6 +3,7 @@ package qrcode
 import (
 	"image/jpeg"
 
+	"tqgin/config"
 	"tqgin/pkg/file"
 	"tqgin/pkg/util"
 
@@ -39,11 +40,11 @@ func GetQrCodeFileName(value string) string {
 }
 
 func GetQrCodeFullPath() string {
-	return "roomPath" + "stting.appSetting.qrCodeSavePath"
+	return config.Tqconfig.String(config.RuntimeRootPath) + config.Tqconfig.String(config.QrCodeSavePath)
 }
 
 func GetQrCodeFullURL(name string) string {
-	return "settting.appSetting.prefixurl" + "/" + "setting.AppSetting.QrCodeSavePath" + name
+	return config.Tqconfig.String(config.PrefixUrl) + "/" + config.Tqconfig.String(config.QrCodeSavePath) + name
 }
 
 func (q *QrCode) Encode(path string) (string, string, error) {

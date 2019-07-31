@@ -2,7 +2,6 @@ package config
 
 import (
 	"log"
-	"time"
 
 	"github.com/astaxie/beego/config"
 )
@@ -16,7 +15,6 @@ const (
 	ImageSavePath   = "ImageSavePath"
 	ImageMaxSize    = "ImageMaxSize"
 	ImageAllowExts  = "ImageAllowExts"
-	ExportSavePath  = "ExportSavePath"
 	QrCodeSavePath  = "QrCodeSavePath"
 	FontSavePath    = "FontSavePath"
 
@@ -30,6 +28,13 @@ const (
 	HttpPort     = "HttpPort"
 	ReadTimeout  = "ReadTimeout"
 	WriteTimeout = "WriteTimeout"
+
+	//redis
+	Redis_Host        = "redis_Host"
+	Redis_Password    = "redis_Password"
+	Redis_MaxIdle     = "redis_MaxIdle"
+	Redis_MaxActive   = "redis_MaxActive"
+	Redis_IdleTimeout = "redis_IdleTimeout"
 )
 
 func init() {
@@ -42,4 +47,18 @@ func init() {
 	}
 
 	log.Println("config success init")
+}
+
+func GetConfigString(conf string) string {
+	return Tqconfig.String(conf)
+}
+
+func GetConfigInt(conf string) int {
+	Value, err := Tqconfig.Int(conf)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return Value
 }
