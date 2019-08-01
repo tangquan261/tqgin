@@ -9,26 +9,67 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-func Result(ctx *gin.Context, code int, data proto.Message, msg string) {
-	protodata, _ := proto.Marshal(data)
-	ctx.JSON(http.StatusOK, gin.H{"code": code, "data": protodata, "msg": msg})
+func Result(ctx *gin.Context, code int, data interface{}, msg string) {
+
+	_, bTure := data.(proto.Message)
+
+	var retData interface{}
+
+	if bTure {
+		retData, _ = proto.Marshal(data.(proto.Message))
+
+	} else {
+		retData = data
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"code": code, "data": retData, "msg": msg})
 }
 
-func ResultOk(ctx *gin.Context, data proto.Message) {
-	protodata, _ := proto.Marshal(data)
-	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.SUCCESS, "data": protodata, "msg": ""})
+func ResultOk(ctx *gin.Context, data interface{}) {
+
+	_, bTure := data.(proto.Message)
+
+	var retData interface{}
+
+	if bTure {
+		retData, _ = proto.Marshal(data.(proto.Message))
+
+	} else {
+		retData = data
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.SUCCESS, "data": retData, "msg": ""})
 }
 
-func ResultOkMsg(ctx *gin.Context, data proto.Message, msg string) {
-	protodata, _ := proto.Marshal(data)
-	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.SUCCESS, "data": protodata, "msg": msg})
+func ResultOkMsg(ctx *gin.Context, data interface{}, msg string) {
+	_, bTure := data.(proto.Message)
+
+	var retData interface{}
+
+	if bTure {
+		retData, _ = proto.Marshal(data.(proto.Message))
+
+	} else {
+		retData = data
+	}
+	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.SUCCESS, "data": retData, "msg": msg})
 }
 
 func ResultFail(ctx *gin.Context, err interface{}) {
-	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.SUCCESS, "data": nil, "msg": err})
+
+	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.ERROR, "data": nil, "msg": err})
 }
 
-func ResultFailData(ctx *gin.Context, data proto.Message, err interface{}) {
-	protodata, _ := proto.Marshal(data)
-	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.SUCCESS, "data": protodata, "msg": err})
+func ResultFailData(ctx *gin.Context, data interface{}, err interface{}) {
+	_, bTure := data.(proto.Message)
+
+	var retData interface{}
+
+	if bTure {
+		retData, _ = proto.Marshal(data.(proto.Message))
+
+	} else {
+		retData = data
+	}
+	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.ERROR, "data": retData, "msg": err})
 }

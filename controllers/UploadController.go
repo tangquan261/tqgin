@@ -33,7 +33,6 @@ func (s *UploadController) uploadImage(con *gin.Context) {
 	}
 	imageName := upload.GetImageName(image.Filename)
 	fullPath := upload.GetImageFullPath()
-	//savePath := upload.GetImagePath()
 	src := fullPath + imageName
 
 	if !upload.CheckImageExt(imageName) || !upload.CheckImageSize(file) {
@@ -54,6 +53,9 @@ func (s *UploadController) uploadImage(con *gin.Context) {
 		return
 	}
 
-	tqgin.ResultOk(con, nil)
+	tqgin.ResultOk(con, gin.H{
+		"image_save_url": upload.GetImagePath() + imageName,
+		"image_url":      upload.GetImageFullUrl(imageName),
+	})
 
 }

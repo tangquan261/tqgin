@@ -14,6 +14,7 @@ func JWT() gin.HandlerFunc {
 		var code int
 		var data interface{}
 
+		code = errorcode.SUCCESS
 		tocken := c.PostForm("tocken")
 		if tocken == "" {
 			code = errorcode.ERROR_INVALID_PARAMS
