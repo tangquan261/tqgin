@@ -82,8 +82,14 @@ typedef GPB_ENUM(TagsInfo_FieldNumber) {
 
 typedef GPB_ENUM(HotRoomInfo_FieldNumber) {
   HotRoomInfo_FieldNumber_RoomId = 1,
-  HotRoomInfo_FieldNumber_RoomTagName = 2,
-  HotRoomInfo_FieldNumber_RoomHot = 3,
+  HotRoomInfo_FieldNumber_RoomType = 2,
+  HotRoomInfo_FieldNumber_RoomName = 3,
+  HotRoomInfo_FieldNumber_Pic = 4,
+  HotRoomInfo_FieldNumber_Intro = 5,
+  HotRoomInfo_FieldNumber_Password = 6,
+  HotRoomInfo_FieldNumber_RoomTagName = 7,
+  HotRoomInfo_FieldNumber_MemCount = 8,
+  HotRoomInfo_FieldNumber_RoomHot = 9,
 };
 
 /**
@@ -93,7 +99,19 @@ typedef GPB_ENUM(HotRoomInfo_FieldNumber) {
 
 @property(nonatomic, readwrite) int64_t roomId;
 
+@property(nonatomic, readwrite) int32_t roomType;
+
+@property(nonatomic, readwrite, copy, null_resettable) NSString *roomName;
+
+@property(nonatomic, readwrite, copy, null_resettable) NSString *pic;
+
+@property(nonatomic, readwrite, copy, null_resettable) NSString *intro;
+
+@property(nonatomic, readwrite, copy, null_resettable) NSString *password;
+
 @property(nonatomic, readwrite, copy, null_resettable) NSString *roomTagName;
+
+@property(nonatomic, readwrite) int32_t memCount;
 
 @property(nonatomic, readwrite) int64_t roomHot;
 

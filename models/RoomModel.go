@@ -20,14 +20,17 @@ type RoomInfo struct {
 	RoomTagName   string
 	RoomLevel     int
 	RoomTotalStar int64
-	RoomHot       int64
+	RoomPic       string
+	RoomIntro     string
+	RoomPassword  string
+	RoomCount     int64
 }
 
 type HotRoomInfo struct {
 	RoomID      int64 `gorm:"primary_key"`
 	RoomTagName string
-	BeginTime   time.Time
 	RoomHot     int64
+	BeginTime   time.Time
 }
 
 type RoomPowerMemberInfo struct {
@@ -114,4 +117,14 @@ func GetPowerRoom(playerID int64, roomID int64) (RoomPowerMemberInfo, bool) {
 	var power RoomPowerMemberInfo
 	notFound := DB.Where("room_id = ?  AND player_id = ?", roomID, playerID).Find(&power).RecordNotFound()
 	return power, notFound
+}
+
+func GetRoomById(roomid int64) *RoomInfo {
+	var room RoomInfo
+	err := DB.Where("room_id = (?)", roomid).Find(&room).Error
+	if err != nil {
+		fmt.Println("GetRoomByIds", err)
+		return nil
+	}
+	return &room
 }

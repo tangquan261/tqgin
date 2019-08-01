@@ -154,11 +154,23 @@ typedef struct TagsInfo__storage_ {
 @implementation HotRoomInfo
 
 @dynamic roomId;
+@dynamic roomType;
+@dynamic roomName;
+@dynamic pic;
+@dynamic intro;
+@dynamic password;
 @dynamic roomTagName;
+@dynamic memCount;
 @dynamic roomHot;
 
 typedef struct HotRoomInfo__storage_ {
   uint32_t _has_storage_[1];
+  int32_t roomType;
+  int32_t memCount;
+  NSString *roomName;
+  NSString *pic;
+  NSString *intro;
+  NSString *password;
   NSString *roomTagName;
   int64_t roomId;
   int64_t roomHot;
@@ -180,19 +192,73 @@ typedef struct HotRoomInfo__storage_ {
         .dataType = GPBDataTypeInt64,
       },
       {
+        .name = "roomType",
+        .dataTypeSpecific.className = NULL,
+        .number = HotRoomInfo_FieldNumber_RoomType,
+        .hasIndex = 1,
+        .offset = (uint32_t)offsetof(HotRoomInfo__storage_, roomType),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom),
+        .dataType = GPBDataTypeInt32,
+      },
+      {
+        .name = "roomName",
+        .dataTypeSpecific.className = NULL,
+        .number = HotRoomInfo_FieldNumber_RoomName,
+        .hasIndex = 2,
+        .offset = (uint32_t)offsetof(HotRoomInfo__storage_, roomName),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom),
+        .dataType = GPBDataTypeString,
+      },
+      {
+        .name = "pic",
+        .dataTypeSpecific.className = NULL,
+        .number = HotRoomInfo_FieldNumber_Pic,
+        .hasIndex = 3,
+        .offset = (uint32_t)offsetof(HotRoomInfo__storage_, pic),
+        .flags = GPBFieldOptional,
+        .dataType = GPBDataTypeString,
+      },
+      {
+        .name = "intro",
+        .dataTypeSpecific.className = NULL,
+        .number = HotRoomInfo_FieldNumber_Intro,
+        .hasIndex = 4,
+        .offset = (uint32_t)offsetof(HotRoomInfo__storage_, intro),
+        .flags = GPBFieldOptional,
+        .dataType = GPBDataTypeString,
+      },
+      {
+        .name = "password",
+        .dataTypeSpecific.className = NULL,
+        .number = HotRoomInfo_FieldNumber_Password,
+        .hasIndex = 5,
+        .offset = (uint32_t)offsetof(HotRoomInfo__storage_, password),
+        .flags = GPBFieldOptional,
+        .dataType = GPBDataTypeString,
+      },
+      {
         .name = "roomTagName",
         .dataTypeSpecific.className = NULL,
         .number = HotRoomInfo_FieldNumber_RoomTagName,
-        .hasIndex = 1,
+        .hasIndex = 6,
         .offset = (uint32_t)offsetof(HotRoomInfo__storage_, roomTagName),
         .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom),
         .dataType = GPBDataTypeString,
       },
       {
+        .name = "memCount",
+        .dataTypeSpecific.className = NULL,
+        .number = HotRoomInfo_FieldNumber_MemCount,
+        .hasIndex = 7,
+        .offset = (uint32_t)offsetof(HotRoomInfo__storage_, memCount),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom),
+        .dataType = GPBDataTypeInt32,
+      },
+      {
         .name = "roomHot",
         .dataTypeSpecific.className = NULL,
         .number = HotRoomInfo_FieldNumber_RoomHot,
-        .hasIndex = 2,
+        .hasIndex = 8,
         .offset = (uint32_t)offsetof(HotRoomInfo__storage_, roomHot),
         .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom),
         .dataType = GPBDataTypeInt64,
@@ -208,7 +274,7 @@ typedef struct HotRoomInfo__storage_ {
                                          flags:GPBDescriptorInitializationFlag_None];
 #if !GPBOBJC_SKIP_MESSAGE_TEXTFORMAT_EXTRAS
     static const char *extraTextFormatInfo =
-        "\003\001EA\000\002K\000\003G\000";
+        "\006\001EA\000\002\010\000\003\010\000\007K\000\010\010\000\tG\000";
     [localDescriptor setupExtraTextInfo:extraTextFormatInfo];
 #endif  // !GPBOBJC_SKIP_MESSAGE_TEXTFORMAT_EXTRAS
     NSAssert(descriptor == nil, @"Startup recursed!");

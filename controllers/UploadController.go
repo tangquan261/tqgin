@@ -23,7 +23,7 @@ func (s *UploadController) uploadImage(con *gin.Context) {
 	file, image, err := con.Request.FormFile("image")
 	if err != nil {
 		log.Println(err)
-		tqgin.ResultFail(con, err)
+		tqgin.ResultFail(con, err.Error())
 		return
 	}
 

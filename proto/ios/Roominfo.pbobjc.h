@@ -110,9 +110,6 @@ typedef GPB_ENUM(applyEnterRoom_FieldNumber) {
   applyEnterRoom_FieldNumber_RoomUserInfoArray = 5,
 };
 
-/**
- * com.road.ddt.proto.command.RankInfoRes rankInfoRes = 52;
- **/
 @interface applyEnterRoom : GPBMessage
 
 @property(nonatomic, readwrite) int64_t roomId;

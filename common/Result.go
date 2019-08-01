@@ -2,7 +2,6 @@ package tqgin
 
 import (
 	"net/http"
-
 	"tqgin/pkg/errorcode"
 
 	"github.com/gin-gonic/gin"
@@ -55,12 +54,12 @@ func ResultOkMsg(ctx *gin.Context, data interface{}, msg string) {
 	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.SUCCESS, "data": retData, "msg": msg})
 }
 
-func ResultFail(ctx *gin.Context, err interface{}) {
+func ResultFail(ctx *gin.Context, msg string) {
 
-	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.ERROR, "data": nil, "msg": err})
+	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.ERROR, "data": nil, "msg": msg})
 }
 
-func ResultFailData(ctx *gin.Context, data interface{}, err interface{}) {
+func ResultFailData(ctx *gin.Context, data interface{}, msg string) {
 	_, bTure := data.(proto.Message)
 
 	var retData interface{}
@@ -71,5 +70,5 @@ func ResultFailData(ctx *gin.Context, data interface{}, err interface{}) {
 	} else {
 		retData = data
 	}
-	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.ERROR, "data": retData, "msg": err})
+	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.ERROR, "data": retData, "msg": msg})
 }

@@ -26,13 +26,13 @@ func Router(router *gin.Engine) {
 
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	new(controllers.UploadController).RegisterRouter(router)
-
 	authModel(router)
 
 	apiv1 := router.Group("/api/v1")
 	apiv1.Use(jwt.JWT())
 	{
+		new(controllers.UploadController).RegisterRouter(router)
+		LoginModel(apiv1)
 		userInfoModel(apiv1)
 		rankInfoModel(apiv1)
 		roomInfoModel(apiv1)
@@ -43,7 +43,11 @@ func Router(router *gin.Engine) {
 
 //登录模块
 func authModel(router *gin.Engine) {
-	new(controllers.LoginController).RegisterRouter(router)
+	new(controllers.AuthController).RegisterRouter(router)
+}
+
+func LoginModel(router *gin.RouterGroup) {
+	new(controllers.UserinfoController).RegisterRouter(router)
 }
 
 //用户信息模块

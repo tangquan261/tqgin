@@ -100,7 +100,6 @@ func (m *ApplyCreateRoom) GetRoomtype() RoomType {
 	return RoomType_roomType_NOAML
 }
 
-//com.road.ddt.proto.command.RankInfoRes rankInfoRes = 52;
 type ApplyEnterRoom struct {
 	RoomID               int64           `protobuf:"varint,1,opt,name=roomID,proto3" json:"roomID,omitempty"`
 	RoomName             string          `protobuf:"bytes,2,opt,name=roomName,proto3" json:"roomName,omitempty"`

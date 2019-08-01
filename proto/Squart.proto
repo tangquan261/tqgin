@@ -15,9 +15,15 @@ message TagsInfo {
 
 //热门房间
 message HotRoomInfo{
-	int64 RoomID = 1;
-	string RoomTagName = 2;
-	int64 RoomHot = 3;
+	int64 	RoomID 		= 1;
+	string  roomtag 		= 2;
+	string 	roomName 	= 3;
+	string 	pic	    		= 4;
+	string 	intro		= 5; 
+	string 	password  	= 6;
+	string 	RoomTagName = 7;
+	int32 	memCount 	= 8;
+	int64 	RoomHot 		= 9;
 }
 
 message HotRooms{

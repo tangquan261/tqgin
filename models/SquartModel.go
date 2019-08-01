@@ -18,25 +18,40 @@ type BannerInfo struct {
 	Click_url   string
 }
 
-func GetHotRoomsByTag(tagName string) []HotRoomInfo {
+func GetHotRoomsByTag(tagName string) []RoomInfo {
 
 	var hotRooms []HotRoomInfo
 	err := DB.Where("room_tag_name = ?", tagName).Find(&hotRooms).Error
 	if err != nil {
 		fmt.Println("GetHotRoomsByTag err:", err)
+		return nil
 	}
-	return hotRooms
+
+	var rooms []RoomInfo
+	for i := 0; i < len(hotRooms); i++ {
+		oneRoom := GetRoomById(hotRooms[i].RoomID)
+		rooms = append(rooms, *oneRoom)
+	}
+
+	return rooms
 }
 
-func GetHotAllRooms() []HotRoomInfo {
+func GetHotAllRooms() []RoomInfo {
 
 	var hotRooms []HotRoomInfo
 
 	err := DB.Find(&hotRooms).Error
 	if err != nil {
 		fmt.Println("GetHotRoomsByTag err:", err)
+		return nil
 	}
-	return hotRooms
+
+	var rooms []RoomInfo
+	for i := 0; i < len(hotRooms); i++ {
+		oneRoom := GetRoomById(hotRooms[i].RoomID)
+		rooms = append(rooms, *oneRoom)
+	}
+	return rooms
 }
 
 func GetBanners() []BannerInfo {

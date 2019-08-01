@@ -1,7 +1,9 @@
 package models
 
 import (
+	"errors"
 	"fmt"
+	"time"
 
 	//"time"
 	"tqgin/proto"
@@ -18,48 +20,40 @@ type UserInfo struct {
 	Cash       int64
 	RoomID     int64
 	Sex        login.SexType //1女，2男，0未知
+	BirthDay   time.Time
+	Sign       string
+	Pic        string
+	Loc        int
+	Locx       float64
+	Locy       float64
+	Photos     string `gorm:size=1000`
 }
 
 func GetDefaultUserinfo(PlayerID int64, Name string, Sex login.SexType) UserInfo {
-
 	var user UserInfo
 	user.PlayerID = PlayerID
 	user.PlayerName = Name
 	user.Sex = Sex
 
 	return user
-
 }
 
-func CreateUser(user *UserInfo) bool {
+func CreateUser(user *UserInfo) error {
 
 	if user.PlayerID <= 0 || user.PlayerName == "" {
-		return false
+		return errors.New("param err")
 	}
 
-	err := DB.Create(user).GetErrors()
-
-	if len(err) > 0 {
-		return false
-	} else {
-		return true
-	}
+	return DB.Create(user).Error
 }
 
-func SaveUser(user *UserInfo, newUser *UserInfo) bool {
-
-	if user.PlayerID == 0 || user.PlayerID != newUser.PlayerID {
-		return false
+func SaveUser(user *UserInfo) error {
+	if user.PlayerID <= 0 {
+		return errors.New("playerGUID error")
 	}
+	err := DB.Model(user).Update(user).Error
 
-	err := DB.Model(user).Update(newUser).GetErrors()
-
-	if len(err) > 0 {
-		fmt.Println(err)
-		return false
-	} else {
-		return true
-	}
+	return err
 }
 
 func GetUser(playerID int64) *UserInfo {
@@ -67,12 +61,28 @@ func GetUser(playerID int64) *UserInfo {
 	var user UserInfo
 	user.PlayerID = playerID
 
-	err := DB.Find(&user, "player_id = ?", playerID).Error
+	err := DB.First(&user, "player_id = ?", playerID).Error
+
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return &user
+}
+
+func GetUsers(playerIDs []int64) []UserInfo {
+
+	if len(playerIDs) <= 0 {
+		return nil
+	}
+	var user []UserInfo
+
+	err := DB.Where("player_id in (?)", playerIDs).Find(&user)
 
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
 
-	return &user
+	return user
 }

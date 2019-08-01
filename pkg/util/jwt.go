@@ -14,6 +14,10 @@ type Claims struct {
 
 var jwtSecret []byte
 
+func init() {
+	jwtSecret = []byte("1111")
+}
+
 func GenerateTocken(username, password string) (string, error) {
 	nowTime := time.Now()
 

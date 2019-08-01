@@ -23,11 +23,17 @@ type RoomManagerController struct {
 }
 
 func (this *RoomManagerController) RegisterRouter(router *gin.RouterGroup) {
-	temp := router.Group("/roomManager")
-	temp.POST("openRoom", this.OpenRoom)
-	temp.POST("closeRoom", this.closeRoom)
-	temp.POST("changeRoomName", this.ChangeRoomName)
-	temp.POST("applyEnterRoom", this.applyEnterRoom)
+	temp := router.Group("/room_manager")
+	temp.POST("open_room", this.OpenRoom)
+	temp.POST("close_room", this.closeRoom)
+	temp.POST("change_roomName", this.ChangeRoomName)
+	temp.POST("apply_enter_Room", this.applyEnterRoom)
+	temp.POST("apply_roominfo", this.applyRoomInfo)
+}
+
+//根据id获取房间信息
+func (r *RoomManagerController) applyRoomInfo(con *gin.Context) {
+
 }
 
 //开启房间

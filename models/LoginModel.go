@@ -82,13 +82,13 @@ func Register(account *Account) (status int) {
 	return
 }
 
-func AccountSaveTocken(account *Account) error {
+func AccountSaveTocken(accountID string, token string) error {
 
-	if account.AccountID == "" {
+	if accountID == "" || token == "" {
 		return errors.New("AccountID is nil")
 	}
-
-	return DB.Model(account).Update(Account{Tocken: account.Tocken, TockenTimeOut: account.TockenTimeOut}).Error
+	log.Println("AccountSaveTocken %v:%v", accountID, token)
+	return DB.Model(Account{}).Where("account_id=?", accountID).Update(Account{Tocken: token, TockenTimeOut: time.Now()}).Error
 }
 
 func AccountChangePwd(account *Account, newPassword string) int {

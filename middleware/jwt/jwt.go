@@ -15,11 +15,13 @@ func JWT() gin.HandlerFunc {
 		var data interface{}
 
 		code = errorcode.SUCCESS
-		tocken := c.PostForm("tocken")
-		if tocken == "" {
+
+		token, _ := c.Cookie("token")
+
+		if token == "" {
 			code = errorcode.ERROR_INVALID_PARAMS
 		} else {
-			_, err := util.ParseToken(tocken)
+			_, err := util.ParseToken(token)
 			if err != nil {
 				switch err.(*jwt.ValidationError).Errors {
 				case jwt.ValidationErrorExpired:

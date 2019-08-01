@@ -1,11 +1,9 @@
 /*
 	房间列表
 */
-
 package controllers
 
 import (
-	"fmt"
 	"tqgin/common"
 	"tqgin/models"
 	"tqgin/proto"
@@ -26,8 +24,6 @@ func (this *SquartController) RegisterRouter(router *gin.RouterGroup) {
 
 func (s *SquartController) applyTagsList(con *gin.Context) {
 
-	var status int
-
 	tags := models.GetTagList()
 
 	var retTags login.TagsInfo
@@ -39,61 +35,53 @@ func (s *SquartController) applyTagsList(con *gin.Context) {
 		retTags.TagInfo = append(retTags.TagInfo, &onetag)
 	}
 
-	fmt.Println(status, tags, "\n", retTags)
-	tqgin.ResultOkMsg(con, &retTags, "成功")
+	tqgin.ResultOkMsg(con, tags, "成功")
 }
 
 func (s *SquartController) applyRoomList(con *gin.Context) {
 
 	TagName := con.PostForm("tagName")
 
-	var status int
-	var data []models.HotRoomInfo
-
-	var retData login.HotRooms
+	var data []models.RoomInfo
 
 	if len(TagName) > 0 {
-		status = 0
 		data = models.GetHotRoomsByTag(TagName)
-
 	} else {
-		status = 0
 		data = models.GetHotAllRooms()
 	}
 
-	for _, room := range data {
-		var oneRoom login.HotRoomInfo
+	//var retData login.HotRooms
+	// for _, room := range data {
+	// 	var oneRoom login.HotRoomInfo
 
-		oneRoom.RoomID = room.RoomID
-		oneRoom.RoomTagName = room.RoomTagName
-		oneRoom.RoomHot = room.RoomHot
+	// 	oneRoom.RoomID = room.RoomID
+	// 	oneRoom.RoomTagName = room.RoomTagName
+	// 	oneRoom.RoomHot = room.RoomHot
 
-		retData.HotRoomInfo = append(retData.HotRoomInfo, &oneRoom)
-	}
+	// 	retData.HotRoomInfo = append(retData.HotRoomInfo, &oneRoom)
+	// }
 
-	fmt.Println(status, data, "\n", retData)
-	tqgin.ResultOk(con, &retData)
+	tqgin.ResultOk(con, data)
 }
 
 func (s *SquartController) getBanners(con *gin.Context) {
 
-	var retBanner login.Banners
-
 	banners := models.GetBanners()
 
-	for _, banner := range banners {
-		var onebanner login.BannerInfo
-		onebanner.BannerId = banner.BannerID
-		onebanner.TargetType = banner.Target_type
+	//var retBanner login.Banners
+	// for _, banner := range banners {
+	// 	var onebanner login.BannerInfo
+	// 	onebanner.BannerId = banner.BannerID
+	// 	onebanner.TargetType = banner.Target_type
 
-		onebanner.StartTime = banner.Start_time.Unix()
-		onebanner.EndTime = banner.End_time.Unix()
-		onebanner.BgImg = banner.Bg_img
-		onebanner.ClickUrl = banner.Click_url
-		retBanner.BannerInfo = append(retBanner.BannerInfo, &onebanner)
-	}
+	// 	onebanner.StartTime = banner.Start_time.Unix()
+	// 	onebanner.EndTime = banner.End_time.Unix()
+	// 	onebanner.BgImg = banner.Bg_img
+	// 	onebanner.ClickUrl = banner.Click_url
+	// 	retBanner.BannerInfo = append(retBanner.BannerInfo, &onebanner)
+	// }
 
-	fmt.Println("getBanners", banners, "\t", retBanner)
+	// fmt.Println("getBanners", banners, "\t", retBanner)
 
-	tqgin.ResultOk(con, &retBanner)
+	tqgin.ResultOk(con, banners)
 }
