@@ -18,6 +18,7 @@ func init() {
 	jwtSecret = []byte("1111")
 }
 
+//根据username和password获取token
 func GenerateTocken(username, password string) (string, error) {
 	nowTime := time.Now()
 
@@ -37,6 +38,7 @@ func GenerateTocken(username, password string) (string, error) {
 	return tocken, err
 }
 
+//根据token获取登录信息结构体
 func ParseToken(tocken string) (*Claims, error) {
 	tokenClainms, err := jwt.ParseWithClaims(tocken, &Claims{}, func(tocken *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil

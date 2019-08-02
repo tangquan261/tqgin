@@ -8,6 +8,7 @@ package controllers
 import (
 	"log"
 	"strconv"
+	"strings"
 	"tqgin/common"
 	"tqgin/models"
 	"tqgin/pkg/errorcode"
@@ -93,7 +94,7 @@ func (c *UserinfoController) updateInfo(con *gin.Context) {
 	user.Locx, _ = strconv.ParseFloat(con.PostForm("locx"), 64)
 	user.Locy, _ = strconv.ParseFloat(con.PostForm("locy"), 64)
 
-	_ = models.SaveUser(user)
+	_ = models.SaveUser(PlayerGUID, user)
 
 	tqgin.Result(con, errorcode.SUCCESS, gin.H{"playerid": PlayerGUID}, "更新数据成功")
 }
@@ -135,6 +136,8 @@ type photos struct {
 
 func (c *UserinfoController) addPhotos(con *gin.Context) {
 
+	playerGUID, _ := con.Cookie("playerid")
+
 	var photo photos
 	err := con.ShouldBindJSON(&photo)
 
@@ -143,5 +146,12 @@ func (c *UserinfoController) addPhotos(con *gin.Context) {
 		tqgin.ResultFail(con, "error")
 		return
 	}
-	tqgin.ResultOk(con, photo)
+
+	photoString := strings.Join(photo.Photos, "_@_")
+	var usrino models.UserInfo
+	uPlayerGUID, _ := strconv.ParseInt(playerGUID, 10, 64)
+	usrino.Photos = photoString
+	models.SaveUser(uPlayerGUID, &usrino)
+
+	tqgin.ResultOk(con, nil)
 }

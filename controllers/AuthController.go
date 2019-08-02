@@ -58,7 +58,9 @@ func (r *AuthController) login(con *gin.Context) {
 			//密码正确
 			tokengen, _ := util.GenerateTocken(Account, Password)
 
-			models.AccountSaveTocken(Account, tokengen)
+			var saveAccount models.Account
+			saveAccount.Tocken = tokengen
+			models.AccountSave(account.AccountID, saveAccount)
 
 			status = errorcode.SUCCESS
 			msg = "登录成功"
@@ -170,9 +172,11 @@ func (c *AuthController) changePassWord(con *gin.Context) {
 		} else if account.Password != oldPassword {
 			msg = "密码错误"
 		} else {
-			account.Password = newPassword
-			status = models.AccountChangePwd(account, newPassword)
-			if status == errorcode.SUCCESS {
+			var save models.Account
+			save.Password = newPassword
+			err := models.AccountSave(accountID, save)
+			if err != nil {
+				status = errorcode.SUCCESS
 				msg = "密码修改成功"
 			} else {
 				msg = "密码修改失败，打印错误日志"

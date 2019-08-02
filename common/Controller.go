@@ -2,6 +2,7 @@ package tqgin
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -22,6 +23,13 @@ func (this *Controller) AjaxData(ctx *gin.Context) {
 }
 func (this *Controller) Redirect(ctx *gin.Context, uri string) {
 	ctx.Redirect(302, uri)
+}
+
+func (this *Controller) GetPlayerGUID(ctx *gin.Context) int64 {
+	myID, _ := ctx.Cookie("playerid")
+	nPlayerID, _ := strconv.ParseInt(myID, 10, 64)
+
+	return nPlayerID
 }
 
 var urimap map[string]int = make(map[string]int)

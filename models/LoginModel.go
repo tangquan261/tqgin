@@ -2,13 +2,11 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"time"
 
 	"tqgin/proto"
-
-	_ "github.com/go-sql-driver/mysql"
+	//_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 )
 
@@ -32,26 +30,26 @@ func LoginAccount(accountID string) *Account {
 
 	var account Account
 
-	err := DB.Find(&account, "account_id = ?", accountID).GetErrors()
+	err := DB.Find(&account, "account_id = ?", accountID).Error
 
-	if len(err) > 0 {
+	if err != nil {
 		log.Println(err, accountID)
 	}
 
 	return &account
 }
 
-func LoginAccountByPlayerID(PlayerID int64) *Account {
+func LoginAccountByPlayerID(PlayerID int64) Account {
 
 	var account Account
 
-	err := DB.Find(&account, "player_id = ?", PlayerID).GetErrors()
+	err := DB.Find(&account, "player_id = ?", PlayerID).Error
 
-	if len(err) > 0 {
+	if err != nil {
 		log.Println(err, PlayerID)
 	}
 
-	return &account
+	return account
 }
 
 func Register(account *Account) (status int) {
@@ -82,27 +80,10 @@ func Register(account *Account) (status int) {
 	return
 }
 
-func AccountSaveTocken(accountID string, token string) error {
-
-	if accountID == "" || token == "" {
-		return errors.New("AccountID is nil")
-	}
-	log.Println("AccountSaveTocken %v:%v", accountID, token)
-	return DB.Model(Account{}).Where("account_id=?", accountID).Update(Account{Tocken: token, TockenTimeOut: time.Now()}).Error
-}
-
-func AccountChangePwd(account *Account, newPassword string) int {
-
+func AccountSave(accountid string, account Account) error {
 	if account.AccountID == "" {
-		return 1
+		return errors.New("account is nui")
 	}
 
-	err := DB.Model(account).Update(Account{Password: newPassword}).GetErrors()
-
-	if len(err) > 0 {
-		fmt.Println(err)
-		return 1
-	} else {
-		return 0
-	}
+	return DB.Model(Account{}).Where("account_id = (?)", accountid).Update(account).Error
 }

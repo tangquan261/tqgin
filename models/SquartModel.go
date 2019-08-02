@@ -1,12 +1,8 @@
 package models
 
 import (
-	"time"
-	//"errors"
 	"fmt"
-	//"time"
-	//"fmt"
-	//	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type BannerInfo struct {

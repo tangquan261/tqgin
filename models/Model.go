@@ -30,7 +30,23 @@ func init() {
 	DB.SingularTable(true)
 	DB.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 		&Account{}, &UserInfo{}, &RoomInfo{}, &RoomPowerMemberInfo{},
-		&RoomTags{}, &HotRoomInfo{}, &SupportRoom{}, &BannerInfo{})
+		&RoomTags{}, &HotRoomInfo{}, &SupportRoom{}, &BannerInfo{},
+		&MicModel{}, &Friend{}, &Black{}, &Attention{})
 
 	fmt.Println("db init success")
 }
+
+/*
+DB.Model(&product).Update("price", gorm.Expr("price * ? + ?", 2, 100))
+//// UPDATE "products" SET "price" = price * '2' + '100', "updated_at" = '2013-11-17 21:34:10' WHERE "id" = '2';
+
+DB.Model(&product).Updates(map[string]interface{}{"price": gorm.Expr("price * ? + ?", 2, 100)})
+//// UPDATE "products" SET "price" = price * '2' + '100', "updated_at" = '2013-11-17 21:34:10' WHERE "id" = '2';
+
+DB.Model(&product).UpdateColumn("quantity", gorm.Expr("quantity - ?", 1))
+//// UPDATE "products" SET "quantity" = quantity - 1 WHERE "id" = '2';
+
+DB.Model(&product).Where("quantity > 1").UpdateColumn("quantity", gorm.Expr("quantity - ?", 1))
+//// UPDATE "products" SET "quantity" = quantity - 1 WHERE "id" = '2' AND quantity > 1;
+
+*/

@@ -1,11 +1,8 @@
 package models
 
 import (
-	//"errors"
 	"fmt"
 	"time"
-	//"fmt"
-	//	"github.com/jinzhu/gorm"
 )
 
 type RoomTags struct {
