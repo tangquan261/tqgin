@@ -54,53 +54,89 @@ func SaveUser(playerid int64, user *UserInfo) error {
 	return err
 }
 
-//负数则是减
+//修改钻石数量，负数则是减
 func ModifyDinamondUser(playerid int64, exDianmond int64) error {
 	if playerid <= 0 {
 		return errors.New("playerGUID error")
 	}
-	err := DB.Model(UserInfo{}).Where("player_id=(?)", playerid).UpdateColumn("diamond",
+	err := DB.Model(UserInfo{}).Where("player_id=(?) and diamond >= (?)", playerid, -exDianmond).UpdateColumn("diamond",
 		gorm.Expr("diamond + ?", exDianmond)).Error
 
-	return err
+	if err == nil {
+		if DB.RowsAffected != 0 {
+			return err
+		} else {
+			return errors.New("无法满足执行条件")
+		}
+	} else {
+		return err
+	}
 }
 
+//修改金币数量，负数则是减
 func ModifyGoldUser(playerid int64, exGold int64) error {
 	if playerid <= 0 {
 		return errors.New("playerGUID error")
 	}
-	err := DB.Model(UserInfo{}).Where("player_id=(?)", playerid).UpdateColumn("gold",
+	err := DB.Model(UserInfo{}).Where("player_id=(?) and gold >= (?)", playerid, -exGold).UpdateColumn("gold",
 		gorm.Expr("gold + ?", exGold)).Error
 
-	return err
+	if err == nil {
+		if DB.RowsAffected != 0 {
+			return err
+		} else {
+			return errors.New("无法满足执行条件")
+		}
+	} else {
+		return err
+	}
 }
 
+//修改现金数量，负数则是减
 func ModifyCashUser(playerid int64, exCash int64) error {
 	if playerid <= 0 {
 		return errors.New("playerGUID error")
 	}
 
-	err := DB.Model(UserInfo{}).Where("player_id=(?)", playerid).UpdateColumn("cash",
+	err := DB.Model(UserInfo{}).Where("player_id=(?) and cash >= (?)", playerid, -exCash).UpdateColumn("cash",
 		gorm.Expr("cash + ?", exCash)).Error
 
-	return err
+	if err == nil {
+		if DB.RowsAffected != 0 {
+			return err
+		} else {
+			return errors.New("无法满足执行条件")
+		}
+	} else {
+		return err
+	}
 }
 
+//金币兑换钻石
 func ExChangeGoldToDiamond(playerid int64, exGold, exDiamond int64) error {
 	if playerid <= 0 || exGold < 0 || exDiamond < 0 {
 		return errors.New("param error")
 	}
+	//先扣除金币在增再钻石
+	err := DB.Model(UserInfo{}).Where("player_id=(?) and gold >= (?)",
+		playerid, exGold).UpdateColumn("gold", gorm.Expr("gold - ?", exGold)).Error
 
-	affected := DB.Model(UserInfo{}).Where("player_id=(?) and gold >= (?)",
-		playerid, exGold).UpdateColumn("gold", gorm.Expr("gold - ?", exGold)).RowsAffected
-
-	var err error
-	if affected == 1 {
-		err = DB.Model(UserInfo{}).Where("player_id=(?)",
-			playerid).UpdateColumn("diamond", gorm.Expr("diamond + ?", exDiamond)).Error
+	if err != nil {
+		return err
+	}
+	if 0 == DB.RowsAffected {
+		return errors.New("无法满足执行条件")
 	}
 
-	return err
+	err = DB.Model(UserInfo{}).Where("player_id=(?)",
+		playerid).UpdateColumn("diamond", gorm.Expr("diamond + ?", exDiamond)).Error
+	if err != nil {
+		return err
+	}
+	if 0 == DB.RowsAffected {
+		return errors.New("无法满足执行条件")
+	}
+	return nil
 }
 
 func GetUser(playerID int64) *UserInfo {
