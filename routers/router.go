@@ -60,9 +60,10 @@ func userInfoModel(router *gin.RouterGroup) {
 func roomInfoModel(router *gin.RouterGroup) {
 	new(controllers.RoomManagerController).RegisterRouter(router)
 	new(controllers.SquartController).RegisterRouter(router)
+	new(controllers.MicoController).RegisterRouter(router)
 }
 
 //排行榜
 func rankInfoModel(router *gin.RouterGroup) {
-
+	new(controllers.RankController).RegisterRouter(router)
 }

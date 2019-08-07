@@ -20,7 +20,6 @@ func (this *UserInfoMoneyController) RegisterRouter(router *gin.RouterGroup) {
 	temp.POST("add_diamond", this.add_diamond)
 	temp.POST("give_gift", this.giveGift)
 	temp.POST("all_gift", this.allGift)
-
 }
 
 type MoneyJsonAdd struct {
@@ -97,7 +96,6 @@ func (r *UserInfoMoneyController) giveGift(c *gin.Context) {
 	models.AddGiveGiftLog(gG.GiftID, playerGUID, gG.RoomID, gG.Players, gG.NCount)
 
 	tqgin.ResultOkMsg(c, nil, "送礼成功")
-
 }
 
 func (r *UserInfoMoneyController) allGift(c *gin.Context) {

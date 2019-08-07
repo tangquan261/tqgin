@@ -112,7 +112,7 @@ func GetHotRoom(roomID int64) (HotRoomInfo, bool) {
 
 func GetPowerRoom(playerID int64, roomID int64) (RoomPowerMemberInfo, bool) {
 	var power RoomPowerMemberInfo
-	notFound := DB.Where("room_id = ?  AND player_id = ?", roomID, playerID).Find(&power).RecordNotFound()
+	notFound := DB.Where("room_id = (?)  AND player_id = (?)", roomID, playerID).Find(&power).RecordNotFound()
 	return power, notFound
 }
 

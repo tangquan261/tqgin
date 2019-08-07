@@ -38,7 +38,6 @@ const (
 )
 
 func init() {
-
 	var err error
 	Tqconfig, err = config.NewConfig("ini", "./conf/app.conf")
 

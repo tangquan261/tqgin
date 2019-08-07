@@ -21,7 +21,7 @@ func MicAdd(roomID, playerGUID int64, micIndex int16) error {
 	mic.PlayerID = playerGUID
 	mic.MicIndex = micIndex
 
-	err := DB.Save(mic).Error
+	err := DB.Model(MicModel{}).Where("room_id = (?) and mic_index = (?)", roomID, micIndex).FirstOrCreate(&mic).Error
 	if err != nil {
 		log.Println("mic add  error", err)
 	}
@@ -29,7 +29,7 @@ func MicAdd(roomID, playerGUID int64, micIndex int16) error {
 }
 
 func MicDelByPlayerID(playerGUID int64) error {
-	err := DB.Where("player_id = (?)", playerGUID).Delete(MicModel{}).Error
+	err := DB.Unscoped().Where("player_id = (?)", playerGUID).Delete(MicModel{}).Error
 	if err != nil {
 		log.Println("MicDelByPlayerID error ", err)
 	}
@@ -42,4 +42,13 @@ func MicDelByDismiss(roomID int64) error {
 		log.Println("MicDelByDismiss error ", err)
 	}
 	return err
+}
+
+func MicGetAllIndex(roomID int64) []MicModel {
+
+	var mics []MicModel
+
+	DB.Model(MicModel{}).Where("room_id = (?)", roomID).Find(&mics)
+
+	return mics
 }
