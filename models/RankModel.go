@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"log"
+	"strconv"
 	"time"
 
 	//"time"
@@ -30,13 +31,24 @@ const (
 )
 
 type RankInfo struct {
+	gorm.Model
 	PlayerID   int64
-	CreateTime time.Time
 	Rich       int64
 	Charm      int64
 	Room       int64
 	Star       int64
 	Popularity int64
+}
+
+//
+var (
+	rankDic      map[string][]RankResult
+	rankDataTime map[string]time.Time
+)
+
+func init() {
+	rankDic = make(map[string][]RankResult)
+	rankDataTime = make(map[string]time.Time)
 }
 
 func RankinfoSave(rank RankInfo) error {
@@ -46,11 +58,11 @@ func RankinfoSave(rank RankInfo) error {
 	}
 
 	now := time.Now()
-	rank.CreateTime = time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, time.Local)
+
 	newRankInfo := rank
 
-	tempDB := DB.Model(RankInfo{}).Where("player_id=(?) and create_time = (?)",
-		rank.PlayerID, rank.CreateTime).FirstOrCreate(&newRankInfo)
+	tempDB := DB.Model(RankInfo{}).Where("player_id=(?) and day(created_at) = (day(?))",
+		rank.PlayerID, now).FirstOrCreate(&newRankInfo)
 	if tempDB.Error != nil {
 		return errors.New("RankinfoSave db error")
 	}
@@ -61,8 +73,8 @@ func RankinfoSave(rank RankInfo) error {
 	}
 
 	if rank.Rich > 0 {
-		err := DB.Model(RankInfo{}).Where("player_id=(?) and create_time = (?)",
-			rank.PlayerID, rank.CreateTime).UpdateColumn("rich", gorm.Expr("rich + ?", rank.Rich)).Error
+		err := DB.Model(RankInfo{}).Where("player_id=(?) and day(created_at) = (day(?))",
+			rank.PlayerID, now).UpdateColumn("rich", gorm.Expr("rich + ?", rank.Rich)).Error
 
 		if err != nil {
 			log.Println("RankinfoSave rich", err)
@@ -70,8 +82,8 @@ func RankinfoSave(rank RankInfo) error {
 	}
 
 	if rank.Charm > 0 {
-		err := DB.Model(RankInfo{}).Where("player_id=(?) and create_time = (?)",
-			rank.PlayerID, rank.CreateTime).UpdateColumn("charm", gorm.Expr("charm + ?", rank.Charm)).Error
+		err := DB.Model(RankInfo{}).Where("player_id=(?) and day(created_at) = (day(?))",
+			rank.PlayerID, now).UpdateColumn("charm", gorm.Expr("charm + ?", rank.Charm)).Error
 
 		if err != nil {
 			log.Println("RankinfoSave Charm", err)
@@ -79,24 +91,24 @@ func RankinfoSave(rank RankInfo) error {
 	}
 
 	if rank.Room > 0 {
-		err := DB.Model(RankInfo{}).Where("player_id=(?) and create_time = (?)",
-			rank.PlayerID, rank.CreateTime).UpdateColumn("room", gorm.Expr("room + ?", rank.Room)).Error
+		err := DB.Model(RankInfo{}).Where("player_id=(?) and day(create_time) = (day(?))",
+			rank.PlayerID, now).UpdateColumn("room", gorm.Expr("room + ?", rank.Room)).Error
 
 		if err != nil {
 			log.Println("RankinfoSave Room", err)
 		}
 	}
 	if rank.Star > 0 {
-		err := DB.Model(RankInfo{}).Where("player_id=(?) and create_time = (?)",
-			rank.PlayerID, rank.CreateTime).UpdateColumn("star", gorm.Expr("star + ?", rank.Star)).Error
+		err := DB.Model(RankInfo{}).Where("player_id=(?) and day(create_time) = (day(?))",
+			rank.PlayerID, now).UpdateColumn("star", gorm.Expr("star + ?", rank.Star)).Error
 
 		if err != nil {
 			log.Println("RankinfoSave Star", err)
 		}
 	}
 	if rank.Popularity > 0 {
-		err := DB.Model(RankInfo{}).Where("player_id=(?) and create_time = (?)",
-			rank.PlayerID, rank.CreateTime).UpdateColumn("popularity", gorm.Expr("popularity + ?", rank.Popularity)).Error
+		err := DB.Model(RankInfo{}).Where("player_id=(?) and day(create_time) = (day(?))",
+			rank.PlayerID, now).UpdateColumn("popularity", gorm.Expr("popularity + ?", rank.Popularity)).Error
 
 		if err != nil {
 			log.Println("RankinfoSave Popularity", err)
@@ -104,4 +116,118 @@ func RankinfoSave(rank RankInfo) error {
 	}
 
 	return nil
+}
+
+type RankResult struct {
+	Player_id  int64
+	Rich       int64
+	Charm      int64
+	Room       int64
+	Star       int64
+	Popularity int64
+}
+
+func RankInfoBy(rankType RankType, rankSubType RankSubType) []RankResult {
+
+	key := strconv.Itoa(int(rankType)) + "_" + strconv.Itoa(int(rankSubType))
+
+	if value, ok := rankDataTime[key]; ok {
+		//5分钟刷去一次新数据
+		if time.Now().Unix() < (value.Unix() + 300) {
+			ret, _ := rankDic[key]
+			return ret
+		}
+	}
+
+	var rets []RankResult
+	var err error
+	if rankType == RankType_Rich { //财富
+		if RankSubType_Day == rankSubType {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(rich) as rich").
+				Where("day(create_time)=day(now())").Group("player_id").Order("sum(rich) desc").
+				Limit(100).Scan(&rets).Error
+		} else if RankSubType_Week == rankSubType {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(rich) as rich").
+				Where("week(create_time)=week(now())").Group("player_id").Order("sum(rich) desc").
+				Limit(100).Scan(&rets).Error
+
+		} else {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(rich) as rich").
+				Where("month(create_time)=month(now())").Group("player_id").Order("sum(rich) desc").
+				Limit(100).Scan(&rets).Error
+		}
+	} else if rankType == RankType_Charm { //魅力
+		if RankSubType_Day == rankSubType {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(charm) as charm").
+				Where("day(create_time)=day(now())").Group("player_id").Order("sum(charm) desc").
+				Limit(100).Scan(&rets).Error
+		} else if RankSubType_Week == rankSubType {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(charm) as charm").
+				Where("week(create_time)=week(now())").Group("player_id").Order("sum(charm) desc").
+				Limit(100).Scan(&rets).Error
+
+		} else {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(charm) as charm").
+				Where("month(create_time)=month(now())").Group("player_id").Order("sum(charm) desc").
+				Limit(100).Scan(&rets).Error
+		}
+	} else if rankType == RankType_Room { //房间
+		if RankSubType_Day == rankSubType {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(room) as room").
+				Where("day(create_time)=day(now())").Group("player_id").Order("sum(room) desc").
+				Limit(100).Scan(&rets).Error
+		} else if RankSubType_Week == rankSubType {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(room) as room").
+				Where("week(create_time)=week(now())").Group("player_id").Order("sum(room) desc").
+				Limit(100).Scan(&rets).Error
+
+		} else {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(room) as room").
+				Where("month(create_time)=month(now())").Group("player_id").Order("sum(room) desc").
+				Limit(100).Scan(&rets).Error
+		}
+	} else if rankType == RankType_Star { //名人
+		if RankSubType_Day == rankSubType {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(star) as star").
+				Where("day(create_time)=day(now())").Group("player_id").Order("sum(star) desc").
+				Limit(100).Scan(&rets).Error
+		} else if RankSubType_Week == rankSubType {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(star) as star").
+				Where("week(create_time)=week(now())").Group("player_id").Order("sum(star) desc").
+				Limit(100).Scan(&rets).Error
+
+		} else {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(star) as star").
+				Where("month(create_time)=month(now())").Group("player_id").Order("sum(star) desc").
+				Limit(100).Scan(&rets).Error
+		}
+	} else if rankType == RankType_Popularity { //声望
+		if RankSubType_Day == rankSubType {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(popularity) as popularity").
+				Where("day(create_time)=day(now())").Group("player_id").Order("sum(popularity) desc").
+				Limit(100).Scan(&rets).Error
+		} else if RankSubType_Week == rankSubType {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(popularity) as popularity").
+				Where("week(create_time)=week(now())").Group("player_id").Order("sum(popularity) desc").
+				Limit(100).Scan(&rets).Error
+
+		} else {
+			err = DB.Model(RankInfo{}).Select("player_id, sum(popularity) as popularity").
+				Where("month(create_time)=month(now())").Group("player_id").Order("sum(popularity) desc").
+				Limit(100).Scan(&rets).Error
+		}
+	} else {
+		//do nothing
+		err = errors.New("not find type")
+	}
+	if err != nil {
+		return nil
+	}
+
+	if len(rets) > 0 {
+		rankDataTime[key] = time.Now()
+		rankDic[key] = rets
+	}
+
+	return rets
 }

@@ -6,8 +6,6 @@
 package controllers
 
 import (
-	// "fmt"
-	// "strconv"
 	"tqgin/common"
 	"tqgin/models"
 
@@ -26,9 +24,9 @@ func (this *RankController) RegisterRouter(router *gin.RouterGroup) {
 }
 
 type rankApply struct {
-	Idx     int64 `json:"idx"`
-	Type    int32 `json:"type"`    //0-4,表示富豪，魅力，房间，名人，声望
-	SubType int32 `json:"subtype"` //0-2,表示日，周，月
+	Idx     int64              `json:"idx"`
+	Type    models.RankType    `json:"type"`    //0-4,表示富豪，魅力，房间，名人，声望
+	SubType models.RankSubType `json:"subtype"` //0-2,表示日，周，月
 }
 
 //排行榜
@@ -39,15 +37,9 @@ func (r *RankController) rankinfo(c *gin.Context) {
 		tqgin.ResultFail(c, "错误")
 		return
 	}
-	var exrank models.RankInfo
-	exrank.Rich = 1
-	exrank.Charm = 2
-	exrank.Popularity = 3
-	exrank.Room = 4
-	exrank.Star = 5
-	exrank.PlayerID = r.GetPlayerGUID(c)
-	models.RankinfoSave(exrank)
-	tqgin.ResultOkMsg(c, rank, "成功")
+
+	ret := models.RankInfoBy(rank.Type, rank.SubType)
+	tqgin.ResultOkMsg(c, ret, "成功")
 }
 
 type roomRankApply struct {
