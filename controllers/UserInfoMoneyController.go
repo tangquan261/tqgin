@@ -80,20 +80,46 @@ func (r *UserInfoMoneyController) giveGift(c *gin.Context) {
 	}
 	UserInfo := models.GetUser(playerGUID)
 
-	needDiamond := int64(giftInfo.CashNum) * int64(len(gG.Players)) * int64(gG.NCount)
+	needGold := int64(giftInfo.CashNum) * int64(len(gG.Players)) * int64(gG.NCount)
 
-	if UserInfo.Diamond < needDiamond {
+	if UserInfo.Gold < needGold {
 		tqgin.ResultFail(c, "钻石不足")
 		return
 	}
 
-	err = models.ModifyDinamondUser(playerGUID, -needDiamond)
+	err = models.ModifyGoldUser(playerGUID, -needGold)
 	if err != nil {
 		tqgin.ResultFail(c, "钻石不足")
 		return
 	}
-
+	//添加送礼记录
 	models.AddGiveGiftLog(gG.GiftID, playerGUID, gG.RoomID, gG.Players, gG.NCount)
+	//增加自己的财富值
+	models.ModifyRichUser(playerGUID, needGold*10)
+
+	//增加给送礼人的魅力值
+	for i := 0; i < len(gG.Players); i++ {
+		models.ModifyCharmUser(gG.Players[i], needGold*10)
+	}
+
+	if gG.RoomID != 0 {
+		//增加自己在该房间财富
+		var roomRank models.RoomRankInfo
+		roomRank.PlayerID = playerGUID
+		roomRank.Rich = needGold * 10
+		roomRank.RoomID = gG.RoomID
+
+		models.RoomRankinfoSave(roomRank)
+
+		//增加别人在该魅力
+		for i := 0; i < len(gG.Players); i++ {
+			var roomRank models.RoomRankInfo
+			roomRank.PlayerID = gG.Players[i]
+			roomRank.Charm = needGold * 10
+			roomRank.RoomID = gG.RoomID
+			models.RoomRankinfoSave(roomRank)
+		}
+	}
 
 	tqgin.ResultOkMsg(c, nil, "送礼成功")
 }

@@ -25,6 +25,8 @@ type UserInfo struct {
 	Locx       float64
 	Locy       float64
 	Photos     string `gorm:size=1000`
+	Rich       int64  //财富
+	Charm      int64  //魅力
 }
 
 func GetDefaultUserinfo(PlayerID int64, Name string, Sex login.SexType) UserInfo {
@@ -100,6 +102,45 @@ func ModifyCashUser(playerid int64, exCash int64) error {
 
 	err := DB.Model(UserInfo{}).Where("player_id=(?) and cash >= (?)", playerid, -exCash).UpdateColumn("cash",
 		gorm.Expr("cash + ?", exCash)).Error
+
+	if err == nil {
+		if DB.RowsAffected != 0 {
+			return err
+		} else {
+			return errors.New("无法满足执行条件")
+		}
+	} else {
+		return err
+	}
+}
+
+//修改财富数量，负数则是减
+func ModifyRichUser(playerid int64, exRich int64) error {
+	if playerid <= 0 {
+		return errors.New("playerGUID error")
+	}
+
+	err := DB.Model(UserInfo{}).Where("player_id=(?) and rich >= (?)", playerid, -exRich).UpdateColumn("rich",
+		gorm.Expr("rich + ?", exRich)).Error
+
+	if err == nil {
+		if DB.RowsAffected != 0 {
+			return err
+		} else {
+			return errors.New("无法满足执行条件")
+		}
+	} else {
+		return err
+	}
+}
+
+func ModifyCharmUser(playerid int64, exCharm int64) error {
+	if playerid <= 0 {
+		return errors.New("playerGUID error")
+	}
+
+	err := DB.Model(UserInfo{}).Where("player_id=(?) and charm >= (?)", playerid, -exCharm).UpdateColumn("charm",
+		gorm.Expr("charm + ?", exCharm)).Error
 
 	if err == nil {
 		if DB.RowsAffected != 0 {

@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"net/http"
+	"strconv"
 	"tqgin/pkg/errorcode"
 	"tqgin/pkg/util"
 
@@ -30,6 +31,12 @@ func JWT() gin.HandlerFunc {
 					code = errorcode.ERROR_AUTH_TOKEN_CHECK_FAIL
 				}
 			}
+		}
+
+		playerstr, _ := c.Cookie("playerid")
+		playerid, err := strconv.ParseInt(playerstr, 10, 64)
+		if err != nil || playerid <= 0 {
+			code = errorcode.ERROR_INVALID_PARAMS
 		}
 
 		if code != errorcode.SUCCESS {

@@ -3,6 +3,8 @@ package models
 import (
 	"fmt"
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 type RoomTags struct {
@@ -11,6 +13,7 @@ type RoomTags struct {
 }
 
 type RoomInfo struct {
+	gorm.Model
 	RoomID        int64 `gorm:"primary_key"`
 	MasterID      int64
 	RoomName      string `gorm:"not null;unique"`

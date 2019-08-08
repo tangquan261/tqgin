@@ -24,7 +24,7 @@ type AttentionController struct {
 func (this *AttentionController) RegisterRouter(router *gin.RouterGroup) {
 	temp := router.Group("/attention")
 
-	temp.Any("attention_list", this.attentionList)
+	temp.POST("attention_list", this.attentionList)
 	temp.POST("add_friend", this.addFriend)
 	temp.POST("remove_friend", this.removeFriend)
 	temp.POST("add_black", this.addBlack)

@@ -33,12 +33,7 @@ func (this *UserinfoController) RegisterRouter(router *gin.RouterGroup) {
 
 func (c *UserinfoController) loginInfo(con *gin.Context) {
 
-	playerid := con.PostForm("playerid")
-
-	if len(playerid) <= 0 {
-		tqgin.Result(con, errorcode.ERROR, nil, "用户id错误")
-		return
-	}
+	playerid := c.GetPlayerGUID()
 
 	playerID, _ := strconv.ParseInt(playerid, 10, 64)
 

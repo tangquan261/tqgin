@@ -43,8 +43,8 @@ func (r *RankController) rankinfo(c *gin.Context) {
 }
 
 type roomRankApply struct {
-	RoomID   int64 `json:"roomid"`
-	RoomType int32 `json:"roomtype"` //0,1表示贡献周榜，魅力周榜
+	RoomID   int64               `json:"roomid"`
+	RoomType models.RoomRankType `json:"roomtype"` //0,1表示贡献周榜，魅力周榜
 }
 
 //房间内贡献，魅力排行榜
@@ -55,5 +55,7 @@ func (r *RankController) roomRankInfo(c *gin.Context) {
 		tqgin.ResultFail(c, "错误")
 		return
 	}
+
+	models.RoomRankInfoBy(rank.RoomID, rank.RoomType)
 	tqgin.ResultOkMsg(c, rank, "成功")
 }

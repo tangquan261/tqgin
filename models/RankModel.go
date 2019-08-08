@@ -132,7 +132,7 @@ func RankInfoBy(rankType RankType, rankSubType RankSubType) []RankResult {
 	key := strconv.Itoa(int(rankType)) + "_" + strconv.Itoa(int(rankSubType))
 
 	if value, ok := rankDataTime[key]; ok {
-		//5分钟刷去一次新数据
+		//5分钟刷去一次新
 		if time.Now().Unix() < (value.Unix() + 300) {
 			ret, _ := rankDic[key]
 			return ret
