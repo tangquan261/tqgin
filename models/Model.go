@@ -31,8 +31,8 @@ func init() {
 	DB.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 		&Account{}, &UserInfo{}, &RoomInfo{}, &RoomPowerMemberInfo{},
 		&RoomTags{}, &HotRoomInfo{}, &SupportRoom{}, &BannerInfo{},
-		&MicModel{}, &Friend{}, &Black{}, &Attention{}, &GifInfo{},
-		&GifGiveRecord{}, &RankInfo{}, &RoomRankInfo{})
+		&MicModel{}, &Black{}, &GifInfo{}, &GifGiveRecord{}, &RankInfo{},
+		&RoomRankInfo{}, &RelationShip{})
 
 	loadConf()
 	fmt.Println("db init success")

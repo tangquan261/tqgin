@@ -14,7 +14,7 @@ type RoomTags struct {
 
 type RoomInfo struct {
 	gorm.Model
-	RoomID        int64 `gorm:"primary_key"`
+	RoomID        int64 `gorm:"not null; unique"`
 	MasterID      int64
 	RoomName      string `gorm:"not null;unique"`
 	RoomTagName   string
@@ -34,6 +34,7 @@ type HotRoomInfo struct {
 }
 
 type RoomPowerMemberInfo struct {
+	gorm.Model
 	RoomId   int64
 	PlayerID int64
 	//1 房主，2管理员
@@ -42,7 +43,7 @@ type RoomPowerMemberInfo struct {
 
 //扶持房间的ID信息
 type SupportRoom struct {
-	RoomID    int64 `gorm:"not null;unique"`
+	RoomID    int64 `gorm:"primary_key"`
 	BeginTime time.Time
 	EndTime   time.Time
 	Msg       string

@@ -6,6 +6,8 @@ import (
 	"tqgin/pkg/errorcode"
 	"tqgin/pkg/util"
 
+	"tqgin/models"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
@@ -36,6 +38,10 @@ func JWT() gin.HandlerFunc {
 		playerstr, _ := c.Cookie("playerid")
 		playerid, err := strconv.ParseInt(playerstr, 10, 64)
 		if err != nil || playerid <= 0 {
+			code = errorcode.ERROR_INVALID_PARAMS
+		}
+
+		if !models.UserHasInfo(playerid) {
 			code = errorcode.ERROR_INVALID_PARAMS
 		}
 

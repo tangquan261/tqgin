@@ -25,7 +25,7 @@ func init() {
 }
 
 type GifInfo struct {
-	GiftID   int64
+	GiftID   int64 `gorm:"primary_key"`
 	GiftName string
 	GiftIcon string
 	CashType GiftCashType //消费类型

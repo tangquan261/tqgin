@@ -4,20 +4,13 @@ package main
 import (
 	"log"
 	"time"
-
-	//"log"
-	//"syscall"
 	"tqgin/config"
 	"tqgin/models"
-
-	//"tqgin/pkg/qrcode"
 	"tqgin/routers"
 
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 
-	//"github.com/segmentio/ksuid"
-	//"github.com/boombuler/barcode/qr"
 	tqlog "github.com/sirupsen/logrus"
 )
 
@@ -38,9 +31,6 @@ var (
 )
 
 func main() {
-
-	// imageRrcode := qrcode.NewQrCode("www.baidu.com", 100, 100, qr.H, qr.Unicode)
-	// imageRrcode.Encode(qrcode.GetQrCodeFullPath())
 
 	//gin.SetMode(gin.ReleaseMode)
 	router = gin.Default()

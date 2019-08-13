@@ -12,7 +12,7 @@ import (
 
 type Account struct {
 	gorm.Model
-	AccountID string `gorm:"primary_key"`
+	AccountID string `gorm:"not null;unique"`
 	Password  string
 	PlayerID  int64 `gorm:"not null"`
 	LoginType login.LoginType

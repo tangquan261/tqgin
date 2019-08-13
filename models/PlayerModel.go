@@ -200,7 +200,7 @@ func UserHasInfo(playerID int64) bool {
 	user.PlayerID = playerID
 
 	var count int32
-	DB.Model(UserInfo{}).Where(user).Count(&count)
+	DB.Model(UserInfo{}).Where(user).Select([]string{"player_id"}).Count(&count)
 
 	return count != 0
 }

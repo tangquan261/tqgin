@@ -33,11 +33,9 @@ func (this *UserinfoController) RegisterRouter(router *gin.RouterGroup) {
 
 func (c *UserinfoController) loginInfo(con *gin.Context) {
 
-	playerid := c.GetPlayerGUID()
+	playerid := c.GetPlayerGUID(con)
 
-	playerID, _ := strconv.ParseInt(playerid, 10, 64)
-
-	account := models.LoginAccountByPlayerID(playerID)
+	account := models.LoginAccountByPlayerID(playerid)
 
 	if account.AccountID == "" {
 		tqgin.Result(con, errorcode.ERROR, nil, "不存在，去注册")
