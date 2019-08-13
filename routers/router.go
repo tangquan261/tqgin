@@ -54,6 +54,7 @@ func LoginModel(router *gin.RouterGroup) {
 func userInfoModel(router *gin.RouterGroup) {
 	new(controllers.UserInfoMoneyController).RegisterRouter(router)
 	new(controllers.RelationController).RegisterRouter(router)
+	new(controllers.CycleController).RegisterRouter(router)
 }
 
 //房间信息模块

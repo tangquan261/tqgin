@@ -19,15 +19,14 @@ type RelationController struct {
 
 func (this *RelationController) RegisterRouter(router *gin.RouterGroup) {
 	temp := router.Group("/relation")
-	temp.POST("follow", this.follow)
-	temp.POST("del_follow", this.delfollow)
-	temp.POST("get_friend", this.getfriend)
-	temp.POST("get_follow", this.getfollows)
-	temp.POST("get_fans", this.getFans)
-	temp.POST("add_black", this.addBlack)
-	temp.POST("del_black", this.removeBlack)
-	temp.POST("get_blacks", this.getBlacks)
-
+	temp.POST("follow", this.follow)         //关注
+	temp.POST("del_follow", this.delfollow)  //取消关注
+	temp.POST("get_friend", this.getfriend)  //获取好友列表
+	temp.POST("get_follow", this.getfollows) //获取关注列表
+	temp.POST("get_fans", this.getFans)      //获取粉丝列表
+	temp.POST("add_black", this.addBlack)    //添加黑名单
+	temp.POST("del_black", this.removeBlack) //移除黑名单
+	temp.POST("get_blacks", this.getBlacks)  //获取很名单
 }
 
 type RelationParam struct {

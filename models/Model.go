@@ -32,7 +32,7 @@ func init() {
 		&Account{}, &UserInfo{}, &RoomInfo{}, &RoomPowerMemberInfo{},
 		&RoomTags{}, &HotRoomInfo{}, &SupportRoom{}, &BannerInfo{},
 		&MicModel{}, &Black{}, &GifInfo{}, &GifGiveRecord{}, &RankInfo{},
-		&RoomRankInfo{}, &RelationShip{})
+		&RoomRankInfo{}, &RelationShip{}, &CycleModel{})
 
 	loadConf()
 	fmt.Println("db init success")
