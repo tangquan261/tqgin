@@ -19,17 +19,18 @@ FType     int32    `json:"ftype"`     //1,2声音，普通
 
 type CycleModel struct {
 	gorm.Model
-	Cid       string
-	Uuid      string
-	PlayerID  int64
-	FType     int32
-	SoundRUL  string
-	PhotoURLs string
-	Content   string
-	Ats       string
-	LocX      int64
-	LocY      int64
-	LocString string
+	Cid       string //客户端uid
+	Uuid      string //服务器生成uid
+	PlayerID  int64  //发布者id
+	FType     int32  //发布类型，1，2，3普通，声音，视频
+	SoundBG   string //声音背景图
+	SoundRUL  string //声音地址
+	PhotoURLs string //图片地址列表
+	Content   string //内容
+	Ats       string //at的人列表
+	LocX      int64  //经度
+	LocY      int64  //纬度
+	LocString string //位置字符串
 }
 
 //根据帖子id获取帖子信息
@@ -65,6 +66,7 @@ func CycleAdd(cycle CycleModel) error {
 	} else {
 		return errors.New("慢点发哦！")
 	}
+
 }
 
 //移除帖子
