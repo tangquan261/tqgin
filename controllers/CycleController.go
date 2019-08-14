@@ -34,7 +34,7 @@ func (this *CycleController) RegisterRouter(router *gin.RouterGroup) {
 
 type FeedParam struct {
 	Cid       string   `json:"cid"`       //创做唯一标识
-	FType     int32    `json:"ftype"`     //1,2声音，普通
+	FType     int32    `json:"ftype"`     //1,2,3 普通,声音,视频
 	SoundRUL  string   `json:"soundurl"`  //声音地址
 	PhotoURLs []string `json:"photourl"`  //图片地址列表
 	Content   string   `json:"content"`   //文本
@@ -115,10 +115,16 @@ func (r *CycleController) getFeed(c *gin.Context) {
 		return
 	}
 
-	if getparam.FType == 1 {
-		ret := models.CycleTestFeed(getparam.Uindex)
+	if getparam.FType == 2 {
+		//声音
+		ret := models.CycleGetSound(getparam.Uindex)
+		tqgin.ResultOk(c, ret)
+	} else if getparam.FType == 3 {
+		//视频
+		ret := models.CycleGetAudio(getparam.Uindex)
 		tqgin.ResultOk(c, ret)
 	} else {
+		//all
 		ret := models.CycleGetFeeds(getparam.Uindex)
 		tqgin.ResultOk(c, ret)
 	}

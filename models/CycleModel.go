@@ -83,7 +83,7 @@ func CycleGetSound(index string) []CycleModel {
 	var ret []CycleModel
 
 	if len(index) <= 0 {
-		DB.Model(CycleModel{}).Where("f_type = 1").Limit(20).Order("id desc").Find(&ret)
+		DB.Model(CycleModel{}).Where("f_type = 2").Limit(20).Order("id desc").Find(&ret)
 		return ret
 	}
 
@@ -93,7 +93,7 @@ func CycleGetSound(index string) []CycleModel {
 
 	if err != nil {
 		//根据没有找到对应数据，则拉取最新的20条数据
-		err = DB.Model(CycleModel{}).Where("f_type = 1").Limit(20).Order("id desc").Find(&ret).Error
+		err = DB.Model(CycleModel{}).Where("f_type = 2").Limit(20).Order("id desc").Find(&ret).Error
 
 		if err != nil {
 			return nil
@@ -101,7 +101,36 @@ func CycleGetSound(index string) []CycleModel {
 		return ret
 	}
 
-	DB.Model(CycleModel{}).Where("f_type = 1 and id < (?)", indexdata.ID).Limit(20).Order("id desc").Find(&ret)
+	DB.Model(CycleModel{}).Where("f_type = 2 and id < (?)", indexdata.ID).Limit(20).Order("id desc").Find(&ret)
+
+	return ret
+}
+
+//获取视频的帖子
+func CycleGetAudio(index string) []CycleModel {
+
+	var ret []CycleModel
+
+	if len(index) <= 0 {
+		DB.Model(CycleModel{}).Where("f_type = 3").Limit(20).Order("id desc").Find(&ret)
+		return ret
+	}
+
+	var indexdata CycleModel
+
+	err := DB.Model(CycleModel{}).Select("id").Where("uuid = (?)", index).Unscoped().Find(&indexdata).Error
+
+	if err != nil {
+		//根据没有找到对应数据，则拉取最新的20条数据
+		err = DB.Model(CycleModel{}).Where("f_type = 3").Limit(20).Order("id desc").Find(&ret).Error
+
+		if err != nil {
+			return nil
+		}
+		return ret
+	}
+
+	DB.Model(CycleModel{}).Where("f_type = 3 and id < (?)", indexdata.ID).Limit(20).Order("id desc").Find(&ret)
 
 	return ret
 }

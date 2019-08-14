@@ -8,10 +8,11 @@ import (
 
 type CycleCommet struct {
 	gorm.Model
-	PlayerID int64  //评论者id
-	Uuid     string //帖子id
-	FromID   int64  //评论id，1级评论是0
-	Conent   string //评论内容
+	PlayerID    int64  //评论者id
+	Uuid        string //帖子id
+	TarPlayerID int64  //被评论者id，1级评论是0
+	FromID      int64  //评论id，1级评论是0 2级评论是CycleCommet 对一个id
+	Conent      string //评论内容
 }
 
 //帖子点赞，评论点赞
@@ -27,6 +28,25 @@ func CycleAddCommet(cycle CycleCommet) error {
 
 	if len(cycle.Uuid) <= 0 || len(cycle.Conent) <= 0 {
 		return errors.New("参数错误")
+	}
+
+	if cycle.FromID > 0 && cycle.PlayerID > 0 {
+		//是二级评论
+		//找到对应的评论，如果不是1级评论，则返回错误
+		var preCycle CycleCommet
+		err := DB.Model(CycleCommet{}).Where("id = (?)", cycle.FromID).Find(&preCycle).Error
+
+		if err != nil {
+			return errors.New("参数错误")
+		}
+
+		if preCycle.FromID > 0 {
+			return errors.New("不能多级评论")
+		}
+	} else {
+		//以及评论
+		cycle.FromID = 0
+		cycle.PlayerID = 0
 	}
 
 	err := DB.Model(CycleCommet{}).Save(&cycle).Error
@@ -52,7 +72,7 @@ func CycleGetCommet(uuid string) []CycleCommet {
 	return ret
 }
 
-//根据评论id删除评论，只删除当前评论，并没有删除二级，三级评论
+//根据评论id删除评论
 func CycleDelCommet(uid int64) error {
 	if uid <= 0 {
 		return errors.New("参数错误")
@@ -88,15 +108,10 @@ func CycleDelCommetByFromid(tx *gorm.DB, fromID int64) {
 		return
 	}
 
-	var commet []CycleCommet
-	err := DB.Model(CycleCommet{}).Where("from_id = (?)", fromID).Find(&commet).Error
+	err := DB.Where("`tq_cycle_like`.uid in (select id from tq_cycle_commet where from_id = (?))", fromID).Delete(CycleLike{}).Error
 	if err != nil {
 		tx.Rollback()
 		return
-	}
-
-	for _, obj := range commet {
-		CycleDelCommetByFromid(tx, obj.ID)
 	}
 
 	err = DB.Where("from_id = (?)", fromID).Delete(CycleCommet{}).Error
@@ -104,8 +119,6 @@ func CycleDelCommetByFromid(tx *gorm.DB, fromID int64) {
 		tx.Rollback()
 		return
 	}
-	//移除该评论下的点赞
-	CycleDelCommetByCycleUID(tx, fromID)
 }
 
 //添加帖子或者评论的点赞
