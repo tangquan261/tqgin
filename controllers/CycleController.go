@@ -7,9 +7,6 @@ package controllers
 import (
 	"fmt"
 	"strings"
-
-	// "fmt"
-	// "strconv"
 	"tqgin/common"
 	"tqgin/models"
 
@@ -25,7 +22,9 @@ type CycleController struct {
 func (this *CycleController) RegisterRouter(router *gin.RouterGroup) {
 	temp := router.Group("/cycle")
 	temp.POST("add_feed", this.addFeed)
-
+	temp.POST("get_feed", this.getFeed)
+	temp.POST("get_feed_follow", this.getFeedFollow)
+	temp.POST("get_feed_fans", this.getFeedFans)
 }
 
 //GiftID  int64   `json:"giftid"`
@@ -56,27 +55,87 @@ func (r *CycleController) addFeed(c *gin.Context) {
 		return
 	}
 
-	var dbFeed models.CycleModel
-	dbFeed.PlayerID = playerID
+	for i := 0; i < 100000; i++ {
 
-	dbFeed.Cid = feed.Cid
-	dbFeed.FType = feed.FType
-	dbFeed.SoundRUL = feed.SoundRUL
-	dbFeed.PhotoURLs = strings.Join(feed.PhotoURLs, "@@@")
-	dbFeed.Content = feed.Content
-	dbFeed.Ats = strings.Join(feed.Ats, "@@@")
-	dbFeed.LocX = feed.LocX
-	dbFeed.LocY = feed.LocY
-	dbFeed.LocString = feed.LocString
+		var dbFeed models.CycleModel
+		dbFeed.PlayerID = playerID
 
-	dbFeed.Uuid = util.Uids()
+		dbFeed.Cid = util.Uids()
+		dbFeed.FType = feed.FType
+		dbFeed.SoundRUL = feed.SoundRUL
+		dbFeed.PhotoURLs = strings.Join(feed.PhotoURLs, "@@@")
+		dbFeed.Content = util.UnicodeEmojiCode(feed.Content)
+		dbFeed.Ats = strings.Join(feed.Ats, "@@@")
+		dbFeed.LocX = feed.LocX
+		dbFeed.LocY = feed.LocY
+		dbFeed.LocString = feed.LocString
 
-	fmt.Println(dbFeed)
+		dbFeed.Uuid = util.Uids()
 
-	err = models.CycleAdd(dbFeed)
+		fmt.Println(dbFeed)
+
+		err = models.CycleAdd(dbFeed)
+
+	}
+
 	if err != nil {
 		tqgin.ResultFail(c, err.Error())
 	} else {
 		tqgin.ResultOkMsg(c, nil, "成功")
 	}
+}
+
+type FeedGetParam struct {
+	Uindex string `json:"index"` //请求文章索引，第一次传入0
+	FType  int32  `json:"ftype"` //1,2 声音，普通
+}
+
+//获取广场动态，声音
+func (r *CycleController) getFeed(c *gin.Context) {
+
+	var getparam FeedGetParam
+	err := c.ShouldBindJSON(&getparam)
+	if err != nil {
+		tqgin.ResultFail(c, "参数错误")
+		return
+	}
+
+	if getparam.FType == 1 {
+		ret := models.CycleTestFeed(getparam.Uindex)
+		tqgin.ResultOk(c, ret)
+	} else {
+		ret := models.CycleGetFeeds(getparam.Uindex)
+		tqgin.ResultOk(c, ret)
+	}
+}
+
+//我关注的人的动态
+func (r *CycleController) getFeedFollow(c *gin.Context) {
+
+	playerID := r.GetPlayerGUID(c)
+
+	var getparam FeedGetParam
+	err := c.ShouldBindJSON(&getparam)
+	if err != nil {
+		tqgin.ResultFail(c, "参数错误")
+		return
+	}
+
+	ret := models.CycleGetFeedsFollow(playerID, getparam.Uindex)
+	tqgin.ResultOk(c, ret)
+}
+
+//我的粉丝的动态
+func (r *CycleController) getFeedFans(c *gin.Context) {
+
+	playerID := r.GetPlayerGUID(c)
+	var getparam FeedGetParam
+	err := c.ShouldBindJSON(&getparam)
+	if err != nil {
+		tqgin.ResultFail(c, "参数错误")
+		return
+	}
+
+	ret := models.CycleGetFeedsFans(playerID, getparam.Uindex)
+	tqgin.ResultOk(c, ret)
 }

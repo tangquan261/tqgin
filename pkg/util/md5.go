@@ -9,6 +9,7 @@ import (
 
 	"github.com/satori/go.uuid"
 	"github.com/zheng-ji/goSnowFlake"
+	//Snowflake 算法是Twitter的分布式ID自增算法,用于生成可以跨数据中心的全局唯一ID(不连续)。
 )
 
 var (
