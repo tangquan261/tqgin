@@ -5,7 +5,6 @@
 package controllers
 
 import (
-	"fmt"
 	"strings"
 	"tqgin/common"
 	"tqgin/models"
@@ -22,6 +21,7 @@ type CycleController struct {
 func (this *CycleController) RegisterRouter(router *gin.RouterGroup) {
 	temp := router.Group("/cycle")
 	temp.POST("add_feed", this.addFeed)
+	temp.POST("del_feed", this.delFeed)
 	temp.POST("get_feed", this.getFeed)
 	temp.POST("get_feed_follow", this.getFeedFollow)
 	temp.POST("get_feed_fans", this.getFeedFans)
@@ -55,28 +55,22 @@ func (r *CycleController) addFeed(c *gin.Context) {
 		return
 	}
 
-	for i := 0; i < 100000; i++ {
+	var dbFeed models.CycleModel
+	dbFeed.PlayerID = playerID
 
-		var dbFeed models.CycleModel
-		dbFeed.PlayerID = playerID
+	dbFeed.Cid = feed.Cid
+	dbFeed.FType = feed.FType
+	dbFeed.SoundRUL = feed.SoundRUL
+	dbFeed.PhotoURLs = strings.Join(feed.PhotoURLs, "@@@")
+	dbFeed.Content = util.UnicodeEmojiCode(feed.Content)
+	dbFeed.Ats = strings.Join(feed.Ats, "@@@")
+	dbFeed.LocX = feed.LocX
+	dbFeed.LocY = feed.LocY
+	dbFeed.LocString = feed.LocString
 
-		dbFeed.Cid = util.Uids()
-		dbFeed.FType = feed.FType
-		dbFeed.SoundRUL = feed.SoundRUL
-		dbFeed.PhotoURLs = strings.Join(feed.PhotoURLs, "@@@")
-		dbFeed.Content = util.UnicodeEmojiCode(feed.Content)
-		dbFeed.Ats = strings.Join(feed.Ats, "@@@")
-		dbFeed.LocX = feed.LocX
-		dbFeed.LocY = feed.LocY
-		dbFeed.LocString = feed.LocString
+	dbFeed.Uuid = util.Uids()
 
-		dbFeed.Uuid = util.Uids()
-
-		fmt.Println(dbFeed)
-
-		err = models.CycleAdd(dbFeed)
-
-	}
+	err = models.CycleAdd(dbFeed)
 
 	if err != nil {
 		tqgin.ResultFail(c, err.Error())
@@ -88,6 +82,27 @@ func (r *CycleController) addFeed(c *gin.Context) {
 type FeedGetParam struct {
 	Uindex string `json:"index"` //请求文章索引，第一次传入0
 	FType  int32  `json:"ftype"` //1,2 声音，普通
+	Uuid   string `json:"uuid"`  //文章唯一uuid
+}
+
+//删除动态
+func (r *CycleController) delFeed(c *gin.Context) {
+
+	var getparam FeedGetParam
+	err := c.ShouldBindJSON(&getparam)
+	if err != nil || len(getparam.Uuid) <= 0 {
+		tqgin.ResultFail(c, "参数错误")
+		return
+	}
+
+	//删除帖子
+	models.CycleDel(getparam.Uuid)
+	//删除评论
+	models.CycleDelCommetByCycleuuid(getparam.Uuid)
+	//删除点赞
+	models.CycleDelLikesByCycleuuid(getparam.Uuid)
+
+	tqgin.ResultOk(c, "成功")
 }
 
 //获取广场动态，声音

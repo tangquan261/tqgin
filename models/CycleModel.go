@@ -32,6 +32,21 @@ type CycleModel struct {
 	LocString string
 }
 
+//根据帖子id获取帖子信息
+func CycleGetModel(uuid string) *CycleModel {
+	if len(uuid) <= 0 {
+		return nil
+	}
+
+	var ret CycleModel
+	err := DB.Model(CycleModel{}).Where("uuid = (?)", uuid).Find(&ret).Error
+	if err != nil {
+		return nil
+	}
+	return &ret
+}
+
+//添加帖子
 func CycleAdd(cycle CycleModel) error {
 
 	if len(cycle.Cid) <= 0 {
@@ -52,6 +67,17 @@ func CycleAdd(cycle CycleModel) error {
 	}
 }
 
+//移除帖子
+func CycleDel(uuid string) error {
+	if len(uuid) < 0 {
+		return errors.New("参数错误")
+	}
+	err := DB.Where("uuid = (?)", uuid).Delete(CycleModel{}).Error
+
+	return err
+}
+
+//获取声音的帖子
 func CycleGetSound(index string) []CycleModel {
 
 	var ret []CycleModel
@@ -80,6 +106,7 @@ func CycleGetSound(index string) []CycleModel {
 	return ret
 }
 
+//获取朋友圈的帖子列表
 func CycleGetFeeds(index string) []CycleModel {
 	var ret []CycleModel
 
