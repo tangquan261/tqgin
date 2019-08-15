@@ -25,7 +25,7 @@ func (this *CycleCommetController) RegisterRouter(router *gin.RouterGroup) {
 }
 
 type CommetParam struct {
-	Uuid    string `json:"uuid"`    //文章id
+	SnowID  int64  `json:"snowid"`  //文章id
 	FromID  int64  `json:"fromID"`  //前一个评论id，1级评论是0
 	Content string `json:"content"` //评论内容
 	Likes   int32  `json:"likes"`   //1点赞0 取消点赞
@@ -42,19 +42,19 @@ func (r *CycleCommetController) addCommet(c *gin.Context) {
 		return
 	}
 
-	if len(feed.Uuid) <= 0 {
+	if feed.SnowID <= 0 {
 		tqgin.ResultFail(c, "参数错误")
 		return
 	}
 
-	cycle := models.CycleGetModel(feed.Uuid)
+	cycle := models.CycleGetModel(feed.SnowID)
 	if cycle == nil {
 		tqgin.ResultFail(c, "参数错误")
 		return
 	}
 
 	var commet models.CycleCommet
-	commet.Uuid = feed.Uuid
+	commet.SnowID = feed.SnowID
 	commet.PlayerID = playerID
 	commet.FromID = feed.FromID
 	commet.Conent = util.UnicodeEmojiCode(feed.Content)
@@ -102,7 +102,7 @@ func (r *CycleCommetController) addLikes(c *gin.Context) {
 		var data models.CycleLike
 		data.PlayerID = playerID
 		data.UID = feed.FromID
-		data.Uuid = feed.Uuid
+		data.SnowID = feed.SnowID
 
 		models.CycleAddLikeCommet(data)
 		tqgin.ResultOk(c, nil)

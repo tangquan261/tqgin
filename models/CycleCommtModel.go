@@ -9,7 +9,7 @@ import (
 type CycleCommet struct {
 	gorm.Model
 	PlayerID    int64  //评论者id
-	Uuid        string //帖子id
+	SnowID      int64  //帖子snowid
 	TarPlayerID int64  //被评论者id，1级评论是0
 	FromID      int64  //评论id，1级评论是0 2级评论是CycleCommet 对一个id
 	Conent      string //评论内容
@@ -18,15 +18,15 @@ type CycleCommet struct {
 //帖子点赞，评论点赞
 type CycleLike struct {
 	gorm.Model
-	Uuid     string //帖子id
-	UID      int64  //评论id，0表示给帖子点赞
-	PlayerID int64  //点赞者
+	SnowID   int64 //帖子id
+	UID      int64 //评论id，0表示给帖子点赞
+	PlayerID int64 //点赞者
 }
 
 //给帖子添加评论
 func CycleAddCommet(cycle CycleCommet) error {
 
-	if len(cycle.Uuid) <= 0 || len(cycle.Conent) <= 0 {
+	if cycle.SnowID <= 0 || len(cycle.Conent) <= 0 {
 		return errors.New("参数错误")
 	}
 
@@ -59,12 +59,12 @@ func CycleAddCommet(cycle CycleCommet) error {
 }
 
 //获取该帖子的所有评论
-func CycleGetCommet(uuid string) []CycleCommet {
-	if len(uuid) <= 0 {
+func CycleGetCommet(snowID int64) []CycleCommet {
+	if snowID <= 0 {
 		return nil
 	}
 	var ret []CycleCommet
-	err := DB.Model(CycleCommet{}).Where("uuid = (?)", uuid).Where(&ret).Error
+	err := DB.Model(CycleCommet{}).Where("snow_id = (?)", snowID).Where(&ret).Error
 
 	if err != nil {
 		return nil
@@ -124,12 +124,12 @@ func CycleDelCommetByFromid(tx *gorm.DB, fromID int64) {
 //添加帖子或者评论的点赞
 func CycleAddLikeCommet(like CycleLike) error {
 
-	if len(like.Uuid) <= 0 {
+	if like.SnowID <= 0 {
 		return errors.New("参数错误")
 	}
 
-	err := DB.Model(CycleLike{}).Where("uuid= (?) and uid = (?) and player_id = (?)",
-		like.Uuid, like.UID, like.PlayerID).FirstOrCreate(&like).Error
+	err := DB.Model(CycleLike{}).Where("snow_id= (?) and uid = (?) and player_id = (?)",
+		like.SnowID, like.UID, like.PlayerID).FirstOrCreate(&like).Error
 
 	if err != nil {
 		return errors.New("参数错误")
@@ -139,16 +139,16 @@ func CycleAddLikeCommet(like CycleLike) error {
 }
 
 //点赞查询数量 根据帖子id和评论id、 uid=0表示查询帖子点赞数，不为零表示评论的点赞数
-func CycleGetLikeCommet(uuid string, uid int64) int64 {
+func CycleGetLikeCommet(snowID int64, uid int64) int64 {
 
-	if len(uuid) <= 0 {
+	if snowID <= 0 {
 		return 0
 	}
 
 	if uid <= 0 {
 		//查询该动态下所有点赞和评论的点赞
 		var count int64
-		err := DB.Model(CycleLike{}).Where("uuid = (?)", uuid).Count(&count).Error
+		err := DB.Model(CycleLike{}).Where("snow_id = (?)", snowID).Count(&count).Error
 		if err != nil {
 			return 0
 		}
@@ -157,7 +157,7 @@ func CycleGetLikeCommet(uuid string, uid int64) int64 {
 	} else {
 		//查询该动态下对应评论的点赞
 		var count int64
-		err := DB.Model(CycleLike{}).Where("id = (?) and uuid = (?)", uid, uuid).Count(&count).Error
+		err := DB.Model(CycleLike{}).Where("id = (?) and snow_id = (?)", uid, snowID).Count(&count).Error
 		if err != nil {
 			return 0
 		}
@@ -195,13 +195,13 @@ func CycleDelCommetByCycleUID(tx *gorm.DB, uid int64) error {
 }
 
 //根据uuid删除所有帖子的评论
-func CycleDelCommetByCycleuuid(uuid string) error {
+func CycleDelCommetByCycleuuid(snowID int64) error {
 
-	if len(uuid) <= 0 {
+	if snowID <= 0 {
 		return errors.New("参数错误")
 	}
 
-	err := DB.Where("uuid = (?)", uuid).Delete(CycleCommet{}).Error
+	err := DB.Where("snow_id = (?)", snowID).Delete(CycleCommet{}).Error
 	if err != nil {
 		return errors.New("参数错误")
 	} else {
@@ -210,12 +210,12 @@ func CycleDelCommetByCycleuuid(uuid string) error {
 }
 
 //根据uuid删除所有帖子的点赞
-func CycleDelLikesByCycleuuid(uuid string) error {
-	if len(uuid) <= 0 {
+func CycleDelLikesByCycleuuid(snowID int64) error {
+	if snowID <= 0 {
 		return errors.New("参数错误")
 	}
 
-	err := DB.Where("uuid = (?)", uuid).Delete(CycleLike{}).Error
+	err := DB.Where("snow_id = (?)", snowID).Delete(CycleLike{}).Error
 	if err != nil {
 		return errors.New("参数错误")
 	} else {

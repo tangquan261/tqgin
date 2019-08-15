@@ -68,7 +68,7 @@ func (r *CycleController) addFeed(c *gin.Context) {
 	dbFeed.LocY = feed.LocY
 	dbFeed.LocString = feed.LocString
 
-	dbFeed.Uuid = util.Uids()
+	dbFeed.SnowID = util.SnowFlakeUUID()
 
 	err = models.CycleAdd(dbFeed)
 
@@ -80,9 +80,8 @@ func (r *CycleController) addFeed(c *gin.Context) {
 }
 
 type FeedGetParam struct {
-	Uindex string `json:"index"` //请求文章索引，第一次传入0
-	FType  int32  `json:"ftype"` //1,2 声音，普通
-	Uuid   string `json:"uuid"`  //文章唯一uuid
+	SnowID int64 `json:"snowid"` //请求文章索引，第一次传入0
+	FType  int32 `json:"ftype"`  //1,2 声音，普通
 }
 
 //删除动态
@@ -90,17 +89,17 @@ func (r *CycleController) delFeed(c *gin.Context) {
 
 	var getparam FeedGetParam
 	err := c.ShouldBindJSON(&getparam)
-	if err != nil || len(getparam.Uuid) <= 0 {
+	if err != nil || getparam.SnowID <= 0 {
 		tqgin.ResultFail(c, "参数错误")
 		return
 	}
 
 	//删除帖子
-	models.CycleDel(getparam.Uuid)
+	models.CycleDel(getparam.SnowID)
 	//删除评论
-	models.CycleDelCommetByCycleuuid(getparam.Uuid)
+	models.CycleDelCommetByCycleuuid(getparam.SnowID)
 	//删除点赞
-	models.CycleDelLikesByCycleuuid(getparam.Uuid)
+	models.CycleDelLikesByCycleuuid(getparam.SnowID)
 
 	tqgin.ResultOk(c, "成功")
 }
@@ -117,15 +116,15 @@ func (r *CycleController) getFeed(c *gin.Context) {
 
 	if getparam.FType == 2 {
 		//声音
-		ret := models.CycleGetSound(getparam.Uindex)
+		ret := models.CycleGetSound(getparam.SnowID)
 		tqgin.ResultOk(c, ret)
 	} else if getparam.FType == 3 {
 		//视频
-		ret := models.CycleGetAudio(getparam.Uindex)
+		ret := models.CycleGetAudio(getparam.SnowID)
 		tqgin.ResultOk(c, ret)
 	} else {
 		//all
-		ret := models.CycleGetFeeds(getparam.Uindex)
+		ret := models.CycleGetFeeds(getparam.SnowID)
 		tqgin.ResultOk(c, ret)
 	}
 }
@@ -142,7 +141,7 @@ func (r *CycleController) getFeedFollow(c *gin.Context) {
 		return
 	}
 
-	ret := models.CycleGetFeedsFollow(playerID, getparam.Uindex)
+	ret := models.CycleGetFeedsFollow(playerID, getparam.SnowID)
 	tqgin.ResultOk(c, ret)
 }
 
@@ -157,6 +156,6 @@ func (r *CycleController) getFeedFans(c *gin.Context) {
 		return
 	}
 
-	ret := models.CycleGetFeedsFans(playerID, getparam.Uindex)
+	ret := models.CycleGetFeedsFans(playerID, getparam.SnowID)
 	tqgin.ResultOk(c, ret)
 }

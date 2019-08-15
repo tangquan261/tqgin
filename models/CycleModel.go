@@ -20,7 +20,7 @@ FType     int32    `json:"ftype"`     //1,2声音，普通
 type CycleModel struct {
 	gorm.Model
 	Cid       string //客户端uid
-	Uuid      string //服务器生成uid
+	SnowID    int64  //服务器生成自增id
 	PlayerID  int64  //发布者id
 	FType     int32  //发布类型，1，2，3普通，声音，视频
 	SoundBG   string //声音背景图
@@ -34,13 +34,13 @@ type CycleModel struct {
 }
 
 //根据帖子id获取帖子信息
-func CycleGetModel(uuid string) *CycleModel {
-	if len(uuid) <= 0 {
+func CycleGetModel(snowID int64) *CycleModel {
+	if snowID <= 0 {
 		return nil
 	}
 
 	var ret CycleModel
-	err := DB.Model(CycleModel{}).Where("uuid = (?)", uuid).Find(&ret).Error
+	err := DB.Model(CycleModel{}).Where("snow_id = (?)", snowID).Find(&ret).Error
 	if err != nil {
 		return nil
 	}
@@ -70,156 +70,99 @@ func CycleAdd(cycle CycleModel) error {
 }
 
 //移除帖子
-func CycleDel(uuid string) error {
-	if len(uuid) < 0 {
+func CycleDel(snowID int64) error {
+	if snowID < 0 {
 		return errors.New("参数错误")
 	}
-	err := DB.Where("uuid = (?)", uuid).Delete(CycleModel{}).Error
+	err := DB.Where("snow_id = (?)", snowID).Delete(CycleModel{}).Error
 
 	return err
 }
 
 //获取声音的帖子
-func CycleGetSound(index string) []CycleModel {
+func CycleGetSound(snowID int64) []CycleModel {
 
 	var ret []CycleModel
 
-	if len(index) <= 0 {
+	if snowID <= 0 {
 		DB.Model(CycleModel{}).Where("f_type = 2").Limit(20).Order("id desc").Find(&ret)
 		return ret
 	}
 
-	var indexdata CycleModel
-
-	err := DB.Model(CycleModel{}).Select("id").Where("uuid = (?)", index).Unscoped().Find(&indexdata).Error
-
-	if err != nil {
-		//根据没有找到对应数据，则拉取最新的20条数据
-		err = DB.Model(CycleModel{}).Where("f_type = 2").Limit(20).Order("id desc").Find(&ret).Error
-
-		if err != nil {
-			return nil
-		}
-		return ret
-	}
-
-	DB.Model(CycleModel{}).Where("f_type = 2 and id < (?)", indexdata.ID).Limit(20).Order("id desc").Find(&ret)
+	DB.Model(CycleModel{}).Where("f_type = 2 and snow_id < (?)", snowID).Limit(20).Order("id desc").Find(&ret)
 
 	return ret
 }
 
 //获取视频的帖子
-func CycleGetAudio(index string) []CycleModel {
+func CycleGetAudio(snowID int64) []CycleModel {
 
 	var ret []CycleModel
 
-	if len(index) <= 0 {
+	if snowID <= 0 {
 		DB.Model(CycleModel{}).Where("f_type = 3").Limit(20).Order("id desc").Find(&ret)
 		return ret
 	}
 
-	var indexdata CycleModel
-
-	err := DB.Model(CycleModel{}).Select("id").Where("uuid = (?)", index).Unscoped().Find(&indexdata).Error
-
-	if err != nil {
-		//根据没有找到对应数据，则拉取最新的20条数据
-		err = DB.Model(CycleModel{}).Where("f_type = 3").Limit(20).Order("id desc").Find(&ret).Error
-
-		if err != nil {
-			return nil
-		}
-		return ret
-	}
-
-	DB.Model(CycleModel{}).Where("f_type = 3 and id < (?)", indexdata.ID).Limit(20).Order("id desc").Find(&ret)
+	DB.Model(CycleModel{}).Where("f_type = 3 and snow_id < (?)", snowID).Limit(20).Order("id desc").Find(&ret)
 
 	return ret
 }
 
 //获取朋友圈的帖子列表
-func CycleGetFeeds(index string) []CycleModel {
+func CycleGetFeeds(snowID int64) []CycleModel {
+
 	var ret []CycleModel
 
-	if len(index) <= 0 {
+	if snowID <= 0 {
 		DB.Model(CycleModel{}).Limit(20).Order("id desc").Find(&ret)
 		return ret
 	}
 
-	var indexdata CycleModel
-
-	err := DB.Model(CycleModel{}).Select("id").Where("uuid = (?)", index).Unscoped().Find(&indexdata).Error
-
-	if err != nil {
-		//根据没有找到对应数据，则拉取最新的20条数据
-		err = DB.Model(CycleModel{}).Limit(20).Order("id desc").Find(&ret).Error
-
-		if err != nil {
-			return nil
-		}
-		return ret
-	}
-
-	DB.Model(CycleModel{}).Where("id < (?)", indexdata.ID).Limit(20).Order("id desc").Find(&ret)
+	DB.Model(CycleModel{}).Where("snow_id < (?)", snowID).Limit(20).Order("id desc").Find(&ret)
 
 	return ret
 }
 
-//组合查询，暂时不用
-func CycleTestFeed(index string) []CycleModel {
+// //组合查询，暂时不用
+// func CycleTestFeed(snowID int64) []CycleModel {
 
+// 	var ret []CycleModel
+// 	if snowID <= 0 {
+// 		DB.Model(CycleModel{}).Limit(20).Order("id desc").Find(&ret)
+// 		return ret
+// 	}
+
+// 	err := DB.Model(CycleModel{}).
+// 		Joins("inner join(select id from tq_cycle_model where uuid = (?)) t2 on tq_cycle_model.id < t2.id ",
+// 			index).Limit(20).Order("id desc").Find(&ret).Error
+
+// 	if err != nil {
+// 		return nil
+// 	}
+
+// 	return ret
+// }
+
+//我关注的人动态
+func CycleGetFeedsFollow(playerID int64, snowID int64) []CycleModel {
 	var ret []CycleModel
-	if len(index) <= 0 {
-		DB.Model(CycleModel{}).Limit(20).Order("id desc").Find(&ret)
+
+	if snowID <= 0 {
+		err := DB.Model(CycleModel{}).
+			Where("`tq_cycle_model`.player_id in (SELECT tarplayer_id FROM tq_relation_ship WHERE  player_id = (?))",
+				playerID).Limit(20).Order("id desc").Find(&ret).Error
+
+		if err != nil {
+			return nil
+		}
+
 		return ret
 	}
 
 	err := DB.Model(CycleModel{}).
-		Joins("inner join(select id from tq_cycle_model where uuid = (?)) t2 on tq_cycle_model.id < t2.id ",
-			index).Limit(20).Order("id desc").Find(&ret).Error
-
-	if err != nil {
-		return nil
-	}
-
-	return ret
-}
-
-//我关注的人动态
-func CycleGetFeedsFollow(playerID int64, index string) []CycleModel {
-	var ret []CycleModel
-
-	if len(index) <= 0 {
-		err := DB.Model(CycleModel{}).
-			Where("`tq_cycle_model`.player_id in (SELECT tarplayer_id FROM tq_relation_ship WHERE  player_id = (?))",
-				playerID).Limit(20).Order("id desc").Find(&ret).Error
-
-		if err != nil {
-			return nil
-		}
-
-		return ret
-	}
-
-	var indexdata CycleModel
-
-	err := DB.Model(CycleModel{}).Select("id").Where("uuid = (?)", index).Unscoped().Find(&indexdata).Error
-
-	if err != nil {
-		//根据没有找到对应数据，则拉取最新的20条数据
-		err := DB.Model(CycleModel{}).
-			Where("`tq_cycle_model`.player_id in (SELECT tarplayer_id FROM tq_relation_ship WHERE  player_id = (?))",
-				playerID).Limit(20).Order("id desc").Find(&ret).Error
-
-		if err != nil {
-			return nil
-		}
-		return ret
-	}
-
-	err = DB.Model(CycleModel{}).
 		Where("`tq_cycle_model`.player_id in (SELECT tarplayer_id FROM tq_relation_ship WHERE  player_id = (?))",
-			playerID).Where("id < (?)", indexdata.ID).Limit(20).Order("id desc").Find(&ret).Error
+			playerID).Where("snow_id < (?)", snowID).Limit(20).Order("id desc").Find(&ret).Error
 
 	if err != nil {
 		return nil
@@ -229,10 +172,10 @@ func CycleGetFeedsFollow(playerID int64, index string) []CycleModel {
 }
 
 //我的粉丝的人动态
-func CycleGetFeedsFans(playerID int64, index string) []CycleModel {
+func CycleGetFeedsFans(playerID int64, snowID int64) []CycleModel {
 	var ret []CycleModel
 
-	if len(index) <= 0 {
+	if snowID <= 0 {
 		err := DB.Model(CycleModel{}).
 			Where("`tq_cycle_model`.player_id in (SELECT player_id FROM tq_relation_ship WHERE  tarplayer_id = (?))",
 				playerID).Limit(20).Order("id desc").Find(&ret).Error
@@ -244,25 +187,9 @@ func CycleGetFeedsFans(playerID int64, index string) []CycleModel {
 		return ret
 	}
 
-	var indexdata CycleModel
-
-	err := DB.Model(CycleModel{}).Select("id").Where("uuid = (?)", index).Unscoped().Find(&indexdata).Error
-
-	if err != nil {
-		//根据没有找到对应数据，则拉取最新的20条数据
-		err := DB.Model(CycleModel{}).
-			Where("`tq_cycle_model`.player_id in (SELECT player_id FROM tq_relation_ship WHERE  tarplayer_id = (?))",
-				playerID).Limit(20).Order("id desc").Find(&ret).Error
-
-		if err != nil {
-			return nil
-		}
-		return ret
-	}
-
-	err = DB.Model(CycleModel{}).
+	err := DB.Model(CycleModel{}).
 		Where("`tq_cycle_model`.player_id in (SELECT player_id FROM tq_relation_ship WHERE  tarplayer_id = (?))",
-			playerID).Where("id < (?)", indexdata.ID).Limit(20).Order("id desc").Find(&ret).Error
+			playerID).Where("snow_id < (?)", snowID).Limit(20).Order("id desc").Find(&ret).Error
 
 	if err != nil {
 		return nil

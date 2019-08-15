@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"time"
+	"tqgin/pkg/tqlog"
 
 	"github.com/satori/go.uuid"
 	"github.com/zheng-ji/goSnowFlake"
@@ -13,12 +14,18 @@ import (
 )
 
 var (
-	iw *goSnowFlake.IdWorker
+	iw     *goSnowFlake.IdWorker
+	iwSnow *goSnowFlake.IdWorker
 )
 
 func init() {
 	var err error
 	iw, err = goSnowFlake.NewIdWorker(1)
+	if err != nil {
+		log.Panic("error init goSnowFlake")
+	}
+
+	iwSnow, err = goSnowFlake.NewIdWorker(2)
 	if err != nil {
 		log.Panic("error init goSnowFlake")
 	}
@@ -50,13 +57,22 @@ func Uids() string {
 	return ret
 }
 
-func Uidu() int64 {
+func UUID() int64 {
 
 	id, err := iw.NextId()
 	if err != nil {
-		log.Panic("error Uidu goSnowFlake")
+		tqlog.TQSysLog.Error("error UUID goSnowFlake")
 		return 0
 	}
 	return id
 
+}
+
+func SnowFlakeUUID() int64 {
+	id, err := iw.NextId()
+	if err != nil {
+		tqlog.TQSysLog.Error("error SnowFlakeUUID goSnowFlake")
+		return 0
+	}
+	return id
 }
