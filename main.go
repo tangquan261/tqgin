@@ -2,35 +2,24 @@
 package main
 
 import (
-	"log"
 	"time"
 	"tqgin/config"
 	"tqgin/models"
+	"tqgin/pkg/tqlog"
 	"tqgin/routers"
 
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
-
-	tqlog "github.com/sirupsen/logrus"
 )
-
-func init() {
-	// Log as JSON instead of the default ASCII formatter.
-	tqlog.SetFormatter(&tqlog.JSONFormatter{})
-
-	// Output to stdout instead of the default stderr
-	// Can be any io.Writer, see below for File example
-	//tqlog.SetOutput(os.Stdout)
-
-	// Only log the warning severity or above.
-	tqlog.SetLevel(tqlog.WarnLevel)
-}
 
 var (
 	router *gin.Engine
 )
 
 func main() {
+
+	models.ConfigDB()
+	tqlog.ConfigLog()
 
 	//gin.SetMode(gin.ReleaseMode)
 	router = gin.Default()
@@ -44,7 +33,7 @@ func main() {
 
 	err := server.ListenAndServe()
 	if err != nil {
-		log.Println("err:%v", err)
+		tqlog.TQSysLog.Warn("init server error")
 	}
 	defer models.DB.Close()
 }

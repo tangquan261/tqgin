@@ -2,21 +2,17 @@ package models
 
 import (
 	"fmt"
-	"time"
+	"tqgin/pkg/tqlog"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	"github.com/rifflock/lfshook"
-	"github.com/sirupsen/logrus"
 )
 
 var (
-	DB    *gorm.DB
-	DBLog *logrus.Logger
+	DB *gorm.DB
 )
 
-func init() {
+func ConfigDB() {
 
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
 		return "tq_" + defaultTableName
@@ -32,7 +28,7 @@ func init() {
 	DB.DB().SetMaxIdleConns(10)
 	DB.DB().SetMaxOpenConns(100)
 	DB.LogMode(true)
-	DB.SetLogger(NewLogger())
+	DB.SetLogger(tqlog.NewDBLogger())
 	DB.SingularTable(true)
 	DB.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 		&Account{}, &UserInfo{}, &RoomInfo{}, &RoomPowerMemberInfo{},
@@ -47,34 +43,6 @@ func init() {
 
 func loadConf() {
 	GetAllGift()
-}
-
-func NewLogger() *logrus.Logger {
-	if DBLog != nil {
-		return DBLog
-	}
-
-	path := "./dblog/dbinfo.log"
-
-	writer, _ := rotatelogs.New(
-		path+".%Y%m%d%H%M",
-		rotatelogs.WithLinkName(path),
-		rotatelogs.WithMaxAge(time.Duration(86400)*time.Second),        //文件最大保存时间
-		rotatelogs.WithRotationTime(time.Duration(604800)*time.Second), //日志切割时间间隔
-	)
-
-	DBLog = logrus.New()
-
-	DBLog.Hooks.Add(lfshook.NewHook(
-		lfshook.WriterMap{
-			logrus.InfoLevel:  writer,
-			logrus.ErrorLevel: writer,
-			logrus.DebugLevel: writer,
-		},
-		&logrus.JSONFormatter{},
-	))
-
-	return DBLog
 }
 
 /*
