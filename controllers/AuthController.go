@@ -192,4 +192,5 @@ func createloginTocken(account, password string) string {
 	h.Write([]byte(account + time.Now().String() + password))
 	md5string := hex.EncodeToString(h.Sum(nil))
 	return md5string
+
 }

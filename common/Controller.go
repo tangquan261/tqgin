@@ -4,18 +4,24 @@ import (
 	"fmt"
 	"strconv"
 
+	"strings"
+	"tqgin/pkg/tqlog"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-
-	"strings"
+	"github.com/sirupsen/logrus"
 )
 
 type Controller struct {
 	Data interface{}
 }
 
-func (this *Controller) RegisterRouter(router *gin.Engine) {
+func (this *Controller) GetTQLog() *logrus.Logger {
+	return tqlog.TQSysLog
+}
 
+func (this *Controller) RegisterRouter(router *gin.Engine) {
+	tqlog.TQSysLog.Debug("RegisterRouter", this)
 }
 
 func (this *Controller) AjaxData(ctx *gin.Context) {

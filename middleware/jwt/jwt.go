@@ -1,9 +1,11 @@
 package jwt
 
 import (
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"tqgin/pkg/errorcode"
+	"tqgin/pkg/tqlog"
 	"tqgin/pkg/util"
 
 	"tqgin/models"
@@ -45,6 +47,11 @@ func JWT() gin.HandlerFunc {
 			code = errorcode.ERROR_INVALID_PARAMS
 		}
 
+		//打印请求日志
+		bodydata, _ := ioutil.ReadAll(c.Request.Body)
+		tqlog.TQRequest.Info("playerid:", playerid, "code:", code,
+			"method:", c.Request.Method, "conentType:", c.ContentType(), "body:", string(bodydata))
+
 		if code != errorcode.SUCCESS {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"code": code,
@@ -54,6 +61,7 @@ func JWT() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+
 		c.Next()
 	}
 }
