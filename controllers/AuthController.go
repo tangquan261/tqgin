@@ -3,8 +3,7 @@ package controllers
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
-	"strconv"
+
 	"time"
 	"tqgin/common"
 	"tqgin/models"
@@ -26,19 +25,37 @@ func (this *AuthController) RegisterRouter(router *gin.Engine) {
 	temp.POST("change_pass_word", this.changePassWord)
 }
 
+type AuthParam struct {
+	Account      string          `json:"account"`
+	Password     string          `json:"passowrd"`
+	LoginType    login.LoginType `json:"logintype"`
+	NickName     string          `json:"nickname"`
+	SexType      login.SexType   `json:"sextype"`
+	NewPassoword string          `json:"newpassword"`
+}
+
 func (r *AuthController) login(con *gin.Context) {
-	Account := con.PostForm("Account")
-	Password := con.PostForm("Password")
-	Type, _ := strconv.Atoi(con.PostForm("Type"))
 
-	fmt.Println("login data:", Account, Password, Type)
+	var autuparam AuthParam
 
-	if len(Account) <= 0 || len(Password) <= 0 {
-		tqgin.Result(con, errorcode.ERROR, nil, "账号，密码不能为空")
+	err := con.ShouldBindJSON(&autuparam)
+
+	if err != nil {
+		tqgin.ResultFail(con, "登录失败")
 		return
 	}
 
-	account := models.LoginAccount(Account)
+	if len(autuparam.Account) <= 0 || len(autuparam.Password) <= 0 {
+		tqgin.ResultFail(con, "登录失败")
+		return
+	}
+
+	account, err := models.LoginAccount(autuparam.Account)
+
+	if err != nil {
+		tqgin.ResultFail(con, "账号错误")
+		return
+	}
 
 	var status int
 	var msg string
@@ -48,79 +65,85 @@ func (r *AuthController) login(con *gin.Context) {
 	if account.AccountID == "" {
 		//不存在，去注册
 		status = errorcode.ERROR
-		msg = "不存在，去注册"
+		msg = "账号错误"
+	} else if account.Password != autuparam.Password {
+		//密码错误
+		status = errorcode.ERROR
+		msg = "账号错误"
+	} else if account.ForbidTime > 0 && account.ForbidTime < time.Now().Unix() {
+		status = errorcode.ERROR
+		msg = "被封禁时间，请联系客服"
 	} else {
-		if account.Password != Password {
-			//密码错误
-			status = errorcode.ERROR
-			msg = "密码错误"
-		} else {
-			//密码正确
-			tokengen, _ := util.GenerateTocken(Account, Password)
+		//密码正确
+		tokengen, _ := util.GenerateTocken(autuparam.Account, autuparam.Password)
 
-			var saveAccount models.Account
-			saveAccount.Tocken = tokengen
-			models.AccountSave(account.AccountID, saveAccount)
+		var saveAccount models.Account
+		saveAccount.Tocken = tokengen
+		models.AccountSave(account.AccountID, saveAccount)
 
-			status = errorcode.SUCCESS
-			msg = "登录成功"
-			data := models.GetUser(account.PlayerID)
-			retLogin.PlayerID = data.PlayerID
-			retLogin.PlayerName = data.PlayerName
-			retLogin.Diamond = data.Diamond
-			retLogin.Gold = data.Gold
-			retLogin.Cash = data.Cash
-			retLogin.RoomID = data.RoomID
-			retLogin.Token = tokengen
-			retLogin.Sex = login.SexType(data.Sex)
-		}
+		status = errorcode.SUCCESS
+		msg = "登录成功"
+		data, _ := models.GetUser(account.PlayerID)
+
+		retLogin.PlayerID = data.PlayerID
+		retLogin.PlayerName = data.PlayerName
+		retLogin.Diamond = data.Diamond
+		retLogin.Gold = data.Gold
+		retLogin.Cash = data.Cash
+		retLogin.RoomID = data.RoomID
+		retLogin.Token = tokengen
+		retLogin.Sex = login.SexType(data.Sex)
 	}
 
 	tqgin.Result(con, status, &retLogin, msg)
 }
 
 func (r *AuthController) register(con *gin.Context) {
-	Account := con.PostForm("Account")
-	Password := con.PostForm("Password")
-	Type, _ := strconv.Atoi(con.PostForm("Type"))
-	NickName := con.PostForm("NickName")
-	SexType, _ := strconv.Atoi(con.PostForm("SexType"))
 
-	fmt.Println("register data:", Account, Password, Type, NickName, SexType)
+	var autuparam AuthParam
+
+	err := con.ShouldBindJSON(&autuparam)
+
+	if err != nil {
+		tqgin.ResultFail(con, "注册失败")
+		return
+	}
 
 	var status int
 	var msg string
 
 	var retLogin login.ReplyLogin
 
-	if len(Account) < 11 {
+	if len(autuparam.Account) < 11 {
 		status = errorcode.ERROR
 		msg = "账号错误"
-	} else if len(Password) < 6 {
+	} else if len(autuparam.Password) < 6 {
 		status = errorcode.ERROR
 		msg = "密码不能太短"
-	} else if len(NickName) <= 0 {
+	} else if len(autuparam.NickName) <= 0 {
 		status = errorcode.ERROR
 		msg = "昵称不能为空"
-	} else if login.SexType(SexType) < login.SexType_Sex_male && login.SexType(SexType) >= login.SexType_Sex_female {
+	} else if autuparam.SexType < login.SexType_Sex_male && autuparam.SexType >= login.SexType_Sex_female {
 		status = errorcode.ERROR
 		msg = "性别错误"
 	} else {
 
 		var account models.Account
-		account.AccountID = Account
-		account.Password = Password
-		account.LoginType = login.LoginType(Type)
+		account.AccountID = autuparam.Account
+		account.Password = autuparam.Password
+		account.LoginType = autuparam.LoginType
 		account.LoginTime = time.Now()
 
-		status = models.Register(&account)
-
-		if status == 0 {
-			user := models.GetDefaultUserinfo(account.PlayerID, NickName, login.SexType(SexType))
+		err := models.Register(account)
+		if err != nil {
+			msg = "注册失败"
+			status = errorcode.ERROR
+		} else {
+			user := models.GetDefaultUserinfo(account.PlayerID, autuparam.NickName, autuparam.SexType)
 
 			err := models.CreateUser(&user)
 			if err == nil {
-				tokengen, _ := util.GenerateTocken(Account, Password)
+				tokengen, _ := util.GenerateTocken(autuparam.Account, autuparam.Password)
 				msg = "注册成功"
 				status = errorcode.SUCCESS
 
@@ -134,12 +157,9 @@ func (r *AuthController) register(con *gin.Context) {
 				retLogin.Sex = login.SexType(user.Sex)
 
 			} else {
-				msg = "创建用户信息失败"
+				msg = "注册失败"
 				status = errorcode.ERROR
 			}
-		} else {
-			msg = "注册失败，已经注册过"
-			status = errorcode.ERROR
 		}
 	}
 
@@ -148,43 +168,42 @@ func (r *AuthController) register(con *gin.Context) {
 
 func (c *AuthController) changePassWord(con *gin.Context) {
 
-	status := errorcode.ERROR
+	var autuparam AuthParam
+
+	err := con.ShouldBindJSON(&autuparam)
+
+	if err != nil {
+		tqgin.ResultFail(con, "注册失败")
+		return
+	}
+
 	var msg string
 
-	accountID := con.PostForm("accountid")
-	oldPassword := con.PostForm("oldpassword")
-	newPassword := con.PostForm("newpassword")
-
-	if len(accountID) < 11 {
+	if len(autuparam.Account) < 11 {
 		msg = "账号错误"
-	} else if len(oldPassword) < 6 {
-		msg = "当前密码错误"
-	} else if len(newPassword) < 6 {
+	} else if len(autuparam.Password) < 6 {
+		msg = "当前密码太短"
+	} else if len(autuparam.NewPassoword) < 6 {
 		msg = "新的密码太短"
-	} else if newPassword == oldPassword {
+	} else if autuparam.NewPassoword == autuparam.Password {
 		msg = "新旧密码不能相同"
 	} else {
+		account, err := models.LoginAccount(autuparam.Account)
 
-		account := models.LoginAccount(accountID)
-
-		if len(account.AccountID) < 11 {
+		if err != nil {
 			msg = "账号不存在"
-		} else if account.Password != oldPassword {
+		} else if account.Password != autuparam.Password {
 			msg = "密码错误"
 		} else {
 			var save models.Account
-			save.Password = newPassword
-			err := models.AccountSave(accountID, save)
-			if err != nil {
-				status = errorcode.SUCCESS
-				msg = "密码修改成功"
-			} else {
-				msg = "密码修改失败，打印错误日志"
-			}
+			save.Password = autuparam.NewPassoword
+			models.AccountSave(autuparam.Account, save)
+			tqgin.ResultOk(con, "修改密码成功")
+			return
 		}
 	}
 
-	tqgin.Result(con, status, nil, msg)
+	tqgin.ResultFail(con, msg)
 }
 
 func createloginTocken(account, password string) string {

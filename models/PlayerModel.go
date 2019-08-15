@@ -11,22 +11,23 @@ import (
 
 type UserInfo struct {
 	gorm.Model
-	PlayerID   int64  `gorm:"not null;unique"`
-	PlayerName string `gorm:"not null;unique"`
-	Diamond    int64
-	Gold       int64
-	Cash       int64
-	RoomID     int64
-	Sex        login.SexType //1女，2男，0未知
-	BirthDay   time.Time
-	Sign       string
-	Pic        string
-	Loc        int
-	Locx       float64
-	Locy       float64
-	Photos     string `gorm:size=1000`
-	Rich       int64  //财富
-	Charm      int64  //魅力
+	PlayerID    int64  `gorm:"not null;unique"`
+	PlayerName  string `gorm:"not null"`
+	DisPlayerID string `gorm:"not null"`
+	Diamond     int64
+	Gold        int64
+	Cash        int64
+	RoomID      int64
+	Sex         login.SexType //1女，2男，0未知
+	BirthDay    time.Time
+	Sign        string
+	Pic         string
+	Loc         int
+	Locx        float64
+	Locy        float64
+	Photos      string `gorm:size=1000`
+	Rich        int64  //财富
+	Charm       int64  //魅力
 }
 
 func GetDefaultUserinfo(PlayerID int64, Name string, Sex login.SexType) UserInfo {
@@ -48,11 +49,11 @@ func CreateUser(user *UserInfo) error {
 }
 
 //不累计的属性存储,不能用户货币类型的更新
-func SaveUser(playerid int64, user *UserInfo) error {
+func SaveUser(playerid int64, user UserInfo) error {
 	if playerid <= 0 {
 		return errors.New("playerGUID error")
 	}
-	err := DB.Model(UserInfo{}).Where("player_id = (?)", playerid).Update(user).Error
+	err := DB.Model(UserInfo{}).Where("player_id = (?)", playerid).Update(&user).Error
 	return err
 }
 
@@ -180,18 +181,14 @@ func ExChangeGoldToDiamond(playerid int64, exGold, exDiamond int64) error {
 	return nil
 }
 
-func GetUser(playerID int64) *UserInfo {
+func GetUser(playerID int64) (UserInfo, error) {
 
 	var user UserInfo
 	user.PlayerID = playerID
 
 	err := DB.First(&user, "player_id = ?", playerID).Error
 
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
-	return &user
+	return user, err
 }
 
 func UserHasInfo(playerID int64) bool {

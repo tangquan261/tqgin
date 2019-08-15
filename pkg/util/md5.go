@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"time"
+	"tqgin/config"
 	"tqgin/pkg/tqlog"
 
 	"github.com/satori/go.uuid"
@@ -20,12 +21,15 @@ var (
 
 func init() {
 	var err error
-	iw, err = goSnowFlake.NewIdWorker(1)
+
+	workid := int64(config.GetConfigInt(config.Snow_Work_Id))
+
+	iw, err = goSnowFlake.NewIdWorker(workid)
 	if err != nil {
 		log.Panic("error init goSnowFlake")
 	}
 
-	iwSnow, err = goSnowFlake.NewIdWorker(2)
+	iwSnow, err = goSnowFlake.NewIdWorker(workid)
 	if err != nil {
 		log.Panic("error init goSnowFlake")
 	}

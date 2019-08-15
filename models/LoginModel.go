@@ -2,19 +2,24 @@ package models
 
 import (
 	"errors"
-	"log"
+
 	"time"
 
+	"tqgin/pkg/tqlog"
 	"tqgin/proto"
-	//_ "github.com/go-sql-driver/mysql"
+
 	"github.com/jinzhu/gorm"
 )
+
+type MoneyAccount struct {
+	MoneyPlayerID int64 `gorm:"primary_key"`
+}
 
 type Account struct {
 	gorm.Model
 	AccountID string `gorm:"not null;unique"`
-	Password  string
-	PlayerID  int64 `gorm:"not null"`
+	Password  string `gorm:"not null"`
+	PlayerID  int64  `gorm:"not null"`
 	LoginType login.LoginType
 	LoginTime time.Time
 	//屏蔽时间
@@ -26,64 +31,90 @@ type Account struct {
 	TockenTimeOut time.Time
 }
 
-func LoginAccount(accountID string) *Account {
+func LoginAccount(accountID string) (Account, error) {
 
 	var account Account
 
 	err := DB.Find(&account, "account_id = ?", accountID).Error
 
-	if err != nil {
-		log.Println(err, accountID)
-	}
-
-	return &account
+	return account, err
 }
 
-func LoginAccountByPlayerID(PlayerID int64) Account {
+func LoginAccountByPlayerID(PlayerID int64) (Account, error) {
 
 	var account Account
 
 	err := DB.Find(&account, "player_id = ?", PlayerID).Error
 
-	if err != nil {
-		log.Println(err, PlayerID)
-	}
-
-	return account
+	return account, err
 }
 
-func Register(account *Account) (status int) {
+func Register(account Account) error {
 
 	var accountCurrent Account
 
-	status = 0
+	tempDB := DB.Where("account_id = (?)", account.AccountID).Find(&accountCurrent)
 
-	DB.Find(&accountCurrent, "account_id = ?", account.AccountID)
-
-	if accountCurrent.AccountID == "" {
-		status = 0
-
-		DB.Last(&accountCurrent)
-
-		if accountCurrent.AccountID == "" {
-			account.PlayerID = 20000
-		} else {
-			account.PlayerID = accountCurrent.PlayerID + 1
-		}
-		account.LoginTime = time.Now()
-
-		DB.Create(account)
-
-	} else {
-		status = 1
+	if tempDB.Error != nil {
+		return errors.New("错误")
 	}
-	return
+
+	if tempDB.RowsAffected != 0 {
+		return errors.New("已经存在")
+	}
+
+	tx := DB.Begin()
+	defer tx.Commit()
+
+	tempDB = tx.Model(Account{}).Where("account_id = (?)", account.AccountID).FirstOrCreate(&account)
+
+	if tempDB.Error != nil {
+		return errors.New("创建错误")
+	}
+
+	if tempDB.RowsAffected == 0 {
+		return errors.New("已经存在")
+	}
+
+	for {
+		playerID := GetPlayerIDNext()
+
+		if canCreatePlayerID(playerID) {
+			err := tx.Model(Account{}).Update("player_id = (?)").
+				Where("account_id = (?)", account.AccountID).Error
+
+			if err != nil {
+				tx.Rollback()
+				tqlog.TQSysLog.Error("create account error :", err)
+				return errors.New("创建错误")
+			}
+			account.PlayerID = playerID
+			break
+		}
+	}
+
+	return nil
 }
 
 func AccountSave(accountid string, account Account) error {
-	if account.AccountID == "" {
-		return errors.New("account is nui")
+	if len(account.AccountID) <= 0 {
+		return errors.New("参数错误")
 	}
 
 	return DB.Model(Account{}).Where("account_id = (?)", accountid).Update(account).Error
+}
+
+//判断当前playerid是否为钱号，不能自动创建
+func canCreatePlayerID(PlayerID int64) bool {
+
+	var count int
+	err := DB.Model(MoneyAccount{}).Where("money_player_id = (?)", PlayerID).Count(&count).Error
+
+	if err != nil {
+		return false
+	}
+	if count > 0 {
+		return false
+	}
+	return true
 }

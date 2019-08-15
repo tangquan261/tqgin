@@ -78,7 +78,7 @@ func (r *UserInfoMoneyController) giveGift(c *gin.Context) {
 		tqgin.ResultFail(c, "礼物不存在")
 		return
 	}
-	UserInfo := models.GetUser(playerGUID)
+	UserInfo, _ := models.GetUser(playerGUID)
 
 	needGold := int64(giftInfo.CashNum) * int64(len(gG.Players)) * int64(gG.NCount)
 

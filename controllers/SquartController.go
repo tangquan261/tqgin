@@ -68,20 +68,5 @@ func (s *SquartController) getBanners(con *gin.Context) {
 
 	banners := models.GetBanners()
 
-	//var retBanner login.Banners
-	// for _, banner := range banners {
-	// 	var onebanner login.BannerInfo
-	// 	onebanner.BannerId = banner.BannerID
-	// 	onebanner.TargetType = banner.Target_type
-
-	// 	onebanner.StartTime = banner.Start_time.Unix()
-	// 	onebanner.EndTime = banner.End_time.Unix()
-	// 	onebanner.BgImg = banner.Bg_img
-	// 	onebanner.ClickUrl = banner.Click_url
-	// 	retBanner.BannerInfo = append(retBanner.BannerInfo, &onebanner)
-	// }
-
-	// fmt.Println("getBanners", banners, "\t", retBanner)
-
 	tqgin.ResultOk(con, banners)
 }

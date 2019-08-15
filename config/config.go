@@ -35,6 +35,8 @@ const (
 	Redis_MaxIdle     = "redis_MaxIdle"
 	Redis_MaxActive   = "redis_MaxActive"
 	Redis_IdleTimeout = "redis_IdleTimeout"
+
+	Snow_Work_Id = "snow_Work_Id"
 )
 
 func init() {

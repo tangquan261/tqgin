@@ -56,6 +56,7 @@ func GetBanners() []BannerInfo {
 	err := DB.Find(&banners).Error
 	if err != nil {
 		fmt.Println("GetBanners", err)
+		return nil
 	}
 	return banners
 }

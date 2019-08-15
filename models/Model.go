@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"sync"
 	"tqgin/pkg/tqlog"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -9,8 +10,14 @@ import (
 )
 
 var (
-	DB *gorm.DB
+	PlayerID_MAX int64
+	lockPlayerID *sync.Mutex
+	DB           *gorm.DB
 )
+
+func init() {
+	lockPlayerID = new(sync.Mutex)
+}
 
 func ConfigDB() {
 
@@ -35,14 +42,51 @@ func ConfigDB() {
 		&RoomTags{}, &HotRoomInfo{}, &SupportRoom{}, &BannerInfo{},
 		&MicModel{}, &Black{}, &GifInfo{}, &GifGiveRecord{}, &RankInfo{},
 		&RoomRankInfo{}, &RelationShip{}, &CycleModel{}, &CycleCommet{},
-		&CycleLike{})
+		&CycleLike{}, &MoneyAccount{})
 
 	loadConf()
+
+	PlayerID_MAX = LoginLastPlayerID()
 	fmt.Println("db init success")
+
+	for i := 0; i < 1000; i++ {
+		go func() {
+			for {
+				player := GetPlayerIDNext()
+				fmt.Println(player)
+			}
+		}()
+	}
 }
 
 func loadConf() {
 	GetAllGift()
+}
+
+func GetPlayerIDNext() int64 {
+	lockPlayerID.Lock()
+	defer lockPlayerID.Unlock()
+	PlayerID_MAX++
+	tqlog.TQSysLog.Info("get playerID next", PlayerID_MAX)
+	return PlayerID_MAX
+}
+
+func LoginLastPlayerID() int64 {
+
+	var account Account
+
+	tempDB := DB.Model(Account{}).Last(&account)
+
+	if tempDB.Error != nil {
+		tqlog.TQSysLog.Panic("LoginLastPlayerID error", tempDB.Error)
+		return 0
+	}
+
+	if tempDB.RowsAffected == 0 {
+		tqlog.TQSysLog.Warn("LoginLastPlayerID 创建第一个用户，id 1000000")
+		return 100000
+	}
+	return account.PlayerID
 }
 
 /*

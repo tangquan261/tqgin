@@ -7,7 +7,6 @@ package controllers
 
 import (
 	"log"
-	"strconv"
 	"strings"
 	"tqgin/common"
 	"tqgin/models"
@@ -35,12 +34,17 @@ func (c *UserinfoController) loginInfo(con *gin.Context) {
 
 	playerid := c.GetPlayerGUID(con)
 
-	account := models.LoginAccountByPlayerID(playerid)
+	account, err := models.LoginAccountByPlayerID(playerid)
+
+	if err != nil {
+		tqgin.ResultFail(con, "登录失败")
+		return
+	}
 
 	if account.AccountID == "" {
-		tqgin.Result(con, errorcode.ERROR, nil, "不存在，去注册")
+		tqgin.ResultFail(con, "登录失败")
 	} else {
-		data := models.GetUser(account.PlayerID)
+		data, _ := models.GetUser(account.PlayerID)
 
 		var retLogin login.ReplyLogin
 		retLogin.PlayerID = data.PlayerID
@@ -56,36 +60,47 @@ func (c *UserinfoController) loginInfo(con *gin.Context) {
 
 }
 
+type UserInfoParam struct {
+	Name       string        `json:"name"`
+	DateString string        `json:"datestring"`
+	Gender     login.SexType `json:"gender"`
+	Sign       string        `json:"sign"`
+	Pic        string        `json:"pic"`
+	LocX       float64       `json:"locx"`
+	LocY       float64       `json:"locy"`
+	Loc        int           `json:"loc"`
+}
+
 //修改个人信息
 func (c *UserinfoController) updateInfo(con *gin.Context) {
 
-	playeridstring, _ := con.Cookie("playerid")
+	PlayerGUID := c.GetPlayerGUID(con)
 
-	PlayerGUID, err := strconv.ParseInt(playeridstring, 10, 64)
-
-	if err != nil || PlayerGUID <= 0 {
-		tqgin.ResultFail(con, "账号id错误")
-		return
-	}
-
-	var user *models.UserInfo
-
-	user = models.GetUser(PlayerGUID)
-	if user == nil {
+	user, err := models.GetUser(PlayerGUID)
+	if err != nil || user.PlayerID <= 0 {
 		tqgin.ResultFail(con, "没有用户信息")
 		return
 	}
 
-	user.PlayerName = con.PostForm("name")
-	dateString := con.PostForm("date")
-	user.BirthDay = util.DateStringToTime(dateString)
-	gender, _ := strconv.Atoi(con.PostForm("gender"))
-	user.Sex = login.SexType(gender)
-	user.Sign = con.PostForm("sign")
-	user.Pic = con.PostForm("pic")
-	user.Loc, _ = strconv.Atoi(con.PostForm("loc"))
-	user.Locx, _ = strconv.ParseFloat(con.PostForm("locx"), 64)
-	user.Locy, _ = strconv.ParseFloat(con.PostForm("locy"), 64)
+	var userinfo UserInfoParam
+
+	err = con.ShouldBindJSON(&userinfo)
+
+	if err != nil {
+		tqgin.ResultFail(con, "解析错误")
+		return
+	}
+
+	user.PlayerName = userinfo.Name
+
+	user.BirthDay = util.DateStringToTime(userinfo.DateString)
+
+	user.Sex = userinfo.Gender
+	user.Sign = userinfo.Sign
+	user.Pic = userinfo.Pic
+	user.Loc = userinfo.Loc
+	user.Locx = userinfo.LocX
+	user.Locy = userinfo.LocY
 
 	_ = models.SaveUser(PlayerGUID, user)
 
@@ -107,16 +122,16 @@ func (c *UserinfoController) getUsersInfo(con *gin.Context) {
 		return
 	}
 
-	if len(playerGUIDS.Uids) <= 0 {
+	if len(playerGUIDS.Uids) <= 0 || len(playerGUIDS.Uids) > 10 {
 		tqgin.ResultFail(con, "error")
 		return
 	}
 
 	var playerinfos []models.UserInfo
 	for i := 0; i < len(playerGUIDS.Uids); i++ {
-		userinfo := models.GetUser(playerGUIDS.Uids[i])
-		if userinfo != nil {
-			playerinfos = append(playerinfos, *userinfo)
+		userinfo, err := models.GetUser(playerGUIDS.Uids[i])
+		if err == nil {
+			playerinfos = append(playerinfos, userinfo)
 		}
 	}
 
@@ -129,7 +144,7 @@ type photos struct {
 
 func (c *UserinfoController) addPhotos(con *gin.Context) {
 
-	playerGUID, _ := con.Cookie("playerid")
+	playerGUID := c.GetPlayerGUID(con)
 
 	var photo photos
 	err := con.ShouldBindJSON(&photo)
@@ -140,11 +155,10 @@ func (c *UserinfoController) addPhotos(con *gin.Context) {
 		return
 	}
 
-	photoString := strings.Join(photo.Photos, "_@_")
+	photoString := strings.Join(photo.Photos, ";")
 	var usrino models.UserInfo
-	uPlayerGUID, _ := strconv.ParseInt(playerGUID, 10, 64)
 	usrino.Photos = photoString
-	models.SaveUser(uPlayerGUID, &usrino)
+	models.SaveUser(playerGUID, usrino)
 
 	tqgin.ResultOk(con, nil)
 }

@@ -17,9 +17,8 @@ var (
 )
 
 func main() {
-
-	models.ConfigDB()
 	tqlog.ConfigLog()
+	models.ConfigDB()
 
 	//gin.SetMode(gin.ReleaseMode)
 	router = gin.Default()
