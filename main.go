@@ -16,11 +16,14 @@ var (
 	router *gin.Engine
 )
 
-func main() {
+func init() {
 	tqlog.ConfigLog()
+}
+
+func main() {
+
 	models.ConfigDB()
 
-	//gin.SetMode(gin.ReleaseMode)
 	router = gin.Default()
 
 	routers.Router(router)
@@ -32,7 +35,7 @@ func main() {
 
 	err := server.ListenAndServe()
 	if err != nil {
-		tqlog.TQSysLog.Warn("init server error")
+		tqlog.TQSysLog.Warn("ListenAndServe Closed")
 	}
 	defer models.DB.Close()
 }

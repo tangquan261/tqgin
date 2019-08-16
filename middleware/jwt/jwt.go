@@ -43,8 +43,9 @@ func JWT() gin.HandlerFunc {
 			code = errorcode.ERROR_INVALID_PARAMS
 		}
 
-		if !models.UserHasInfo(playerid) {
-			code = errorcode.ERROR_INVALID_PARAMS
+		account := models.LoginAccountByPlayerID(playerid)
+		if account == nil || account.Tocken != token {
+			code = errorcode.ERROR_AUTH_TOKEN_CHECK_FAIL
 		}
 
 		//打印请求日志
@@ -59,9 +60,8 @@ func JWT() gin.HandlerFunc {
 				"data": data,
 			})
 			c.Abort()
-			return
+		} else {
+			c.Next()
 		}
-
-		c.Next()
 	}
 }

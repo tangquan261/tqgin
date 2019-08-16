@@ -181,14 +181,20 @@ func ExChangeGoldToDiamond(playerid int64, exGold, exDiamond int64) error {
 	return nil
 }
 
-func GetUser(playerID int64) (UserInfo, error) {
+func GetUser(playerID int64) *UserInfo {
 
 	var user UserInfo
-	user.PlayerID = playerID
 
-	err := DB.First(&user, "player_id = ?", playerID).Error
+	DBtemp := DB.First(&user, "player_id = ?", playerID)
+	if DBtemp.Error != nil {
+		return nil
+	}
 
-	return user, err
+	if DBtemp.RowsAffected <= 0 {
+		return nil
+	}
+
+	return &user
 }
 
 func UserHasInfo(playerID int64) bool {

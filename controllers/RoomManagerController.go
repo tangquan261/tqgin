@@ -6,16 +6,10 @@
 package controllers
 
 import (
-	"fmt"
-	"log"
-	"strconv"
-
 	"tqgin/common"
 	"tqgin/models"
-	"tqgin/proto"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang/protobuf/proto"
 )
 
 type RoomManagerController struct {
@@ -24,50 +18,55 @@ type RoomManagerController struct {
 
 func (this *RoomManagerController) RegisterRouter(router *gin.RouterGroup) {
 	temp := router.Group("/room_manager")
-	temp.POST("open_room", this.OpenRoom)
-	temp.POST("close_room", this.closeRoom)
-	temp.POST("change_roomName", this.ChangeRoomName)
-	temp.POST("apply_enter_Room", this.applyEnterRoom)
-	temp.POST("apply_roominfo", this.applyRoomInfo)
+	temp.POST("app_open_room", this.applyOpenRoom)     //请求创建房间,获取创建房间配置信息
+	temp.POST("open_room", this.OpenRoom)              //请求创建
+	temp.POST("close_room", this.closeRoom)            //关闭房间
+	temp.POST("change_roomName", this.ChangeRoomName)  //修改房间信息
+	temp.POST("apply_enter_Room", this.applyEnterRoom) //进入房间
+	temp.POST("apply_roominfo", this.applyRoomInfo)    //请求房间信息
 }
 
-//根据id获取房间信息
-func (r *RoomManagerController) applyRoomInfo(con *gin.Context) {
+func (r *RoomManagerController) applyOpenRoom(con *gin.Context) {
 
 }
 
 //开启房间
 func (r *RoomManagerController) OpenRoom(con *gin.Context) {
 
-	var createRoominfo login.ApplyCreateRoom
-
-	data := con.PostForm("data")
-
-	err := proto.Unmarshal([]byte(data), &createRoominfo)
-	if err != nil {
-		log.Fatalln(err)
+	type OpenRoomParam struct {
+		RoomName      string `json:"roomname"`      //房间名字
+		RoomIntro     string `json:"roomdetail"`    //房间介绍
+		RoomNotice    string `json:"roomnotice"`    //介绍公告
+		RoomTag       string `json:"roomtags"`      //房间类型
+		RoomPic       string `json:"roompic"`       //房间头像
+		RoomAudioType int32  `json:"roomaudiotype"` //房间声音类型
 	}
 
-	playerIDstr, _ := con.Cookie("playerid")
-	//token, _ := con.Cookie("token")
+	var createRoominfo OpenRoomParam
 
-	playerID, _ := strconv.ParseInt(playerIDstr, 10, 64)
+	err := con.ShouldBindJSON(&createRoominfo)
+	if err != nil {
+		tqgin.ResultFail(con, "创建失败")
+	}
+
+	playerID := r.GetPlayerGUID(con)
 
 	var roominfo models.RoomInfo
-	roominfo.RoomName = createRoominfo.RoomName
 	roominfo.RoomID = playerID
-	roominfo.MasterID = playerID
-	roominfo.RoomTagName = createRoominfo.RoomTags
 
-	err = models.CreateRoom(&roominfo)
+	roominfo.RoomName = createRoominfo.RoomName
+	roominfo.RoomIntro = createRoominfo.RoomIntro
+	roominfo.RoomNotice = createRoominfo.RoomNotice
+	roominfo.RoomTag = createRoominfo.RoomTag
+	roominfo.RoomPic = createRoominfo.RoomPic
+	roominfo.RoomAudioType = createRoominfo.RoomAudioType
+
+	err = models.CreateRoom(roominfo)
 	if err != nil {
-		fmt.Println(err)
+		tqgin.ResultFail(con, "创建失败")
+	} else {
+		tqgin.ResultOkMsg(con, createRoominfo, "创建成功")
 	}
-
-	fmt.Println("请求创建房间成功", createRoominfo, roominfo)
-
-	tqgin.Result(con, 0, &createRoominfo, "请求创建房间")
-
 }
 
 //关闭房间
@@ -82,19 +81,9 @@ func (r *RoomManagerController) ChangeRoomName(con *gin.Context) {
 
 func (r *RoomManagerController) applyEnterRoom(con *gin.Context) {
 
-	roomIDstr := con.PostForm("roomID")
+}
 
-	if len(roomIDstr) > 0 {
+//根据id获取房间信息
+func (r *RoomManagerController) applyRoomInfo(con *gin.Context) {
 
-		roomID, err := strconv.Atoi(roomIDstr)
-
-		if err != nil {
-			fmt.Println("applyEnterRoom atoi", err, roomID)
-		}
-
-		//room, err := models.GetRoomInfo(int64(roomID))
-
-	}
-
-	//tqgin.ResultOk(con)
 }

@@ -48,15 +48,6 @@ func ConfigDB() {
 
 	PlayerID_MAX = LoginLastPlayerID()
 	fmt.Println("db init success")
-
-	for i := 0; i < 1000; i++ {
-		go func() {
-			for {
-				player := GetPlayerIDNext()
-				fmt.Println(player)
-			}
-		}()
-	}
 }
 
 func loadConf() {

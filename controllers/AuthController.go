@@ -50,9 +50,9 @@ func (r *AuthController) login(con *gin.Context) {
 		return
 	}
 
-	account, err := models.LoginAccount(autuparam.Account)
+	account := models.LoginAccount(autuparam.Account)
 
-	if err != nil {
+	if account == nil {
 		tqgin.ResultFail(con, "账号错误")
 		return
 	}
@@ -83,7 +83,7 @@ func (r *AuthController) login(con *gin.Context) {
 
 		status = errorcode.SUCCESS
 		msg = "登录成功"
-		data, _ := models.GetUser(account.PlayerID)
+		data := models.GetUser(account.PlayerID)
 
 		retLogin.PlayerID = data.PlayerID
 		retLogin.PlayerName = data.PlayerName
@@ -188,9 +188,9 @@ func (c *AuthController) changePassWord(con *gin.Context) {
 	} else if autuparam.NewPassoword == autuparam.Password {
 		msg = "新旧密码不能相同"
 	} else {
-		account, err := models.LoginAccount(autuparam.Account)
+		account := models.LoginAccount(autuparam.Account)
 
-		if err != nil {
+		if account == nil {
 			msg = "账号不存在"
 		} else if account.Password != autuparam.Password {
 			msg = "密码错误"

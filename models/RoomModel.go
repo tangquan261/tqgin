@@ -1,7 +1,7 @@
 package models
 
 import (
-	"fmt"
+	"errors"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -14,23 +14,22 @@ type RoomTags struct {
 
 type RoomInfo struct {
 	gorm.Model
-	RoomID        int64 `gorm:"not null; unique"`
-	MasterID      int64
-	RoomName      string `gorm:"not null;unique"`
-	RoomTagName   string
-	RoomLevel     int
-	RoomTotalStar int64
-	RoomPic       string
-	RoomIntro     string
-	RoomPassword  string
-	RoomCount     int64
+	RoomID        int64  `gorm:"not null"`        //房间id=playerid
+	RoomName      string `gorm:"not null;unique"` //房间名字
+	RoomIntro     string `gorm:""`                //房间介绍
+	RoomNotice    string `gorm:""`                //介绍公告
+	RoomTag       string `gorm:""`                //房间tag
+	RoomAudioType int32  `gorm:""`                //房间声音类型
+	RoomTotalStar int64  `gorm:""`                //房间总星
+	RoomPic       string `gorm:""`                //房间头像
+	RoomPassword  string `gorm:""`                //房间密码
 }
 
 type HotRoomInfo struct {
-	RoomID      int64 `gorm:"primary_key"`
-	RoomTagName string
-	RoomHot     int64
-	BeginTime   time.Time
+	RoomID    int64 `gorm:"primary_key"`
+	RoomTag   string
+	RoomHot   int64
+	BeginTime time.Time
 }
 
 type RoomPowerMemberInfo struct {
@@ -57,45 +56,53 @@ func GetTagList() []*RoomTags {
 	return tags
 }
 
-func CreateRoom(room *RoomInfo) error {
+func CreateRoom(room RoomInfo) error {
 
-	err := DB.Save(room).Error
-
-	if err == nil {
-
-		_, notFound := GetPowerRoom(room.MasterID, room.RoomID)
-		if notFound {
-			//没有找到该数据
-			var roomPower RoomPowerMemberInfo
-			roomPower.PlayerID = room.MasterID
-			roomPower.RoomId = room.RoomID
-			roomPower.RoomPower = 1
-			DB.Save(&roomPower)
-		}
-
-		_, notFound = GetHotRoom(room.RoomID)
-		if notFound {
-			//没有在热门中找到
-			count := getHotRoomCountByTag(room.RoomTagName)
-			if count < 100 {
-				//改类型的热门数量小于100
-				newhotRoom := HotRoomInfo{RoomID: room.RoomID, RoomTagName: room.RoomTagName, RoomHot: 100, BeginTime: time.Now()}
-				addHotRoom(&newhotRoom)
-			}
-		} else {
-			//在热门中找到
-			//newhotRoom := HotRoomInfo{RoomID: room.RoomID, RoomTagName: room.RoomTagName, RoomHot: 100, BeginTime: time.Now()}
-			//addHotRoom(&newhotRoom)
-		}
+	if room.RoomID <= 0 {
+		return errors.New("创建失败")
 	}
-	fmt.Println("创建房间的返回", err)
-	return err
+
+	DBtemp := DB.Where("room_id =(?)", room.RoomID).FirstOrCreate(&room)
+
+	if DBtemp.Error != nil {
+		return errors.New("创建失败")
+	}
+
+	if DBtemp.RowsAffected == 0 {
+		return errors.New("创建失败")
+	}
+
+	_, notFound := GetPowerRoom(room.RoomID, room.RoomID)
+	if notFound {
+		//没有找到该数据
+		var roomPower RoomPowerMemberInfo
+		roomPower.PlayerID = room.RoomID
+		roomPower.RoomId = room.RoomID
+		roomPower.RoomPower = 1
+		DB.Save(&roomPower)
+	}
+
+	_, notFound = GetHotRoom(room.RoomID)
+	if notFound {
+		//没有在热门中找到
+		count := getHotRoomCountByTag(room.RoomTag)
+		if count < 100 {
+			//改类型的热门数量小于100
+			newhotRoom := HotRoomInfo{RoomID: room.RoomID, RoomTag: room.RoomTag, RoomHot: 100, BeginTime: time.Now()}
+			addHotRoom(&newhotRoom)
+		}
+	} else {
+		//在热门中找到
+		//newhotRoom := HotRoomInfo{RoomID: room.RoomID, RoomTagName: room.RoomTagName, RoomHot: 100, BeginTime: time.Now()}
+		//addHotRoom(&newhotRoom)
+	}
+	return nil
 }
 
 func addHotRoom(hotRoom *HotRoomInfo) {
 	err := DB.Save(hotRoom).Error
 	if err != nil {
-		fmt.Println("add hot room error", err)
+
 	}
 }
 
@@ -104,7 +111,6 @@ func getHotRoomCountByTag(tagName string) int {
 	var count int
 	DB.Raw("select count(1) as total from tq_hot_room_info where room_tag_name = ? ", tagName).Count(&count)
 
-	fmt.Println("getHotRoomCountByTag nums:", count)
 	return count
 }
 
@@ -124,7 +130,7 @@ func GetRoomById(roomid int64) *RoomInfo {
 	var room RoomInfo
 	err := DB.Where("room_id = (?)", roomid).Find(&room).Error
 	if err != nil {
-		fmt.Println("GetRoomByIds", err)
+
 		return nil
 	}
 	return &room

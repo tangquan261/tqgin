@@ -1,5 +1,5 @@
 /*
-	房间列表
+	房间大厅列表
 */
 package controllers
 
@@ -49,17 +49,6 @@ func (s *SquartController) applyRoomList(con *gin.Context) {
 	} else {
 		data = models.GetHotAllRooms()
 	}
-
-	//var retData login.HotRooms
-	// for _, room := range data {
-	// 	var oneRoom login.HotRoomInfo
-
-	// 	oneRoom.RoomID = room.RoomID
-	// 	oneRoom.RoomTagName = room.RoomTagName
-	// 	oneRoom.RoomHot = room.RoomHot
-
-	// 	retData.HotRoomInfo = append(retData.HotRoomInfo, &oneRoom)
-	// }
 
 	tqgin.ResultOk(con, data)
 }

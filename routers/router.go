@@ -26,6 +26,7 @@ func Router(router *gin.Engine) {
 
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	//不需要验证登录
 	authModel(router)
 
 	apiv1 := router.Group("/api/v1")

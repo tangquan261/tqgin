@@ -9,8 +9,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var TQSysLog *logrus.Logger
-var TQRequest *logrus.Logger
+var TQSysLog *logrus.Logger  //系统日志
+var TQRequest *logrus.Logger //DB日志
 
 func ConfigLog() {
 	TQSysLog = NewSysLogger()

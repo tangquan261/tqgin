@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 	"tqgin/pkg/errorcode"
-
 	"tqgin/pkg/tqlog"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +21,8 @@ func Result(ctx *gin.Context, code int, data interface{}, msg string) {
 
 	_, bTure := data.(proto.Message)
 
+	tqlog.TQRequest.Debug("playerID:", playerID(ctx), " code:", code, " data:", data, " msg:", msg)
+
 	var retData interface{}
 
 	if bTure {
@@ -30,8 +31,6 @@ func Result(ctx *gin.Context, code int, data interface{}, msg string) {
 	} else {
 		retData = data
 	}
-
-	tqlog.TQRequest.Debug("playerID:", playerID(ctx), " code:", code, " data:", retData, " msg:", msg)
 
 	ctx.JSON(http.StatusOK, gin.H{"code": code, "data": retData, "msg": msg})
 }
@@ -40,6 +39,8 @@ func ResultOk(ctx *gin.Context, data interface{}) {
 
 	_, bTure := data.(proto.Message)
 
+	tqlog.TQRequest.Debug("playerID:", playerID(ctx), " code:", errorcode.SUCCESS, " data:", data, " msg:", "")
+
 	var retData interface{}
 
 	if bTure {
@@ -49,13 +50,13 @@ func ResultOk(ctx *gin.Context, data interface{}) {
 		retData = data
 	}
 
-	tqlog.TQRequest.Debug("playerID:", playerID(ctx), " code:", errorcode.SUCCESS, " data:", retData, " msg:", "")
 	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.SUCCESS, "data": retData, "msg": ""})
 }
 
 func ResultOkMsg(ctx *gin.Context, data interface{}, msg string) {
 	_, bTure := data.(proto.Message)
 
+	tqlog.TQRequest.Debug("playerID:", playerID(ctx), " code:", errorcode.SUCCESS, " data:", data, " msg:", msg)
 	var retData interface{}
 
 	if bTure {
@@ -65,7 +66,6 @@ func ResultOkMsg(ctx *gin.Context, data interface{}, msg string) {
 		retData = data
 	}
 
-	tqlog.TQRequest.Debug("playerID:", playerID(ctx), " code:", errorcode.SUCCESS, " data:", retData, " msg:", msg)
 	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.SUCCESS, "data": retData, "msg": msg})
 }
 
@@ -78,6 +78,8 @@ func ResultFail(ctx *gin.Context, msg string) {
 func ResultFailData(ctx *gin.Context, data interface{}, msg string) {
 	_, bTure := data.(proto.Message)
 
+	tqlog.TQRequest.Debug("playerID:", playerID(ctx), " code:", errorcode.ERROR, " data:", data, " msg:", msg)
+
 	var retData interface{}
 
 	if bTure {
@@ -87,6 +89,5 @@ func ResultFailData(ctx *gin.Context, data interface{}, msg string) {
 		retData = data
 	}
 
-	tqlog.TQRequest.Debug("playerID:", playerID(ctx), " code:", errorcode.ERROR, " data:", retData, " msg:", msg)
 	ctx.JSON(http.StatusOK, gin.H{"code": errorcode.ERROR, "data": retData, "msg": msg})
 }

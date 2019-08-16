@@ -31,22 +31,33 @@ type Account struct {
 	TockenTimeOut time.Time
 }
 
-func LoginAccount(accountID string) (Account, error) {
+func LoginAccount(accountID string) *Account {
 
 	var account Account
 
-	err := DB.Find(&account, "account_id = ?", accountID).Error
+	DBtemp := DB.Find(&account, "account_id = ?", accountID)
+	if DBtemp.Error != nil {
+		return nil
+	}
+	if DBtemp.RowsAffected <= 0 {
+		return nil
+	}
 
-	return account, err
+	return &account
 }
 
-func LoginAccountByPlayerID(PlayerID int64) (Account, error) {
+func LoginAccountByPlayerID(PlayerID int64) *Account {
 
 	var account Account
 
-	err := DB.Find(&account, "player_id = ?", PlayerID).Error
-
-	return account, err
+	DBtemp := DB.Find(&account, "player_id = ?", PlayerID)
+	if DBtemp.Error != nil {
+		return nil
+	}
+	if DBtemp.RowsAffected <= 0 {
+		return nil
+	}
+	return &account
 }
 
 func Register(account Account) error {
@@ -60,7 +71,15 @@ func Register(account Account) error {
 	}
 
 	if tempDB.RowsAffected != 0 {
-		return errors.New("已经存在")
+
+		userInfo := GetUser(accountCurrent.PlayerID)
+		if userInfo != nil {
+			return errors.New("已经存在")
+		} else {
+			account.PlayerID = accountCurrent.PlayerID
+			AccountSave(account.AccountID, account)
+			return nil
+		}
 	}
 
 	tx := DB.Begin()

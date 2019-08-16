@@ -21,7 +21,7 @@ func (this *Controller) GetTQLog() *logrus.Logger {
 }
 
 func (this *Controller) RegisterRouter(router *gin.Engine) {
-	tqlog.TQSysLog.Debug("RegisterRouter", this)
+
 }
 
 func (this *Controller) AjaxData(ctx *gin.Context) {

@@ -24,40 +24,10 @@ type UserinfoController struct {
 
 func (this *UserinfoController) RegisterRouter(router *gin.RouterGroup) {
 	temp := router.Group("/user")
-	temp.POST("login_info", this.loginInfo)
-	temp.POST("update_info", this.updateInfo)
-	temp.POST("get_user_info", this.getUsersInfo)
-	temp.POST("add_photos", this.addPhotos)
-}
 
-func (c *UserinfoController) loginInfo(con *gin.Context) {
-
-	playerid := c.GetPlayerGUID(con)
-
-	account, err := models.LoginAccountByPlayerID(playerid)
-
-	if err != nil {
-		tqgin.ResultFail(con, "登录失败")
-		return
-	}
-
-	if account.AccountID == "" {
-		tqgin.ResultFail(con, "登录失败")
-	} else {
-		data, _ := models.GetUser(account.PlayerID)
-
-		var retLogin login.ReplyLogin
-		retLogin.PlayerID = data.PlayerID
-		retLogin.PlayerName = data.PlayerName
-		retLogin.Diamond = data.Diamond
-		retLogin.Gold = data.Gold
-		retLogin.Cash = data.Cash
-		retLogin.RoomID = data.RoomID
-		retLogin.Sex = login.SexType(data.Sex)
-
-		tqgin.Result(con, errorcode.SUCCESS, &retLogin, "获取信息成功")
-	}
-
+	temp.POST("update_info", this.updateInfo)     //更新用户信息
+	temp.POST("get_user_info", this.getUsersInfo) //获取用户id
+	temp.POST("add_photos", this.addPhotos)       //添加图片
 }
 
 type UserInfoParam struct {
@@ -76,15 +46,15 @@ func (c *UserinfoController) updateInfo(con *gin.Context) {
 
 	PlayerGUID := c.GetPlayerGUID(con)
 
-	user, err := models.GetUser(PlayerGUID)
-	if err != nil || user.PlayerID <= 0 {
+	user := models.GetUser(PlayerGUID)
+	if user == nil {
 		tqgin.ResultFail(con, "没有用户信息")
 		return
 	}
 
 	var userinfo UserInfoParam
 
-	err = con.ShouldBindJSON(&userinfo)
+	err := con.ShouldBindJSON(&userinfo)
 
 	if err != nil {
 		tqgin.ResultFail(con, "解析错误")
@@ -102,7 +72,7 @@ func (c *UserinfoController) updateInfo(con *gin.Context) {
 	user.Locx = userinfo.LocX
 	user.Locy = userinfo.LocY
 
-	_ = models.SaveUser(PlayerGUID, user)
+	models.SaveUser(PlayerGUID, *user)
 
 	tqgin.Result(con, errorcode.SUCCESS, gin.H{"playerid": PlayerGUID}, "更新数据成功")
 }
@@ -129,9 +99,9 @@ func (c *UserinfoController) getUsersInfo(con *gin.Context) {
 
 	var playerinfos []models.UserInfo
 	for i := 0; i < len(playerGUIDS.Uids); i++ {
-		userinfo, err := models.GetUser(playerGUIDS.Uids[i])
-		if err == nil {
-			playerinfos = append(playerinfos, userinfo)
+		userinfo := models.GetUser(playerGUIDS.Uids[i])
+		if userinfo != nil {
+			playerinfos = append(playerinfos, *userinfo)
 		}
 	}
 
