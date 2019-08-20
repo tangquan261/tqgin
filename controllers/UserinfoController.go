@@ -25,9 +25,11 @@ type UserinfoController struct {
 func (this *UserinfoController) RegisterRouter(router *gin.RouterGroup) {
 	temp := router.Group("/user")
 
-	temp.POST("update_info", this.updateInfo)     //更新用户信息
-	temp.POST("get_user_info", this.getUsersInfo) //获取用户id
-	temp.POST("add_photos", this.addPhotos)       //添加图片
+	temp.POST("update_info", this.updateInfo)            //更新用户信息
+	temp.POST("get_users_info", this.getUsersInfo)       //获取用户基础ids
+	temp.POST("get_user_detail", this.getUserDetailInfo) //获取用户详细信息
+	temp.POST("add_photos", this.addPhotos)              //添加图片
+
 }
 
 type UserInfoParam struct {
@@ -77,11 +79,53 @@ func (c *UserinfoController) updateInfo(con *gin.Context) {
 	tqgin.Result(con, errorcode.SUCCESS, gin.H{"playerid": PlayerGUID}, "更新数据成功")
 }
 
-func (c *UserinfoController) getUsersInfo(con *gin.Context) {
+type UserIDInfo struct {
+	PlayerID int64 `json:"playerid"`
+}
 
-	type playerIDs struct {
-		Uids []int64 `json:"uids"`
+//获取用户详情信息
+func (c *UserinfoController) getUserDetailInfo(con *gin.Context) {
+
+	var user UserIDInfo
+
+	err := con.ShouldBindJSON(&user)
+	if err != nil {
+		tqgin.ResultFail(con, "参数错误")
+		return
 	}
+
+	if user.PlayerID < 0 {
+		tqgin.ResultFail(con, "error")
+		return
+	}
+
+	tqgin.Result(con, errorcode.SUCCESS, nil, "成功")
+}
+
+//获取用户主页信息
+func (c *UserinfoController) getUserMineInfo(con *gin.Context) {
+
+	var user UserIDInfo
+
+	err := con.ShouldBindJSON(&user)
+	if err != nil {
+		tqgin.ResultFail(con, "参数错误")
+		return
+	}
+
+	if user.PlayerID < 0 {
+		tqgin.ResultFail(con, "error")
+		return
+	}
+
+	tqgin.Result(con, errorcode.SUCCESS, nil, "成功")
+}
+
+type playerIDs struct {
+	Uids []int64 `json:"uids"`
+}
+
+func (c *UserinfoController) getUsersInfo(con *gin.Context) {
 
 	var playerGUIDS playerIDs
 

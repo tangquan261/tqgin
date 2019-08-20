@@ -25,18 +25,17 @@ func (this *AuthController) RegisterRouter(router *gin.Engine) {
 	temp.POST("change_pass_word", this.changePassWord)
 }
 
-type AuthParam struct {
-	Account      string          `json:"account"`
-	Password     string          `json:"passowrd"`
-	LoginType    login.LoginType `json:"logintype"`
-	NickName     string          `json:"nickname"`
-	SexType      login.SexType   `json:"sextype"`
-	NewPassoword string          `json:"newpassword"`
+type Authlogin struct {
+	Account   string          `json:"account"`
+	Password  string          `json:"passowrd"`
+	LoginType login.LoginType `json:"logintype"`
+	NickName  string          `json:"nickname"`
+	SexType   login.SexType   `json:"sextype"`
 }
 
 func (r *AuthController) login(con *gin.Context) {
 
-	var autuparam AuthParam
+	var autuparam Authlogin
 
 	err := con.ShouldBindJSON(&autuparam)
 
@@ -98,9 +97,17 @@ func (r *AuthController) login(con *gin.Context) {
 	tqgin.Result(con, status, &retLogin, msg)
 }
 
+type AuthRegister struct {
+	Account   string          `json:"account"`
+	Password  string          `json:"passowrd"`
+	LoginType login.LoginType `json:"logintype"`
+	NickName  string          `json:"nickname"`
+	SexType   login.SexType   `json:"sextype"`
+}
+
 func (r *AuthController) register(con *gin.Context) {
 
-	var autuparam AuthParam
+	var autuparam AuthRegister
 
 	err := con.ShouldBindJSON(&autuparam)
 
@@ -166,9 +173,15 @@ func (r *AuthController) register(con *gin.Context) {
 	tqgin.Result(con, status, &retLogin, msg)
 }
 
+type AuthChangePassword struct {
+	Account      string `json:"account"`
+	Password     string `json:"passowrd"`
+	NewPassoword string `json:"newpassword"`
+}
+
 func (c *AuthController) changePassWord(con *gin.Context) {
 
-	var autuparam AuthParam
+	var autuparam AuthChangePassword
 
 	err := con.ShouldBindJSON(&autuparam)
 

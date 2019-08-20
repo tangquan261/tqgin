@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -17,16 +16,18 @@ type BannerInfo struct {
 func GetHotRoomsByTag(tagName string) []RoomInfo {
 
 	var hotRooms []HotRoomInfo
-	err := DB.Where("room_tag_name = ?", tagName).Find(&hotRooms).Error
+	//
+	err := DB.Where("room_tag = ? and (end_time IS NULL or end_time < (?))", tagName, time.Now()).Order("room_hot desc").Limit(100).Find(&hotRooms).Error
 	if err != nil {
-		fmt.Println("GetHotRoomsByTag err:", err)
 		return nil
 	}
 
 	var rooms []RoomInfo
 	for i := 0; i < len(hotRooms); i++ {
 		oneRoom := GetRoomById(hotRooms[i].RoomID)
-		rooms = append(rooms, *oneRoom)
+		if oneRoom != nil {
+			rooms = append(rooms, *oneRoom)
+		}
 	}
 
 	return rooms
@@ -36,16 +37,17 @@ func GetHotAllRooms() []RoomInfo {
 
 	var hotRooms []HotRoomInfo
 
-	err := DB.Find(&hotRooms).Error
+	err := DB.Order("begin_time ASC").Limit(100).Find(&hotRooms).Error
 	if err != nil {
-		fmt.Println("GetHotRoomsByTag err:", err)
 		return nil
 	}
 
 	var rooms []RoomInfo
 	for i := 0; i < len(hotRooms); i++ {
 		oneRoom := GetRoomById(hotRooms[i].RoomID)
-		rooms = append(rooms, *oneRoom)
+		if oneRoom != nil {
+			rooms = append(rooms, *oneRoom)
+		}
 	}
 	return rooms
 }
@@ -55,7 +57,6 @@ func GetBanners() []BannerInfo {
 
 	err := DB.Find(&banners).Error
 	if err != nil {
-		fmt.Println("GetBanners", err)
 		return nil
 	}
 	return banners

@@ -56,6 +56,11 @@ func (r *RankController) roomRankInfo(c *gin.Context) {
 		return
 	}
 
+	if rank.RoomID <= 0 {
+		tqgin.ResultFail(c, "错误")
+		return
+	}
+
 	models.RoomRankInfoBy(rank.RoomID, rank.RoomType)
 	tqgin.ResultOkMsg(c, rank, "成功")
 }

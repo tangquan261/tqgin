@@ -40,12 +40,22 @@ func (s *SquartController) applyTagsList(con *gin.Context) {
 
 func (s *SquartController) applyRoomList(con *gin.Context) {
 
-	TagName := con.PostForm("tagName")
+	type RoomtagParam struct {
+		RoomTag string `json:"roomtag"` //房间Tag类型
+	}
+
+	var roomTag RoomtagParam
+
+	err := con.ShouldBindJSON(&roomTag)
+	if err != nil {
+		tqgin.ResultFail(con, "参数错误")
+		return
+	}
 
 	var data []models.RoomInfo
 
-	if len(TagName) > 0 {
-		data = models.GetHotRoomsByTag(TagName)
+	if len(roomTag.RoomTag) > 0 {
+		data = models.GetHotRoomsByTag(roomTag.RoomTag)
 	} else {
 		data = models.GetHotAllRooms()
 	}

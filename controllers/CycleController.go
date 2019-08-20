@@ -24,7 +24,7 @@ func (this *CycleController) RegisterRouter(router *gin.RouterGroup) {
 	temp.POST("del_feed", this.delFeed)
 	temp.POST("get_feed", this.getFeed)
 	temp.POST("get_feed_follow", this.getFeedFollow)
-	temp.POST("get_feed_fans", this.getFeedFans)
+	//temp.POST("get_feed_fans", this.getFeedFans)
 }
 
 //GiftID  int64   `json:"giftid"`

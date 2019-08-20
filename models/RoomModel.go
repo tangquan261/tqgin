@@ -19,17 +19,21 @@ type RoomInfo struct {
 	RoomIntro     string `gorm:""`                //房间介绍
 	RoomNotice    string `gorm:""`                //介绍公告
 	RoomTag       string `gorm:""`                //房间tag
-	RoomAudioType int32  `gorm:""`                //房间声音类型
+	RoomAudioType int32  `gorm:""`                //房间声音类型1：娱乐模式，2：天籁之音，3：超高音质
 	RoomTotalStar int64  `gorm:""`                //房间总星
 	RoomPic       string `gorm:""`                //房间头像
+	RoomBGPic     string `gorm:""`                //房间背景图
 	RoomPassword  string `gorm:""`                //房间密码
+	RoomOrderMic  int32  `gorm:""`                //上麦类型，1，2自由上麦，排序上麦
+
 }
 
 type HotRoomInfo struct {
 	RoomID    int64 `gorm:"primary_key"`
 	RoomTag   string
 	RoomHot   int64
-	BeginTime time.Time
+	BeginTime time.Time //开始时间
+	EndTime   time.Time //关闭时间
 }
 
 type RoomPowerMemberInfo struct {
@@ -62,51 +66,78 @@ func CreateRoom(room RoomInfo) error {
 		return errors.New("创建失败")
 	}
 
-	DBtemp := DB.Where("room_id =(?)", room.RoomID).FirstOrCreate(&room)
+	createRoom := room
+	DBtemp := DB.Where("room_id =(?)", room.RoomID).FirstOrCreate(&createRoom)
 
 	if DBtemp.Error != nil {
 		return errors.New("创建失败")
 	}
 
 	if DBtemp.RowsAffected == 0 {
-		return errors.New("创建失败")
+		//已经存在了，更新
+		err := DB.Model(RoomInfo{}).Where("room_id =(?)", room.RoomID).Update(&room).Error
+
+		if err != nil {
+			return errors.New("创建失败")
+		}
 	}
 
-	_, notFound := GetPowerRoom(room.RoomID, room.RoomID)
-	if notFound {
-		//没有找到该数据
-		var roomPower RoomPowerMemberInfo
-		roomPower.PlayerID = room.RoomID
-		roomPower.RoomId = room.RoomID
-		roomPower.RoomPower = 1
-		DB.Save(&roomPower)
+	support := GetSupportRoomById(room.RoomID)
+	if support != nil {
+		//官方支持的房间
+		newhotRoom := HotRoomInfo{RoomID: room.RoomID, RoomTag: room.RoomTag, RoomHot: 999999, BeginTime: time.Now()}
+		addHotRoom(&newhotRoom)
+		OpenHotRoom(room.RoomID)
+		return nil
 	}
 
-	_, notFound = GetHotRoom(room.RoomID)
-	if notFound {
-		//没有在热门中找到
-		count := getHotRoomCountByTag(room.RoomTag)
+	hotroom := GetHotRoom(room.RoomID)
+	if hotroom == nil {
+		count := GetHotRoomCountByTag(room.RoomTag)
+		//数量小于100
 		if count < 100 {
 			//改类型的热门数量小于100
 			newhotRoom := HotRoomInfo{RoomID: room.RoomID, RoomTag: room.RoomTag, RoomHot: 100, BeginTime: time.Now()}
 			addHotRoom(&newhotRoom)
+			return nil
 		}
 	} else {
-		//在热门中找到
-		//newhotRoom := HotRoomInfo{RoomID: room.RoomID, RoomTagName: room.RoomTagName, RoomHot: 100, BeginTime: time.Now()}
-		//addHotRoom(&newhotRoom)
+		OpenHotRoom(room.RoomID)
 	}
+
 	return nil
 }
 
+//添加热门房间
 func addHotRoom(hotRoom *HotRoomInfo) {
-	err := DB.Save(hotRoom).Error
-	if err != nil {
-
-	}
+	DB.Where("room_id = ?", hotRoom.RoomID).FirstOrCreate(&hotRoom)
 }
 
-func getHotRoomCountByTag(tagName string) int {
+//打开热门房间
+func OpenHotRoom(roomid int64) error {
+	return DB.Model(HotRoomInfo{}).Where("room_id = ?", roomid).
+		Updates(map[string]interface{}{"begin_time": time.Now(), "end_time": nil}).Error
+}
+
+//关闭热门房间
+func CloseHotRoom(roomid int64) error {
+	return DB.Model(HotRoomInfo{}).Where("room_id = ?", roomid).
+		UpdateColumn("end_time", time.Now()).Error
+}
+
+//更新热门值
+func UpdateHotRomhot(roomid int64, addHot int64) error {
+	return DB.Model(HotRoomInfo{}).Where("room_id=(?)", roomid).
+		UpdateColumn("room_hot", gorm.Expr("room_hot + ?", addHot)).Error
+}
+
+//清空所有热门值
+func ClearHotRooms() {
+	DB.Model(HotRoomInfo{}).UpdateColumn("room_hot", 100)
+}
+
+//根据tag类型，获取所有该类型房间数量
+func GetHotRoomCountByTag(tagName string) int {
 
 	var count int
 	DB.Raw("select count(1) as total from tq_hot_room_info where room_tag_name = ? ", tagName).Count(&count)
@@ -114,10 +145,16 @@ func getHotRoomCountByTag(tagName string) int {
 	return count
 }
 
-func GetHotRoom(roomID int64) (HotRoomInfo, bool) {
+//根据房间id获取热门房间
+func GetHotRoom(roomID int64) *HotRoomInfo {
 	var hotRoom HotRoomInfo
-	notFound := DB.Where("room_id = ?", roomID).Find(&hotRoom).RecordNotFound()
-	return hotRoom, notFound
+	DBTemp := DB.Where("room_id = ?", roomID).Find(&hotRoom)
+
+	if DBTemp.Error != nil || DBTemp.RowsAffected == 0 {
+		return nil
+	}
+
+	return &hotRoom
 }
 
 func GetPowerRoom(playerID int64, roomID int64) (RoomPowerMemberInfo, bool) {
@@ -127,11 +164,36 @@ func GetPowerRoom(playerID int64, roomID int64) (RoomPowerMemberInfo, bool) {
 }
 
 func GetRoomById(roomid int64) *RoomInfo {
+
 	var room RoomInfo
-	err := DB.Where("room_id = (?)", roomid).Find(&room).Error
-	if err != nil {
+
+	DBtemp := DB.Where("room_id = (?)", roomid).Find(&room)
+
+	if DBtemp.Error != nil || DBtemp.RowsAffected == 0 {
 
 		return nil
 	}
 	return &room
+}
+
+func GetSupportRoomById(roomid int64) *SupportRoom {
+
+	var room SupportRoom
+
+	DBtemp := DB.Where("room_id = (?)", roomid).Find(&room)
+
+	if DBtemp.Error != nil || DBtemp.RowsAffected == 0 {
+
+		return nil
+	}
+	return &room
+}
+
+//修改房间信息
+func SaveRoominfo(roomID int64, roominfo RoomInfo) error {
+	if roomID <= 0 {
+		return errors.New("SaveRoominfo error")
+	}
+	err := DB.Model(RoomInfo{}).Where("room_id = (?)", roomID).Update(&roominfo).Error
+	return err
 }
