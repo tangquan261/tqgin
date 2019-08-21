@@ -197,3 +197,32 @@ func CycleGetFeedsFans(playerID int64, snowID int64) []CycleModel {
 
 	return ret
 }
+
+//获取某个人的动态
+func CycleGetSingleFeeds(playerID int64, snowID int64, limitCount int) []CycleModel {
+
+	if limitCount <= 0 || limitCount > 30 {
+		return nil
+	}
+
+	var ret []CycleModel
+
+	if snowID <= 0 {
+		err := DB.Model(CycleModel{}).Where("player_id = (?)", playerID).
+			Limit(limitCount).Order("id desc").Find(&ret).Error
+
+		if err != nil {
+			return nil
+		}
+
+		return ret
+	}
+
+	err := DB.Model(CycleModel{}).Where("player_id = (?) and snow_id < (?)", playerID, snowID).Limit(limitCount).Order("id desc").Find(&ret).Error
+
+	if err != nil {
+		return nil
+	}
+
+	return ret
+}

@@ -42,7 +42,7 @@ func ConfigDB() {
 		&RoomTags{}, &HotRoomInfo{}, &SupportRoom{}, &BannerInfo{},
 		&MicModel{}, &Black{}, &GifInfo{}, &GifGiveRecord{}, &RankInfo{},
 		&RoomRankInfo{}, &RelationShip{}, &CycleModel{}, &CycleCommet{},
-		&CycleLike{}, &MoneyAccount{})
+		&CycleLike{}, &MoneyAccount{}, &ConsumeUserCount{}, &GfitUserCount{})
 
 	loadConf()
 

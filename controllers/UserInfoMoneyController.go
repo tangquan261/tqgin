@@ -17,9 +17,9 @@ type UserInfoMoneyController struct {
 
 func (this *UserInfoMoneyController) RegisterRouter(router *gin.RouterGroup) {
 	temp := router.Group("/money")
-	temp.POST("add_diamond", this.add_diamond)
-	temp.POST("give_gift", this.giveGift)
-	temp.POST("all_gift", this.allGift)
+	temp.POST("add_diamond", this.add_diamond) //添加钻石
+	temp.POST("give_gift", this.giveGift)      //送礼物
+	temp.POST("all_gift", this.allGift)        //获取所有礼物配置
 }
 
 type MoneyJsonAdd struct {
@@ -80,7 +80,8 @@ func (r *UserInfoMoneyController) giveGift(c *gin.Context) {
 	}
 	UserInfo := models.GetUser(playerGUID)
 
-	needGold := int64(giftInfo.CashNum) * int64(len(gG.Players)) * int64(gG.NCount)
+	oneNeedGold := int64(giftInfo.CashNum) * int64(gG.NCount)
+	needGold := oneNeedGold * int64(len(gG.Players))
 
 	if UserInfo.Gold < needGold {
 		tqgin.ResultFail(c, "钻石不足")
@@ -94,12 +95,17 @@ func (r *UserInfoMoneyController) giveGift(c *gin.Context) {
 	}
 	//添加送礼记录
 	models.AddGiveGiftLog(gG.GiftID, playerGUID, gG.RoomID, gG.Players, gG.NCount)
+
+	//增加个人送礼总数记录
+	models.AddConsumeUserCount(playerGUID, gG.GiftID, gG.NCount*int32(len(gG.Players)))
 	//增加自己的财富值
 	models.ModifyRichUser(playerGUID, needGold*10)
 
-	//增加给送礼人的魅力值
 	for i := 0; i < len(gG.Players); i++ {
-		models.ModifyCharmUser(gG.Players[i], needGold*10)
+		//增加给被送礼人的魅力值
+		models.ModifyCharmUser(gG.Players[i], oneNeedGold*10)
+		//增加获得礼物人的礼物记录
+		models.AddGiftUserCount(gG.Players[i], gG.GiftID, gG.NCount)
 	}
 
 	if gG.RoomID != 0 {

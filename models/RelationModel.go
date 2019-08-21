@@ -61,6 +61,28 @@ func GetFollow(playerID int64) []RelationShip {
 	return users
 }
 
+func GetFollowCount(playerID int64) int {
+	var count int
+
+	err := DB.Raw("select count(1) as total from tq_relation_ship where player_id = ? ", playerID).Count(&count).Error
+
+	if err != nil {
+		return 0
+	}
+
+	return count
+}
+
+func GetFansCount(playerID int64) int {
+	var count int
+
+	err := DB.Raw("select count(1) as total from tq_relation_ship where tarplayer_id = ? ", playerID).Count(&count).Error
+	if err != nil {
+		return 0
+	}
+	return count
+}
+
 //获取关注我的人，即我的粉丝
 func GetFans(playerID int64) []RelationShip {
 	if playerID <= 0 {

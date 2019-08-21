@@ -13,21 +13,26 @@ type UserInfo struct {
 	gorm.Model
 	PlayerID    int64  `gorm:"not null;unique"`
 	PlayerName  string `gorm:"not null"`
-	DisPlayerID string `gorm:"not null"`
+	DisPlayerID string `gorm:"unique"`
 	Diamond     int64
 	Gold        int64
 	Cash        int64
 	RoomID      int64
 	Sex         login.SexType //1女，2男，0未知
-	BirthDay    time.Time
-	Sign        string
-	Pic         string
+	Sign        string        //签名
+	Pic         string        //头像
 	Loc         int
 	Locx        float64
 	Locy        float64
-	Photos      string `gorm:size=1000`
-	Rich        int64  //财富
-	Charm       int64  //魅力
+	Photos      string    `gorm:size=1000`
+	Rich        int64     //财富
+	Charm       int64     //魅力
+	CityName    string    //城市
+	BirthDay    time.Time //出生日期
+	StarSign    string    //星座，由出生日期算出
+	Profession  string    //职业
+	School      string
+	MarryState  string //婚姻状态
 }
 
 func GetDefaultUserinfo(PlayerID int64, Name string, Sex login.SexType) UserInfo {
