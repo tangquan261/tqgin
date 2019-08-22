@@ -1,0 +1,54 @@
+PODS:
+  - AFNetworking (3.2.1):
+    - AFNetworking/NSURLSession (= 3.2.1)
+    - AFNetworking/Reachability (= 3.2.1)
+    - AFNetworking/Security (= 3.2.1)
+    - AFNetworking/Serialization (= 3.2.1)
+    - AFNetworking/UIKit (= 3.2.1)
+  - AFNetworking/NSURLSession (3.2.1):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (3.2.1)
+  - AFNetworking/Security (3.2.1)
+  - AFNetworking/Serialization (3.2.1)
+  - AFNetworking/UIKit (3.2.1):
+    - AFNetworking/NSURLSession
+  - AgoraRtcEngine_iOS (2.3.1)
+  - GZIP (1.2.2)
+  - Masonry (1.1.0)
+  - SVProgressHUD (2.2.5)
+  - YYModel (1.0.4)
+  - ZipArchive (1.4.0)
+
+DEPENDENCIES:
+  - AFNetworking
+  - AgoraRtcEngine_iOS
+  - GZIP (~> 1.2)
+  - Masonry
+  - SVProgressHUD
+  - YYModel
+  - ZipArchive (~> 1.4.0)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - AFNetworking
+    - AgoraRtcEngine_iOS
+    - GZIP
+    - Masonry
+    - SVProgressHUD
+    - YYModel
+    - ZipArchive
+
+SPEC CHECKSUMS:
+  AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
+  AgoraRtcEngine_iOS: b0304fee470e0b88bd3abedf9ce1c4309f4fd722
+  GZIP: 12374d285e3b5d46cfcd480700fcfc7e16caf4f1
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
+  YYModel: 2a7fdd96aaa4b86a824e26d0c517de8928c04b30
+  ZipArchive: e25a4373192673e3229ac8d6e9f64a3e5713c966
+
+PODFILE CHECKSUM: 0af47374d585be9d71a07eeda2414efd61b5b27b
+
+COCOAPODS: 1.5.3
