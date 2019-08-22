@@ -29,8 +29,8 @@ type Authlogin struct {
 	Account   string          `json:"account"`
 	Password  string          `json:"passowrd"`
 	LoginType login.LoginType `json:"logintype"`
-	NickName  string          `json:"nickname"`
-	SexType   login.SexType   `json:"sextype"`
+	//NickName  string          `json:"nickname"`
+	//SexType   login.SexType   `json:"sextype"`
 }
 
 func (r *AuthController) login(con *gin.Context) {
@@ -56,21 +56,15 @@ func (r *AuthController) login(con *gin.Context) {
 		return
 	}
 
-	var status int
 	var msg string
-
-	var retLogin login.ReplyLogin
 
 	if account.AccountID == "" {
 		//不存在，去注册
-		status = errorcode.ERROR
 		msg = "账号错误"
 	} else if account.Password != autuparam.Password {
 		//密码错误
-		status = errorcode.ERROR
 		msg = "账号错误"
 	} else if account.ForbidTime > 0 && account.ForbidTime < time.Now().Unix() {
-		status = errorcode.ERROR
 		msg = "被封禁时间，请联系客服"
 	} else {
 		//密码正确
@@ -80,21 +74,14 @@ func (r *AuthController) login(con *gin.Context) {
 		saveAccount.Tocken = tokengen
 		models.AccountSave(account.AccountID, saveAccount)
 
-		status = errorcode.SUCCESS
 		msg = "登录成功"
 		data := models.GetUser(account.PlayerID)
 
-		retLogin.PlayerID = data.PlayerID
-		retLogin.PlayerName = data.PlayerName
-		retLogin.Diamond = data.Diamond
-		retLogin.Gold = data.Gold
-		retLogin.Cash = data.Cash
-		retLogin.RoomID = data.RoomID
-		retLogin.Token = tokengen
-		retLogin.Sex = login.SexType(data.Sex)
+		tqgin.ResultOkMsg(con, gin.H{"token": tokengen, "user": data}, "登录成功")
+		return
 	}
 
-	tqgin.Result(con, status, &retLogin, msg)
+	tqgin.ResultFail(con, msg)
 }
 
 type AuthRegister struct {
@@ -116,11 +103,8 @@ func (r *AuthController) register(con *gin.Context) {
 		return
 	}
 
-	var status int
 	var msg string
-
-	var retLogin login.ReplyLogin
-
+	var status int
 	if len(autuparam.Account) < 11 {
 		status = errorcode.ERROR
 		msg = "账号错误"
@@ -133,44 +117,37 @@ func (r *AuthController) register(con *gin.Context) {
 	} else if autuparam.SexType < login.SexType_Sex_male && autuparam.SexType >= login.SexType_Sex_female {
 		status = errorcode.ERROR
 		msg = "性别错误"
-	} else {
-
-		var account models.Account
-		account.AccountID = autuparam.Account
-		account.Password = autuparam.Password
-		account.LoginType = autuparam.LoginType
-		account.LoginTime = time.Now()
-
-		err := models.Register(account)
-		if err != nil {
-			msg = "注册失败"
-			status = errorcode.ERROR
-		} else {
-			user := models.GetDefaultUserinfo(account.PlayerID, autuparam.NickName, autuparam.SexType)
-
-			err := models.CreateUser(&user)
-			if err == nil {
-				tokengen, _ := util.GenerateTocken(autuparam.Account, autuparam.Password)
-				msg = "注册成功"
-				status = errorcode.SUCCESS
-
-				retLogin.PlayerID = user.PlayerID
-				retLogin.PlayerName = user.PlayerName
-				retLogin.Diamond = user.Diamond
-				retLogin.Gold = user.Gold
-				retLogin.Cash = user.Cash
-				retLogin.RoomID = user.RoomID
-				retLogin.Token = tokengen
-				retLogin.Sex = login.SexType(user.Sex)
-
-			} else {
-				msg = "注册失败"
-				status = errorcode.ERROR
-			}
-		}
+	}
+	if status == errorcode.ERROR {
+		tqgin.ResultFail(con, msg)
+		return
 	}
 
-	tqgin.Result(con, status, &retLogin, msg)
+	var account models.Account
+	account.AccountID = autuparam.Account
+	account.Password = autuparam.Password
+	account.LoginType = autuparam.LoginType
+	account.LoginTime = time.Now()
+
+	err = models.Register(account)
+	if err != nil {
+		msg = "注册失败"
+		tqgin.ResultFail(con, msg)
+	} else {
+		user := models.GetDefaultUserinfo(account.PlayerID, autuparam.NickName, autuparam.SexType)
+
+		err := models.CreateUser(&user)
+		if err == nil {
+			Newtoken, _ := util.GenerateTocken(autuparam.Account, autuparam.Password)
+			msg = "注册成功"
+			status = errorcode.SUCCESS
+			tqgin.ResultOkMsg(con, gin.H{"token": Newtoken, "user": user}, msg)
+
+		} else {
+			msg = "注册失败"
+			tqgin.ResultFail(con, msg)
+		}
+	}
 }
 
 type AuthChangePassword struct {
