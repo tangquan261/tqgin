@@ -7,6 +7,7 @@
 //
 
 #import "MicoView.h"
+#import "MicModel.h"
 
 @interface MicoView()
 
@@ -25,7 +26,7 @@
         _dicMic = [NSMutableDictionary dictionaryWithCapacity:8];
         
         
-        _btnHeadMic = [[UIButton alloc] initWithFrame:CGRectMake(100, 0, 100, 30)];
+        _btnHeadMic = [[UIButton alloc] initWithFrame:CGRectMake(100, 0, 100, 40)];
         [self addSubview:_btnHeadMic];
         [_btnHeadMic setTitle:@"上麦" forState:UIControlStateNormal];
         [_btnHeadMic addTarget:self action:@selector(doActionHead:) forControlEvents:UIControlEventTouchUpInside];
@@ -34,10 +35,10 @@
             UIButton *btn = nil;
             
             if (i <4) {
-                btn = [[UIButton alloc] initWithFrame:CGRectMake(20+i*75, 50, 50, 30)];
+                btn = [[UIButton alloc] initWithFrame:CGRectMake(20+i*95, 50, 70, 40)];
             }
             else{
-                btn = [[UIButton alloc] initWithFrame:CGRectMake(20+(i-4)*75, 100, 50, 30)];
+                btn = [[UIButton alloc] initWithFrame:CGRectMake(20+(i-4)*95, 100, 70, 40)];
             }
             [btn setBackgroundColor:[UIColor yellowColor]];
             [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
@@ -66,27 +67,22 @@
     }
 }
 
-- (void)setDicmic:(NSMutableDictionary *)dicmic{
+- (void)setArrayMic:(NSArray *)arrayMic{
+    
+    _arrayMic = arrayMic;
     [self.btnHeadMic setTitle:@"上" forState:UIControlStateNormal];
     
-    for (id btnnindex in _dicMic) {
-        UIButton *btn  = [_dicMic objectForKey:btnnindex];
+    for (id obj in self.dicMic) {
+        UIButton *btn  = [self.dicMic objectForKey:obj];
         [btn setTitle:@"上" forState:UIControlStateNormal];
     }
-    
-    for (id obj in dicmic) {
-//        ZegoAudioStream *stream = [dicmic objectForKey:obj];
-//        if ([stream.extraInfo integerValue] == 100) {
-//            [self.btnHeadMic setTitle:stream.userName forState:UIControlStateNormal];
-//        }
-//        else{
-//            UIButton *btn = [self.dicMic objectForKey:@([stream.extraInfo integerValue])];
-//            if (btn != nil) {
-//                [btn setTitle:stream.userName forState:UIControlStateNormal];
-//            }
-//        }
+    for (MicModel* obj in _arrayMic) {
+        
+        UIButton *btn = [self.dicMic objectForKey:@(obj.MicIndex)];
+        if (btn != nil) {
+            [btn setTitle:[NSString stringWithFormat:@"%lu",obj.PlayerID] forState:UIControlStateNormal];
+        }
     }
 }
-
 
 @end

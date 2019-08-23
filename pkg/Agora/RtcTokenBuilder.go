@@ -1,4 +1,4 @@
-package rtctokenbuilder
+package tokenbuilder
 
 import (
 	"fmt"

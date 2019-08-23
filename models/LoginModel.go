@@ -116,11 +116,11 @@ func Register(account Account) error {
 }
 
 func AccountSave(accountid string, account Account) error {
-	if len(account.AccountID) <= 0 {
+	if len(accountid) <= 0 {
 		return errors.New("参数错误")
 	}
 
-	return DB.Model(Account{}).Where("account_id = (?)", accountid).Update(account).Error
+	return DB.Model(Account{}).Where("account_id = (?)", accountid).Update(&account).Error
 }
 
 //判断当前playerid是否为钱号，不能自动创建

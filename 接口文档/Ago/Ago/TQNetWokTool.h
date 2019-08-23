@@ -39,7 +39,10 @@ typedef NS_ENUM(NSUInteger, SuccessCode){
 - (void)saveLoginInfo:(NSDictionary*)dic;
 
 @property (nonatomic, copy)NSString *tocken;
+@property (nonatomic, copy)NSString *RTMToken;
 @property (nonatomic, strong)AccountModel *account;
+
+@property (nonatomic, copy)NSString *channelID;
 
 - (void)requestGet:(NSString *)url params:(id)params showLoading:(BOOL)showLoading success:(void (^)(id responseObject, SuccessCode codeType))success failure:(void (^)(NSError *error))failure;
 

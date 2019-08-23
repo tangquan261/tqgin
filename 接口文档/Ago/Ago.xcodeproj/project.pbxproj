@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		71481A74231004E50038256C /* MicModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 71481A73231004E50038256C /* MicModel.m */; };
 		714FF663230D35AF00331389 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 714FF662230D35AF00331389 /* AppDelegate.m */; };
 		714FF666230D35AF00331389 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 714FF665230D35AF00331389 /* ViewController.m */; };
 		714FF669230D35AF00331389 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 714FF667230D35AF00331389 /* Main.storyboard */; };
@@ -23,6 +24,13 @@
 		714FF6A5230D368900331389 /* MsgItemTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 714FF69C230D368900331389 /* MsgItemTableViewCell.m */; };
 		719FCE24230E41EE0055A15D /* TQNetWokTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 719FCE23230E41EE0055A15D /* TQNetWokTool.m */; };
 		719FCE28230E65F10055A15D /* AccountModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 719FCE27230E65F10055A15D /* AccountModel.m */; };
+		719FCE2D230EB1D30055A15D /* AgoraRtmKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 719FCE2C230EB1D30055A15D /* AgoraRtmKit.framework */; };
+		719FCE2F230EB2170055A15D /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 719FCE2E230EB2170055A15D /* libc++.tbd */; };
+		719FCE31230EB2240055A15D /* libresolv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 719FCE30230EB2240055A15D /* libresolv.tbd */; };
+		719FCE33230EB22C0055A15D /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 719FCE32230EB22C0055A15D /* SystemConfiguration.framework */; };
+		719FCE35230EB2350055A15D /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 719FCE34230EB2350055A15D /* CoreTelephony.framework */; };
+		719FCE38230EB29E0055A15D /* AgoraRTMManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 719FCE37230EB29E0055A15D /* AgoraRTMManager.m */; };
+		719FCE3B230ECA760055A15D /* NSStringUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 719FCE3A230ECA760055A15D /* NSStringUtil.m */; };
 		D70BF8723CB4E991FB9A769C /* Pods_Ago.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B41FC342590B7E0D97BE9450 /* Pods_Ago.framework */; };
 /* End PBXBuildFile section */
 
@@ -45,6 +53,8 @@
 
 /* Begin PBXFileReference section */
 		1C0C8C33C0035A4F635428FD /* Pods-Ago.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Ago.release.xcconfig"; path = "Pods/Target Support Files/Pods-Ago/Pods-Ago.release.xcconfig"; sourceTree = "<group>"; };
+		71481A72231004E50038256C /* MicModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MicModel.h; sourceTree = "<group>"; };
+		71481A73231004E50038256C /* MicModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MicModel.m; sourceTree = "<group>"; };
 		714FF65E230D35AF00331389 /* Ago.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ago.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		714FF661230D35AF00331389 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		714FF662230D35AF00331389 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -77,6 +87,15 @@
 		719FCE23230E41EE0055A15D /* TQNetWokTool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TQNetWokTool.m; sourceTree = "<group>"; };
 		719FCE26230E65F10055A15D /* AccountModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AccountModel.h; sourceTree = "<group>"; };
 		719FCE27230E65F10055A15D /* AccountModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AccountModel.m; sourceTree = "<group>"; };
+		719FCE2C230EB1D30055A15D /* AgoraRtmKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AgoraRtmKit.framework; sourceTree = "<group>"; };
+		719FCE2E230EB2170055A15D /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
+		719FCE30230EB2240055A15D /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
+		719FCE32230EB22C0055A15D /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		719FCE34230EB2350055A15D /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
+		719FCE36230EB29E0055A15D /* AgoraRTMManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AgoraRTMManager.h; sourceTree = "<group>"; };
+		719FCE37230EB29E0055A15D /* AgoraRTMManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AgoraRTMManager.m; sourceTree = "<group>"; };
+		719FCE39230ECA760055A15D /* NSStringUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NSStringUtil.h; sourceTree = "<group>"; };
+		719FCE3A230ECA760055A15D /* NSStringUtil.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSStringUtil.m; sourceTree = "<group>"; };
 		97C33935C44E1DC5C86127DF /* Pods-Ago.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Ago.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Ago/Pods-Ago.debug.xcconfig"; sourceTree = "<group>"; };
 		B41FC342590B7E0D97BE9450 /* Pods_Ago.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Ago.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -86,6 +105,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				719FCE35230EB2350055A15D /* CoreTelephony.framework in Frameworks */,
+				719FCE33230EB22C0055A15D /* SystemConfiguration.framework in Frameworks */,
+				719FCE31230EB2240055A15D /* libresolv.tbd in Frameworks */,
+				719FCE2F230EB2170055A15D /* libc++.tbd in Frameworks */,
+				719FCE2D230EB1D30055A15D /* AgoraRtmKit.framework in Frameworks */,
 				D70BF8723CB4E991FB9A769C /* Pods_Ago.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -151,6 +175,10 @@
 				714FF670230D35B100331389 /* main.m */,
 				719FCE22230E41EE0055A15D /* TQNetWokTool.h */,
 				719FCE23230E41EE0055A15D /* TQNetWokTool.m */,
+				719FCE36230EB29E0055A15D /* AgoraRTMManager.h */,
+				719FCE37230EB29E0055A15D /* AgoraRTMManager.m */,
+				719FCE39230ECA760055A15D /* NSStringUtil.h */,
+				719FCE3A230ECA760055A15D /* NSStringUtil.m */,
 			);
 			path = Ago;
 			sourceTree = "<group>";
@@ -191,6 +219,8 @@
 			children = (
 				719FCE26230E65F10055A15D /* AccountModel.h */,
 				719FCE27230E65F10055A15D /* AccountModel.m */,
+				71481A72231004E50038256C /* MicModel.h */,
+				71481A73231004E50038256C /* MicModel.m */,
 			);
 			path = model;
 			sourceTree = "<group>";
@@ -207,6 +237,11 @@
 		7B1B937A2A193040E455F4A8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				719FCE34230EB2350055A15D /* CoreTelephony.framework */,
+				719FCE32230EB22C0055A15D /* SystemConfiguration.framework */,
+				719FCE30230EB2240055A15D /* libresolv.tbd */,
+				719FCE2E230EB2170055A15D /* libc++.tbd */,
+				719FCE2C230EB1D30055A15D /* AgoraRtmKit.framework */,
 				B41FC342590B7E0D97BE9450 /* Pods_Ago.framework */,
 			);
 			name = Frameworks;
@@ -401,9 +436,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				719FCE38230EB29E0055A15D /* AgoraRTMManager.m in Sources */,
+				71481A74231004E50038256C /* MicModel.m in Sources */,
 				714FF6A2230D368900331389 /* MicoView.m in Sources */,
 				714FF666230D35AF00331389 /* ViewController.m in Sources */,
 				714FF671230D35B100331389 /* main.m in Sources */,
+				719FCE3B230ECA760055A15D /* NSStringUtil.m in Sources */,
 				714FF6A4230D368900331389 /* MsgTableView.m in Sources */,
 				719FCE24230E41EE0055A15D /* TQNetWokTool.m in Sources */,
 				714FF6A0230D368900331389 /* NSData_ext.m in Sources */,
@@ -585,6 +623,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 26A9TBZGNP;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = Ago/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -603,6 +645,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 26A9TBZGNP;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = Ago/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

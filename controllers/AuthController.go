@@ -3,10 +3,12 @@ package controllers
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"strconv"
 
 	"time"
 	"tqgin/common"
 	"tqgin/models"
+	"tqgin/pkg/Agora"
 	"tqgin/pkg/errorcode"
 	"tqgin/pkg/util"
 	"tqgin/proto"
@@ -77,7 +79,11 @@ func (r *AuthController) login(con *gin.Context) {
 		msg = "登录成功"
 		data := models.GetUser(account.PlayerID)
 
-		tqgin.ResultOkMsg(con, gin.H{"token": tokengen, "user": data}, "登录成功")
+		accountstring := strconv.FormatInt(account.PlayerID, 10)
+
+		RTMtoken, _ := tokenbuilder.RTMBuildToken("1f836f0e094446d2858f156ca366313d", "08e1620922bf40ff9ac81517f4219f51", accountstring, 1000, 0)
+
+		tqgin.ResultOkMsg(con, gin.H{"token": tokengen, "user": data, "RTMTocken": RTMtoken}, "登录成功")
 		return
 	}
 
@@ -141,7 +147,11 @@ func (r *AuthController) register(con *gin.Context) {
 			Newtoken, _ := util.GenerateTocken(autuparam.Account, autuparam.Password)
 			msg = "注册成功"
 			status = errorcode.SUCCESS
-			tqgin.ResultOkMsg(con, gin.H{"token": Newtoken, "user": user}, msg)
+			accountstring := strconv.FormatInt(account.PlayerID, 10)
+
+			RTMtoken, _ := tokenbuilder.RTMBuildToken("1f836f0e094446d2858f156ca366313d", "08e1620922bf40ff9ac81517f4219f51", accountstring, 1000, 0)
+
+			tqgin.ResultOkMsg(con, gin.H{"token": Newtoken, "user": user, "RTMTocken": RTMtoken}, msg)
 
 		} else {
 			msg = "注册失败"

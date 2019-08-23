@@ -7,8 +7,10 @@ package controllers
 
 import (
 	//"fmt"
+	"strconv"
 	"tqgin/common"
 	"tqgin/models"
+	"tqgin/pkg/Agora"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,14 +21,45 @@ type RoomManagerController struct {
 
 func (this *RoomManagerController) RegisterRouter(router *gin.RouterGroup) {
 	temp := router.Group("/room_manager")
-	temp.POST("config_room", this.applyConfigRoom)    //请求创建房间,获取创建房间配置信息
-	temp.POST("open_room", this.OpenRoom)             //请求创建
-	temp.POST("close_room", this.closeRoom)           //关闭房间
-	temp.POST("change_roominfo", this.ChangeRoomInfo) //修改房间信息
-	temp.POST("apply_roominfo", this.applyRoomInfo)   //请求房间信息
-	temp.POST("apply_add_admin", this.applyAddAdmin)  //添加房间管理
-	temp.POST("apply_del_admin", this.applyDelAdmin)  //移除房间管理
-	//temp.POST("apply_enter_Room", this.applyEnterRoom) //进入房间
+	temp.POST("config_room", this.applyConfigRoom)     //请求创建房间,获取创建房间配置信息
+	temp.POST("open_room", this.OpenRoom)              //请求创建
+	temp.POST("close_room", this.closeRoom)            //关闭房间
+	temp.POST("change_roominfo", this.ChangeRoomInfo)  //修改房间信息
+	temp.POST("apply_roominfo", this.applyRoomInfo)    //请求房间信息
+	temp.POST("apply_add_admin", this.applyAddAdmin)   //添加房间管理
+	temp.POST("apply_del_admin", this.applyDelAdmin)   //移除房间管理
+	temp.POST("apply_enter_Room", this.applyEnterRoom) //进入房间
+	//添加或者移除房间管理员
+	//添加或者移除房间黑名单
+	//获取房间管理员和黑名单的列表
+}
+
+func (r *RoomManagerController) applyEnterRoom(con *gin.Context) {
+
+	type EnterRoomParam struct {
+		RoomID int64 `json:"roomid"` //房间id
+	}
+
+	var enterRoom EnterRoomParam
+	err := con.ShouldBindJSON(&enterRoom)
+	if err != nil {
+		tqgin.ResultFailData(con, nil, "错误")
+		return
+	}
+
+	playerID := r.GetPlayerGUID(con)
+	channel := "channel" + strconv.FormatInt(enterRoom.RoomID, 10)
+
+	token, _ := tokenbuilder.BuildTokenWithUID("1f836f0e094446d2858f156ca366313d",
+		"08e1620922bf40ff9ac81517f4219f51", channel, uint32(playerID),
+		tokenbuilder.RolePublisher, 0)
+
+	room := models.GetRoomById(enterRoom.RoomID)
+	micsqueue := models.MicQueueInfo(enterRoom.RoomID)
+	mics := models.MicGetAllIndex(enterRoom.RoomID)
+
+	tqgin.ResultOkMsg(con, gin.H{"token": token, "room": room,
+		"micqueue": micsqueue, "mics": mics}, "获取成功")
 }
 
 func (r *RoomManagerController) applyConfigRoom(con *gin.Context) {

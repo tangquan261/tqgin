@@ -7,6 +7,7 @@
 //
 
 #import "TQNetWokTool.h"
+#import "AgoraRTMManager.h"
 
 @interface TQNetWokTool()
 
@@ -32,7 +33,12 @@
     _tocken = token;
     NSDictionary *user = [[dic objectForKey:@"data"] objectForKey:@"user"];
     _account = [AccountModel yy_modelWithJSON:user];
-    NSLog(@"%@",_account);
+    
+    _RTMToken = [[dic objectForKey:@"data"] objectForKey:@"RTMTocken"];
+    
+    if (_RTMToken) {
+      [[AgoraRTMManager instance] login:[NSString stringWithFormat:@"%lu",_account.PlayerID] trmToken:_RTMToken];
+    }
 }
 
 - (void)setAccount:(AccountModel *)account{
@@ -57,7 +63,7 @@
             [SVProgressHUD dismissWithDelay:1];
         }
         
-        _manager = [[AFHTTPSessionManager alloc] initWithBaseURL:[NSURL URLWithString:@"http://127.0.0.1:8080"]];
+        _manager = [[AFHTTPSessionManager alloc] initWithBaseURL:[NSURL URLWithString:@"http://192.168.1.55:8080"]];
         //_manager.requestSerializer = [AFHTTPRequestSerializer serializer];
         _manager.requestSerializer = [AFJSONRequestSerializer serializer];
         _manager.responseSerializer = [AFHTTPResponseSerializer serializer];

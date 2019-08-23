@@ -10,7 +10,7 @@ import (
 	"tqgin/pkg/tqlog"
 	"tqgin/pkg/util"
 
-	//"tqgin/models"
+	"tqgin/models"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -43,10 +43,10 @@ func JWT() gin.HandlerFunc {
 		if err != nil || playerid <= 0 {
 			code = errorcode.ERROR_INVALID_PARAMS
 		} else {
-			// account := models.LoginAccountByPlayerID(playerid)
-			// if account == nil || account.Tocken != token {
-			// 	code = errorcode.ERROR_AUTH_TOKEN_CHECK_FAIL
-			// }
+			account := models.LoginAccountByPlayerID(playerid)
+			if account == nil || account.Tocken != token {
+				code = errorcode.ERROR_AUTH_TOKEN_CHECK_FAIL
+			}
 		}
 
 		//打印请求日志
@@ -58,7 +58,7 @@ func JWT() gin.HandlerFunc {
 		c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(rawData)) // 关键点
 
 		if code != errorcode.SUCCESS {
-			c.JSON(http.StatusUnauthorized, gin.H{
+			c.JSON(http.StatusOK, gin.H{
 				"code": code,
 				"msg":  errorcode.GetMsg(code),
 				"data": rawData,

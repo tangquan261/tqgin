@@ -26,7 +26,7 @@ func (this *RelationController) RegisterRouter(router *gin.RouterGroup) {
 	temp.POST("get_fans", this.getFans)      //获取粉丝列表
 	temp.POST("add_black", this.addBlack)    //添加黑名单
 	temp.POST("del_black", this.removeBlack) //移除黑名单
-	temp.POST("get_blacks", this.getBlacks)  //获取很名单
+	temp.POST("get_blacks", this.getBlacks)  //获取黑名单
 }
 
 type RelationParam struct {

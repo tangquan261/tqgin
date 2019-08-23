@@ -40,9 +40,9 @@ func ConfigDB() {
 	DB.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 		&Account{}, &UserInfo{}, &RoomInfo{}, &RoomPowerMemberInfo{},
 		&RoomTags{}, &HotRoomInfo{}, &SupportRoom{}, &BannerInfo{},
-		&MicModel{}, &Black{}, &GifInfo{}, &GifGiveRecord{}, &RankInfo{},
+		&MicUserModel{}, &Black{}, &GifInfo{}, &GifGiveRecord{}, &RankInfo{},
 		&RoomRankInfo{}, &RelationShip{}, &CycleModel{}, &CycleCommet{},
-		&CycleLike{}, &MoneyAccount{}, &ConsumeUserCount{}, &GfitUserCount{})
+		&CycleLike{}, &MoneyAccount{}, &ConsumeUserCount{}, &GfitUserCount{}, &MicQueue{})
 
 	loadConf()
 

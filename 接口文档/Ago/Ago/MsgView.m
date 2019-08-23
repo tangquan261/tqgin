@@ -8,7 +8,8 @@
 
 #import "MsgView.h"
 #import "Masonry.h"
-
+#import <AgoraRtmKit/AgoraRtmKit.h>
+#import "NSStringUtil.h"
 @interface MsgView()<UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic, strong)UITableView *tableView;
@@ -46,7 +47,13 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     UITableViewCell *cell= [tableView dequeueReusableCellWithIdentifier:@"UITableViewCell" forIndexPath:indexPath];
     
-    cell.textLabel.text = _array[indexPath.row];
+    AgoraRtmMessage *msg = _array[indexPath.row];
+    
+    cell.textLabel.text = [NSString stringWithFormat:@"%@_%lu",msg.text, msg.type];
+    
+    NSDictionary *dic = [NSStringUtil dictionaryWithJsonString:msg.text];
+    NSLog(@"%@",dic);
+    
     return cell;
 }
 

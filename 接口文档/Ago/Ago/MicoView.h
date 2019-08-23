@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic,copy)void(^blockAction)(NSInteger    nindex);
 
-- (void)setDicmic:(NSMutableDictionary *)dicmic;
+@property (nonatomic, strong)NSArray *arrayMic;
 
 @end
 

@@ -17,7 +17,8 @@ func GetHotRoomsByTag(tagName string) []RoomInfo {
 
 	var hotRooms []HotRoomInfo
 	//
-	err := DB.Where("room_tag = ? and (end_time IS NULL or end_time < (?))", tagName, time.Now()).Order("room_hot desc").Limit(100).Find(&hotRooms).Error
+	err := DB.Where("room_tag = ? and (end_time IS NULL or end_time < (?))",
+		tagName, time.Now()).Order("room_hot desc").Limit(100).Find(&hotRooms).Error
 	if err != nil {
 		return nil
 	}

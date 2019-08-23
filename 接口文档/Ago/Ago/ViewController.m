@@ -14,7 +14,9 @@
 #import "MsgViewController.h"
 #import "TQNetWokTool.h"
 #import "AgoraRtcEngineKit/AgoraRtcEngineKit.h"
+#import "AgoraRTMManager.h"
 
+#import "MicModel.h"
 
 @interface ViewController ()<UITableViewDelegate, UITableViewDataSource,AgoraRtcEngineDelegate>
 
@@ -23,8 +25,6 @@
 @property (nonatomic, strong)UIButton* btnSendMsg;
 @property (nonatomic, strong)UIButton* btnExit;
 @property (nonatomic, strong)UIButton* btnNew;
-
-@property (nonatomic, strong)NSMutableArray *arrayList;
 
 @property (nonatomic, strong)UITableView *tableView;
 
@@ -39,6 +39,10 @@
 @property (nonatomic, strong)NSMutableDictionary *dicMic;
 
 @property (nonatomic, strong)NSMutableArray *arrayMsg;
+
+@property (nonatomic, strong)NSDictionary*roominfo;
+
+@property (nonatomic, strong)NSArray *arrrayMicQueue;
 @end
 
 @implementation ViewController
@@ -48,7 +52,6 @@
     
     [TQNetWokTool instance];
     // Do any additional setup after loading the view, typically from a nib.
-    _arrayList = [NSMutableArray arrayWithCapacity:10];
     _dicMic = [NSMutableDictionary dictionaryWithCapacity:10];
     _arrayMsg = [NSMutableArray arrayWithCapacity:10];
     [self.view addSubview:self.btnSendMsg];
@@ -95,10 +98,66 @@
     [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"UITableViewCell"];
     
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUsersList:) name:CHANNEL_USERS_UPDATE object:nil];
+    
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateMsgList:) name:CHANNEL_MSG_UPDATE object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateMicsList:) name:CHANNEL_MICS_UPDATE object:nil];
+    
+    
     [self.AgoraRoom setChannelProfile:AgoraChannelProfileCommunication];
+
+}
+
+- (void)updateMicsList:(NSNotification*)notify{
+    self.micView.arrayMic = [AgoraRTMManager instance].arrayMics;
+}
+
+- (void)runLoop{
+
+    NSInteger index = [self getMyMicQueue];
     
-    
+    if (index >= 0) {
+        
+        NSString *url = @"/api/v1/mico/mic_heattime";
+        
+        NSMutableDictionary *dic = [NSMutableDictionary dictionary];
+        [dic setObject:[self.roominfo objectForKey:@"RoomID"]  forKey:@"roomid"];
+        [dic setObject:@(index) forKey:@"micindex"];
+        
+        [[TQNetWokTool instance] requestGet:url params:dic showLoading:NO success:^(id  _Nonnull responseObject, SuccessCode codeType) {
+           
+            if (codeType == SuccessCode_Success) {
+                [AgoraRTMManager instance].arrayMics = [NSArray yy_modelArrayWithClass:[MicModel class] json:[responseObject objectForKey:@"data"]];
+                [self.micView setArrayMic:[AgoraRTMManager instance].arrayMics];
+            }
+        } failure:^(NSError * _Nonnull error) {
+            
+        }];
+    }
    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self runLoop];
+    });
+}
+
+- (NSInteger)getMyMicQueue{
+    for (MicModel* obj in [AgoraRTMManager instance].arrayMics) {
+        if (obj.PlayerID == [TQNetWokTool instance].account.PlayerID){
+            return obj.MicIndex;
+        }
+    }
+    return -1;
+}
+
+
+- (void)updateMsgList:(NSNotification*)notify{
+    [self.msgView setArray:[AgoraRTMManager instance].currentChannelMsg];
+}
+
+- (void)updateUsersList:(NSNotification*)notify{
+    [self.tableView reloadData];
 }
 
 - (void)doActionIn:(UIButton*)sender{
@@ -106,14 +165,12 @@
     if ([sender.titleLabel.text isEqualToString:@"进入"]){
         [sender setTitle:@"离开" forState:UIControlStateNormal];
         
-        NSInteger roomID =20001;
+        NSInteger roomID =20000;
         NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithCapacity:10];
         [dic setObject:@(roomID) forKey:@"roomid"];
         
-        NSString *url = @"/api/v1/agroa/get_tocken";
-        [self.AgoraRoom setClientRole:AgoraClientRoleBroadcaster];
-        
-       
+        NSString *url = @"/api/v1/room_manager/apply_enter_Room";
+        [self.AgoraRoom setClientRole:AgoraClientRoleAudience];
         
         [[TQNetWokTool instance] requestPost:url params:dic showLoading:YES success:^(id  _Nonnull responseObject, SuccessCode codeType) {
             
@@ -124,32 +181,59 @@
                 return;
             }
             
-            NSString *agoratoken = [responseObject objectForKey:@"data"];
+            NSString *agoratoken = [[responseObject objectForKey:@"data"] objectForKey:@"token"];
+            self.roominfo=  [[responseObject objectForKey:@"data"] objectForKey:@"room"];
             
-            [self.AgoraRoom joinChannelByToken:agoratoken channelId: [NSString stringWithFormat:@"channel%u",roomID] info:nil uid:[TQNetWokTool instance].account.PlayerID joinSuccess:^(NSString * _Nonnull channel, NSUInteger uid, NSInteger elapsed) {
+            NSArray *mics = [[responseObject objectForKey:@"data"] objectForKey:@"mics"];
+            
+            [AgoraRTMManager instance].arrayMics = [NSArray yy_modelArrayWithClass:[MicModel class] json:mics];
+            NSArray*micqueue = [[responseObject objectForKey:@"data"] objectForKey:@"micqueue"];
+           
+            [self.micView setArrayMic:[AgoraRTMManager instance].arrayMics];
+            
+            [self.AgoraRoom joinChannelByToken:agoratoken channelId:[NSString stringWithFormat:@"channel%ld",(long)roomID]  info:nil uid:[TQNetWokTool instance].account.PlayerID joinSuccess:^(NSString * _Nonnull channel, NSUInteger uid, NSInteger elapsed) {
                 
             }];
             
-           
+            [self runLoop];
+            
         } failure:^(NSError * _Nonnull error) {
             
         }];
-
+        
+        [[AgoraRTMManager instance] enterChannel:[NSString stringWithFormat:@"channel%ld",(long)roomID] block:^(AgoraRtmJoinChannelErrorCode errorCode) {
+            
+            [[AgoraRTMManager instance] getChannetlMember:^(NSArray<AgoraRtmMember *> * _Nullable members, AgoraRtmGetMembersErrorCode errorCode) {
+                
+                [self.tableView reloadData];
+            }];
+        }];
+        
     }
     else{
         [sender setTitle:@"进入" forState:UIControlStateNormal];
-        // [[self zegoRoom] logoutRoom];
-        [self.arrayList removeAllObjects];
-        [self.tableView reloadData];
         
+        [self.AgoraRoom leaveChannel:^(AgoraChannelStats * _Nonnull stat) {
+           
+        }];
+        
+        [[AgoraRTMManager instance] leaveChannel];
+        
+        [self.tableView reloadData];
         [self.dicMic removeAllObjects];
         [self.arrayMsg removeAllObjects];
+        self.msgView.array = @[];
+        [AgoraRTMManager instance].arrayMics = @[];
+        [self.micView setArrayMic:[AgoraRTMManager instance].arrayMics];
     }
 }
 
 - (void)doActionSend:(UIButton*)sender{
-    NSString *msg = @"大家好";
-  
+    
+    NSDictionary *dic = @{@"content":@"大家好",
+                          @"type":@(1)
+                          };
+    [[AgoraRTMManager instance] sendChannelMsg:dic];
 }
 
 - (void)doActionNewMsg:(UIButton*)sender{
@@ -191,12 +275,15 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     
-    return [_arrayList count];
+    return [[AgoraRTMManager instance].currentChannelMember count];
     
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCell" forIndexPath:indexPath];
-   
+    
+    AgoraRtmMember *model = [AgoraRTMManager instance].currentChannelMember[indexPath.row];
+    
+    cell.textLabel.text = [NSString stringWithFormat:@"%@_%@",model.userId,model.channelId];
     return cell;
 }
 
@@ -271,12 +358,47 @@
         _micView = [[MicoView alloc] initWithFrame:CGRectMake(0, 130, 375, 200)];
         [_micView setBlockAction:^(NSInteger nindex) {
             
-            if ([self hasNindex:nindex]) {
-                [SVProgressHUD showWithStatus:@"已经有人了"];
-                [SVProgressHUD dismissWithDelay:1.5];
-                return;
+            NSString *url = @"/api/v1/mico/mico_apply_up";
+            
+            NSMutableDictionary *dic = [NSMutableDictionary dictionary];
+            [dic setObject:[self.roominfo objectForKey:@"RoomID"] forKey:@"roomid"];
+            [dic setObject:@(nindex) forKey:@"micindex"];
+            NSInteger playerID = [self getmicIdByindex:nindex];
+            
+            if(0 == playerID){
+                //没有用户，自己上麦
+                url = @"/api/v1/mico/mico_apply_up";
             }
-            [self.micView setDicmic:self.dicMic];
+            else{
+                if (playerID == [TQNetWokTool instance].account.PlayerID) {
+                    //是自己,自己下麦
+                     url = @"/api/v1/mico/mico_apply_down";
+                }
+                else{
+                    //是别人，抱下麦
+                    url = @"/api/v1/mico/mic_hold_down";
+                    [dic setObject:@(playerID) forKey:@"tarPlayerID"];
+                }
+            }
+            
+            [[TQNetWokTool instance] requestPost:url params:dic showLoading:NO success:^(id  _Nonnull responseObject, SuccessCode codeType) {
+                
+                if (codeType == SuccessCode_Success) {
+                    
+                    id mics =[[responseObject objectForKey:@"data"] objectForKey:@"mics"];
+                    [AgoraRTMManager instance].arrayMics = [NSArray yy_modelArrayWithClass:[MicModel class] json:mics];
+                    [self.micView setArrayMic:[AgoraRTMManager instance].arrayMics];
+                    
+                    NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithCapacity:4];
+                    [dic setObject:@(100) forKey:@"type"];
+                    [dic setObject:@(1) forKey:@"subtype"];
+                    [dic setObject:mics forKey:@"mics"];
+                    [[AgoraRTMManager instance] sendChannelMsg:dic];
+                }
+            } failure:^(NSError * _Nonnull error) {
+                
+            }];
+            
         }];
         [_micView setBackgroundColor:[UIColor grayColor]];
         
@@ -302,12 +424,14 @@
 }
 
 
-- (BOOL)hasNindex:(NSInteger)nindex{
+- (NSInteger)getmicIdByindex:(NSInteger)nindex{
     
-    for (id key in self.dicMic) {
-        
+    for (MicModel* mic in [AgoraRTMManager instance].arrayMics) {
+        if(mic.MicIndex == nindex){
+            return mic.PlayerID;
+        }
     }
-    return NO;
+    return 0;
 }
 
 - (MsgView*)msgView{
@@ -337,4 +461,19 @@
     
 }
 
+
+- (void)rtcEngine:(AgoraRtcEngineKit *_Nonnull)engine audioTransportStatsOfUid:(NSUInteger)uid delay:(NSUInteger)delay lost:(NSUInteger)lost rxKBitRate:(NSUInteger)rxKBitRate{
+    NSLog(@"%lu_%lu_%lu_%lu",uid, delay, lost, rxKBitRate);
+}
+- (void)rtcEngine:(AgoraRtcEngineKit * _Nonnull)engine reportAudioVolumeIndicationOfSpeakers:(NSArray<AgoraRtcAudioVolumeInfo *> * _Nonnull)speakers totalVolume:(NSInteger)totalVolume{
+    
+}
+
+- (void)rtcEngine:(AgoraRtcEngineKit * _Nonnull)engine activeSpeaker:(NSUInteger)speakerUid{
+    
+}
+
+- (void)rtcEngine:(AgoraRtcEngineKit * _Nonnull)engine didJoinedOfUid:(NSUInteger)uid elapsed:(NSInteger)elapsed{
+    
+}
 @end
