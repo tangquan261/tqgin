@@ -3,15 +3,17 @@ package controllers
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
+	"math/rand"
 	"strconv"
 
 	"time"
 	"tqgin/common"
 	"tqgin/models"
 	"tqgin/pkg/Agora"
+	"tqgin/pkg/define"
 	"tqgin/pkg/errorcode"
 	"tqgin/pkg/util"
-	"tqgin/proto"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,14 +27,53 @@ func (this *AuthController) RegisterRouter(router *gin.Engine) {
 	temp.POST("login", this.login)
 	temp.POST("register", this.register)
 	temp.POST("change_pass_word", this.changePassWord)
+	temp.POST("phone_code", this.getPhoneCode)
+}
+
+func (r *AuthController) getPhoneCode(con *gin.Context) {
+
+	type AuthCode struct {
+		Account  string               `json:"account"`
+		CodeType define.PhoneCodeType `json:"codetype"` //1注册2修改密码3绑定手机
+	}
+
+	var auth AuthCode
+	err := con.ShouldBindJSON(&auth)
+	if err != nil {
+		tqgin.ResultFail(con, "参数错误")
+		return
+	}
+
+	count := models.AuthSaveCount(auth.Account, auth.CodeType)
+	if count > 5 {
+		tqgin.ResultFail(con, "今日短信超额了")
+		return
+	}
+
+	authmodel := models.AuthGetCode(auth.Account, auth.CodeType)
+
+	if authmodel == nil ||
+		(authmodel != nil && authmodel.UpdatedAt.Add(1*time.Minute).Before(time.Now())) {
+		//时间过期了，可以继续申请
+		var authNew models.AuthCode
+		authNew.Account = auth.Account
+		authNew.CodeType = auth.CodeType
+
+		codeMg := CreateCaptcha()
+		authNew.CodeText = codeMg
+
+		models.AuthSaveCode(authNew)
+		tqgin.ResultOkMsg(con, codeMg, "成功")
+
+	} else {
+		tqgin.ResultFail(con, "慢点获取,请稍后")
+	}
 }
 
 type Authlogin struct {
-	Account   string          `json:"account"`
-	Password  string          `json:"passowrd"`
-	LoginType login.LoginType `json:"logintype"`
-	//NickName  string          `json:"nickname"`
-	//SexType   login.SexType   `json:"sextype"`
+	Account   string           `json:"account"`
+	Password  string           `json:"password"`
+	LoginType define.LoginType `json:"logintype"`
 }
 
 func (r *AuthController) login(con *gin.Context) {
@@ -76,14 +117,13 @@ func (r *AuthController) login(con *gin.Context) {
 		saveAccount.Tocken = tokengen
 		models.AccountSave(account.AccountID, saveAccount)
 
-		msg = "登录成功"
 		data := models.GetUser(account.PlayerID)
 
 		accountstring := strconv.FormatInt(account.PlayerID, 10)
 
 		RTMtoken, _ := tokenbuilder.RTMBuildToken("1f836f0e094446d2858f156ca366313d", "08e1620922bf40ff9ac81517f4219f51", accountstring, 1000, 0)
 
-		tqgin.ResultOkMsg(con, gin.H{"token": tokengen, "user": data, "RTMTocken": RTMtoken}, "登录成功")
+		tqgin.ResultOkMsg(con, gin.H{"token": tokengen, "user": data, "RTMToken": RTMtoken}, "登录成功")
 		return
 	}
 
@@ -91,11 +131,12 @@ func (r *AuthController) login(con *gin.Context) {
 }
 
 type AuthRegister struct {
-	Account   string          `json:"account"`
-	Password  string          `json:"passowrd"`
-	LoginType login.LoginType `json:"logintype"`
-	NickName  string          `json:"nickname"`
-	SexType   login.SexType   `json:"sextype"`
+	Account   string           `json:"account"`
+	Password  string           `json:"password"`
+	LoginType define.LoginType `json:"logintype"`
+	NickName  string           `json:"nickname"`
+	SexType   define.SexType   `json:"sextype"`
+	PhoneCode string           `json:"phonecode"`
 }
 
 func (r *AuthController) register(con *gin.Context) {
@@ -111,21 +152,30 @@ func (r *AuthController) register(con *gin.Context) {
 
 	var msg string
 	var status int
-	if len(autuparam.Account) < 11 {
-		status = errorcode.ERROR
+
+	if len(autuparam.PhoneCode) < 4 {
+		msg = "验证码错误"
+	} else if len(autuparam.Account) < 11 {
 		msg = "账号错误"
 	} else if len(autuparam.Password) < 6 {
-		status = errorcode.ERROR
 		msg = "密码不能太短"
 	} else if len(autuparam.NickName) <= 0 {
-		status = errorcode.ERROR
 		msg = "昵称不能为空"
-	} else if autuparam.SexType < login.SexType_Sex_male && autuparam.SexType >= login.SexType_Sex_female {
-		status = errorcode.ERROR
+	} else if autuparam.SexType < define.SexType_Sex_male &&
+		autuparam.SexType >= define.SexType_Sex_female {
 		msg = "性别错误"
 	}
+
 	if status == errorcode.ERROR {
 		tqgin.ResultFail(con, msg)
+		return
+	}
+
+	authCode := models.AuthGetCode(autuparam.Account, 1)
+
+	if authCode == nil || authCode.CodeText != autuparam.PhoneCode ||
+		authCode.UpdatedAt.Add(1*time.Minute).Before(time.Now()) {
+		tqgin.ResultFail(con, "验证码错误")
 		return
 	}
 
@@ -135,23 +185,29 @@ func (r *AuthController) register(con *gin.Context) {
 	account.LoginType = autuparam.LoginType
 	account.LoginTime = time.Now()
 
-	err = models.Register(account)
+	newPlayerID, err := models.Register(account)
 	if err != nil {
-		msg = "注册失败"
-		tqgin.ResultFail(con, msg)
+		tqgin.ResultFail(con, err.Error())
 	} else {
-		user := models.GetDefaultUserinfo(account.PlayerID, autuparam.NickName, autuparam.SexType)
+		user := models.GetDefaultUserinfo(newPlayerID, autuparam.NickName, autuparam.SexType)
 
 		err := models.CreateUser(&user)
 		if err == nil {
+
 			Newtoken, _ := util.GenerateTocken(autuparam.Account, autuparam.Password)
+
+			var saveAccount models.Account
+			saveAccount.Tocken = Newtoken
+			saveAccount.TockenTimeOut = time.Now().Add(24 * 30 * time.Hour)
+			models.AccountSave(autuparam.Account, saveAccount)
+
 			msg = "注册成功"
 			status = errorcode.SUCCESS
 			accountstring := strconv.FormatInt(account.PlayerID, 10)
 
 			RTMtoken, _ := tokenbuilder.RTMBuildToken("1f836f0e094446d2858f156ca366313d", "08e1620922bf40ff9ac81517f4219f51", accountstring, 1000, 0)
 
-			tqgin.ResultOkMsg(con, gin.H{"token": Newtoken, "user": user, "RTMTocken": RTMtoken}, msg)
+			tqgin.ResultOkMsg(con, gin.H{"token": Newtoken, "user": user, "RTMToken": RTMtoken}, msg)
 
 		} else {
 			msg = "注册失败"
@@ -161,9 +217,9 @@ func (r *AuthController) register(con *gin.Context) {
 }
 
 type AuthChangePassword struct {
-	Account      string `json:"account"`
-	Password     string `json:"passowrd"`
-	NewPassoword string `json:"newpassword"`
+	Account   string `json:"account"`
+	Password  string `json:"password"`
+	PhoneCode string `json:"phonecode"`
 }
 
 func (c *AuthController) changePassWord(con *gin.Context) {
@@ -182,21 +238,23 @@ func (c *AuthController) changePassWord(con *gin.Context) {
 	if len(autuparam.Account) < 11 {
 		msg = "账号错误"
 	} else if len(autuparam.Password) < 6 {
-		msg = "当前密码太短"
-	} else if len(autuparam.NewPassoword) < 6 {
 		msg = "新的密码太短"
-	} else if autuparam.NewPassoword == autuparam.Password {
-		msg = "新旧密码不能相同"
 	} else {
+		authCode := models.AuthGetCode(autuparam.Account, 2)
+
+		if authCode == nil || authCode.CodeText != autuparam.PhoneCode ||
+			authCode.UpdatedAt.Add(1*time.Minute).Before(time.Now()) {
+			tqgin.ResultFail(con, "验证码错误")
+			return
+		}
+
 		account := models.LoginAccount(autuparam.Account)
 
 		if account == nil {
 			msg = "账号不存在"
-		} else if account.Password != autuparam.Password {
-			msg = "密码错误"
 		} else {
 			var save models.Account
-			save.Password = autuparam.NewPassoword
+			save.Password = autuparam.Password
 			models.AccountSave(autuparam.Account, save)
 			tqgin.ResultOk(con, "修改密码成功")
 			return
@@ -212,4 +270,8 @@ func createloginTocken(account, password string) string {
 	md5string := hex.EncodeToString(h.Sum(nil))
 	return md5string
 
+}
+
+func CreateCaptcha() string {
+	return fmt.Sprintf("%04v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(10000))
 }

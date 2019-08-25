@@ -42,7 +42,8 @@ func ConfigDB() {
 		&RoomTags{}, &HotRoomInfo{}, &SupportRoom{}, &BannerInfo{},
 		&MicUserModel{}, &Black{}, &GifInfo{}, &GifGiveRecord{}, &RankInfo{},
 		&RoomRankInfo{}, &RelationShip{}, &CycleModel{}, &CycleCommet{},
-		&CycleLike{}, &MoneyAccount{}, &ConsumeUserCount{}, &GfitUserCount{}, &MicQueue{})
+		&CycleLike{}, &MoneyAccount{}, &ConsumeUserCount{}, &GfitUserCount{},
+		&MicQueue{}, &AuthCode{})
 
 	loadConf()
 
@@ -69,13 +70,17 @@ func LoginLastPlayerID() int64 {
 	tempDB := DB.Model(Account{}).Last(&account)
 
 	if tempDB.Error != nil {
-		tqlog.TQSysLog.Panic("LoginLastPlayerID error", tempDB.Error)
+		if tempDB.RecordNotFound() {
+			return 20000
+		} else {
+			tqlog.TQSysLog.Panic("LoginLastPlayerID error", tempDB.Error)
+		}
 		return 0
 	}
 
 	if tempDB.RowsAffected == 0 {
 		tqlog.TQSysLog.Warn("LoginLastPlayerID 创建第一个用户，id 1000000")
-		return 100000
+		return 20000
 	}
 	return account.PlayerID
 }

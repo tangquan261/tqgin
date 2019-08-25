@@ -6,7 +6,6 @@ package controllers
 import (
 	"tqgin/common"
 	"tqgin/models"
-	"tqgin/proto"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,14 +25,14 @@ func (s *SquartController) applyTagsList(con *gin.Context) {
 
 	tags := models.GetTagList()
 
-	var retTags login.TagsInfo
+	//	var retTags login.TagsInfo
 
-	for _, tag := range tags {
-		var onetag login.TagInfo
-		onetag.ID = tag.ID
-		onetag.TagName = tag.TagName
-		retTags.TagInfo = append(retTags.TagInfo, &onetag)
-	}
+	//	for _, tag := range tags {
+	//		var onetag login.TagInfo
+	//		onetag.ID = tag.ID
+	//		onetag.TagName = tag.TagName
+	//		retTags.TagInfo = append(retTags.TagInfo, &onetag)
+	//	}
 
 	tqgin.ResultOkMsg(con, tags, "成功")
 }

@@ -3,34 +3,25 @@ package models
 import (
 	"errors"
 
+	"tqgin/pkg/define"
+
 	"github.com/jinzhu/gorm"
 )
 
-/*
-FType     int32    `json:"ftype"`     //1,2声音，普通
-	SoundRUL  string   `json:"soundurl"`  //声音地址
-	PhotoURLs []string `json:"photourl"`  //图片地址列表
-	Content      string   `json:"content"`      //文本
-	Ats       []string `json:"at"`        //at的人列表
-	LocX      int64    `json:"locx"`      //x位置
-	LocY      int64    `json:"locy"`      //y位置
-	LocString string    `json:"locstring"` //位置名称
-*/
-
 type CycleModel struct {
 	gorm.Model
-	Cid       string //客户端uid
-	SnowID    int64  //服务器生成自增id
-	PlayerID  int64  //发布者id
-	FType     int32  //发布类型，1，2，3普通，声音，视频
-	SoundBG   string //声音背景图
-	SoundRUL  string //声音地址
-	PhotoURLs string //图片地址列表
-	Content   string //内容
-	Ats       string //at的人列表
-	LocX      int64  //经度
-	LocY      int64  //纬度
-	LocString string //位置字符串
+	Cid       string           //客户端uid
+	SnowID    int64            //服务器生成自增id
+	PlayerID  int64            //发布者id
+	FType     define.CycleType //发布类型，1，2，3普通，声音，视频
+	SoundBG   string           //声音背景图
+	SoundRUL  string           //声音地址
+	PhotoURLs string           //图片地址列表
+	Content   string           //内容
+	Ats       string           //at的人列表
+	LocX      int64            //经度
+	LocY      int64            //纬度
+	LocString string           //位置字符串
 }
 
 //根据帖子id获取帖子信息

@@ -41,7 +41,7 @@ const (
 
 func init() {
 	var err error
-	Tqconfig, err = config.NewConfig("ini", "./conf/app.conf")
+	Tqconfig, err = config.NewConfig("ini", "/Users/tq/go/src/tqgin/conf/app.conf")
 
 	if err != nil {
 		log.Fatal(err)

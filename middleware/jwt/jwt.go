@@ -25,7 +25,7 @@ func JWT() gin.HandlerFunc {
 		token, _ := c.Cookie("token")
 
 		if token == "" {
-			code = errorcode.ERROR_INVALID_PARAMS
+			code = errorcode.ERROR_AUTH_TOKEN_ERROR
 		} else {
 			_, err := util.ParseToken(token)
 			if err != nil {
@@ -41,7 +41,7 @@ func JWT() gin.HandlerFunc {
 		playerstr, _ := c.Cookie("playerid")
 		playerid, err := strconv.ParseInt(playerstr, 10, 64)
 		if err != nil || playerid <= 0 {
-			code = errorcode.ERROR_INVALID_PARAMS
+			code = errorcode.ERROR_AUTH_TOKEN_ERROR
 		} else {
 			account := models.LoginAccountByPlayerID(playerid)
 			if account == nil || account.Tocken != token {
