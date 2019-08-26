@@ -5,6 +5,7 @@ import (
 	"time"
 	"tqgin/config"
 	"tqgin/models"
+	_ "tqgin/pkg/filter"
 	"tqgin/pkg/tqlog"
 	"tqgin/routers"
 
