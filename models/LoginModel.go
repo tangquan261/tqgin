@@ -2,11 +2,10 @@ package models
 
 import (
 	"errors"
-
 	"time"
 
+	"tqgin/pkg/define"
 	"tqgin/pkg/tqlog"
-	"tqgin/proto"
 
 	"github.com/jinzhu/gorm"
 )
@@ -20,7 +19,7 @@ type Account struct {
 	AccountID string `gorm:"not null;unique"`
 	Password  string `gorm:"not null"`
 	PlayerID  int64  `gorm:"not null"`
-	LoginType login.LoginType
+	LoginType define.LoginType
 	LoginTime time.Time
 	//屏蔽时间
 	ForbidTime int64
@@ -29,6 +28,50 @@ type Account struct {
 	//登录验证tocken码
 	Tocken        string
 	TockenTimeOut time.Time
+}
+
+type AuthCode struct {
+	gorm.Model
+	Account  string               `gorm:"not null"`
+	CodeType define.PhoneCodeType `gorm:"not null"` //1注册2修改密码3绑定手机s
+	CodeText string               `gorm:"not null"`
+}
+
+func AuthSaveCode(authCode AuthCode) error {
+
+	return DB.Model(AuthCode{}).Save(&authCode).Error
+}
+
+func AuthSaveCount(account string, codeType define.PhoneCodeType) int {
+
+	var count int
+
+	err := DB.Raw("select count(1) from tq_auth_code where account = (?) and code_type = (?) and day(created_at) = (day(?))",
+		account, codeType, time.Now()).Count(&count).Error
+
+	if err != nil {
+		return -1
+	}
+
+	return count
+
+}
+
+func AuthGetCode(account string, codeType define.PhoneCodeType) *AuthCode {
+
+	var auth AuthCode
+
+	DBtemp := DB.Model(AuthCode{}).Where("account= (?) and code_type = (?)",
+		account, codeType).Last(&auth)
+
+	if DBtemp.RecordNotFound() {
+		return nil
+	}
+	if DBtemp.Error != nil {
+		return nil
+	}
+
+	return &auth
 }
 
 func LoginAccount(accountID string) *Account {
@@ -60,25 +103,25 @@ func LoginAccountByPlayerID(PlayerID int64) *Account {
 	return &account
 }
 
-func Register(account Account) error {
+//返回playerid，0为错误
+func Register(account Account) (int64, error) {
 
 	var accountCurrent Account
 
 	tempDB := DB.Where("account_id = (?)", account.AccountID).Find(&accountCurrent)
 
-	if tempDB.Error != nil {
-		return errors.New("错误")
+	if tempDB.Error != nil && !tempDB.RecordNotFound() {
+		return 0, errors.New("重复注册")
 	}
 
 	if tempDB.RowsAffected != 0 {
-
 		userInfo := GetUser(accountCurrent.PlayerID)
 		if userInfo != nil {
-			return errors.New("已经存在")
+			return 0, errors.New("重复注册")
 		} else {
 			account.PlayerID = accountCurrent.PlayerID
 			AccountSave(account.AccountID, account)
-			return nil
+			return accountCurrent.PlayerID, nil
 		}
 	}
 
@@ -88,31 +131,31 @@ func Register(account Account) error {
 	tempDB = tx.Model(Account{}).Where("account_id = (?)", account.AccountID).FirstOrCreate(&account)
 
 	if tempDB.Error != nil {
-		return errors.New("创建错误")
+		return 0, errors.New("创建错误")
 	}
 
 	if tempDB.RowsAffected == 0 {
-		return errors.New("已经存在")
+		return 0, errors.New("重复注册")
 	}
 
 	for {
 		playerID := GetPlayerIDNext()
 
 		if canCreatePlayerID(playerID) {
-			err := tx.Model(Account{}).Update("player_id = (?)").
-				Where("account_id = (?)", account.AccountID).Error
+			err := tx.Model(Account{}).Where("account_id = (?)", account.AccountID).
+				UpdateColumn("player_id", playerID).Error
 
 			if err != nil {
 				tx.Rollback()
 				tqlog.TQSysLog.Error("create account error :", err)
-				return errors.New("创建错误")
+				return 0, errors.New("创建错误")
 			}
 			account.PlayerID = playerID
-			break
+			return playerID, nil
 		}
 	}
 
-	return nil
+	return 0, nil
 }
 
 func AccountSave(accountid string, account Account) error {

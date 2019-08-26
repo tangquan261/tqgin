@@ -9,6 +9,7 @@ import (
 	"tqgin/common"
 	"tqgin/models"
 
+	"tqgin/pkg/define"
 	"tqgin/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -33,15 +34,15 @@ func (this *CycleController) RegisterRouter(router *gin.RouterGroup) {
 //Players []int64 `json:"players"`
 
 type FeedParam struct {
-	Cid       string   `json:"cid"`       //创做唯一标识
-	FType     int32    `json:"ftype"`     //1,2,3 普通,声音,视频
-	SoundRUL  string   `json:"soundurl"`  //声音地址
-	PhotoURLs []string `json:"photourl"`  //图片地址列表
-	Content   string   `json:"content"`   //文本
-	Ats       []string `json:"at"`        //at的人列表
-	LocX      int64    `json:"locx"`      //x位置
-	LocY      int64    `json:"locy"`      //y位置
-	LocString string   `json:"locstring"` //位置名称
+	Cid       string           `json:"cid"`       //创做唯一标识
+	FType     define.CycleType `json:"ftype"`     //1,2,3 普通,声音,视频
+	SoundRUL  string           `json:"soundurl"`  //声音地址
+	PhotoURLs []string         `json:"photourl"`  //图片地址列表
+	Content   string           `json:"content"`   //文本
+	Ats       []string         `json:"at"`        //at的人列表
+	LocX      int64            `json:"locx"`      //x位置
+	LocY      int64            `json:"locy"`      //y位置
+	LocString string           `json:"locstring"` //位置名称
 }
 
 //添加朋友圈

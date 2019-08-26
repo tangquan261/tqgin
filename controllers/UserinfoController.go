@@ -6,15 +6,16 @@
 package controllers
 
 import (
+	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"tqgin/common"
 	"tqgin/models"
+	"tqgin/pkg/Agora"
+	"tqgin/pkg/define"
 	"tqgin/pkg/errorcode"
-	"tqgin/pkg/util"
-	"tqgin/proto"
 
-	//"github.com/astaxie/beego/validation"
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,14 +38,6 @@ func (this *UserinfoController) RegisterRouter(router *gin.RouterGroup) {
 //获取自己我的信息
 func (c *UserinfoController) getUserMineInfo(con *gin.Context) {
 
-	type mineInfoRet struct {
-		Pic         string
-		Name        string
-		DisPlayerID string
-		FollowCount int
-		FansCount   int
-	}
-
 	playerID := c.GetPlayerGUID(con)
 
 	user := models.GetUser(playerID)
@@ -53,14 +46,10 @@ func (c *UserinfoController) getUserMineInfo(con *gin.Context) {
 		tqgin.ResultFail(con, "失败")
 	} else {
 
-		var mineRet mineInfoRet
-		mineRet.Name = user.PlayerName
-		mineRet.Pic = user.Pic
-		mineRet.DisPlayerID = user.DisPlayerID
-		mineRet.FollowCount = models.GetFollowCount(playerID)
-		mineRet.FansCount = models.GetFansCount(playerID)
+		accountstring := strconv.FormatInt(user.PlayerID, 10)
+		RTMtoken, _ := tokenbuilder.RTMBuildToken("1f836f0e094446d2858f156ca366313d", "08e1620922bf40ff9ac81517f4219f51", accountstring, 1000, 0)
+		tqgin.ResultOkMsg(con, gin.H{"user": user, "RTMToken": RTMtoken}, "登录成功")
 
-		tqgin.Result(con, errorcode.SUCCESS, mineRet, "成功")
 	}
 }
 
@@ -116,7 +105,7 @@ func (c *UserinfoController) getUserDetailInfo(con *gin.Context) {
 		userinfoRet.FollowCount = models.GetFollowCount(user.PlayerID)
 		userinfoRet.FansCount = models.GetFansCount(user.PlayerID)
 		userinfoRet.Sign = userinfo.Sign
-		userinfoRet.Photos = strings.Split(userinfo.Photos, ",")
+		userinfoRet.Photos = strings.Split(userinfo.Photos, ";")
 		userinfoRet.CityName = userinfo.CityName
 		userinfoRet.StarSign = userinfo.StarSign
 		userinfoRet.Profession = userinfo.Profession
@@ -172,28 +161,35 @@ func (c *UserinfoController) addPhotos(con *gin.Context) {
 	var photo photos
 	err := con.ShouldBindJSON(&photo)
 
-	if err != nil || len(photo.Photos) <= 0 {
-		tqgin.ResultFail(con, "error")
+	fmt.Println("photo:", photo)
+
+	if err != nil || len(photo.Photos) <= 0 || len(photo.Photos) > 8 {
+		tqgin.ResultFail(con, "参数错误")
 		return
 	}
+
+	firstImage := photo.Photos[0]
 
 	photoString := strings.Join(photo.Photos, ";")
 	var usrino models.UserInfo
 	usrino.Photos = photoString
+	usrino.Pic = firstImage
+
 	models.SaveUser(playerGUID, usrino)
 
-	tqgin.ResultOk(con, nil)
+	tqgin.ResultOkMsg(con, gin.H{"pic": firstImage, "photos": photo.Photos}, "成功")
 }
 
 type UserInfoParam struct {
-	Name       string        `json:"name"`
-	DateString string        `json:"datestring"`
-	Gender     login.SexType `json:"gender"`
-	Sign       string        `json:"sign"`
-	Pic        string        `json:"pic"`
-	LocX       float64       `json:"locx"`
-	LocY       float64       `json:"locy"`
-	Loc        int           `json:"loc"`
+	Name       string         `json:"name"`
+	DateString string         `json:"datestring"`
+	Gender     define.SexType `json:"gender"`
+	Sign       string         `json:"sign"`
+	Pic        string         `json:"pic"`
+	LocX       float64        `json:"locx"`
+	LocY       float64        `json:"locy"`
+	Loc        int            `json:"loc"`
+	City       string         `json:"city"`
 }
 
 //修改个人信息
@@ -218,14 +214,14 @@ func (c *UserinfoController) updateInfo(con *gin.Context) {
 
 	user.PlayerName = userinfo.Name
 
-	user.BirthDay = util.DateStringToTime(userinfo.DateString)
-
+	user.BirthDay = userinfo.DateString
 	user.Sex = userinfo.Gender
 	user.Sign = userinfo.Sign
 	user.Pic = userinfo.Pic
 	user.Loc = userinfo.Loc
 	user.Locx = userinfo.LocX
 	user.Locy = userinfo.LocY
+	user.CityName = userinfo.City
 
 	models.SaveUser(PlayerGUID, *user)
 

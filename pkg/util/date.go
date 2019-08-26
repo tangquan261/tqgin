@@ -19,6 +19,21 @@ func DateStringToTime(dateString string) time.Time {
 	return retDate
 }
 
+//字符串转换为time.Time时间
+func BirdayDateStringToTime(dateString string) time.Time {
+
+	if len(dateString) <= 0 {
+		return time.Now()
+	}
+
+	retDate, err := time.Parse("2006-01-02", dateString)
+
+	if err != nil {
+		return time.Now()
+	}
+	return retDate
+}
+
 //字符串转换为uninx时间
 func DateStringToUinx(dateString string) int64 {
 	return DateStringToTime(dateString).Unix()

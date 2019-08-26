@@ -8,7 +8,7 @@ const (
 	ERROR_AUTH_TOKEN_CHECK_FAIL = 20001 //token鉴权失败
 	ERROR_AUTH_TOKEN_TIMEOUT    = 20002 //token超时
 	ERROR_AUTH_TOKEN_CREATE     = 20003 //创建失败
-	ERROR_AUTH_TOKEN            = 20004 //tocken错误
+	ERROR_AUTH_TOKEN_ERROR      = 20004 //tocken错误
 
 	ERROR_UPLOAD_SAVE_IMAGE_FAIL    = 30001 //保存图片失败
 	ERROR_UPLOAD_CHECK_IMAGE_FAIL   = 30002 //检查图片失败
@@ -23,7 +23,7 @@ var MsgFlags = map[int]string{
 	ERROR_AUTH_TOKEN_CHECK_FAIL: "token鉴权失败",
 	ERROR_AUTH_TOKEN_TIMEOUT:    "token超时",
 	ERROR_AUTH_TOKEN_CREATE:     "创建失败",
-	ERROR_AUTH_TOKEN:            "tocken错误",
+	ERROR_AUTH_TOKEN_ERROR:      "tocken错误",
 
 	ERROR_UPLOAD_SAVE_IMAGE_FAIL:    "保存图片失败",
 	ERROR_UPLOAD_CHECK_IMAGE_FAIL:   "检查图片失败",

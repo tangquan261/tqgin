@@ -4,14 +4,14 @@ package login;
 
 //注册，登录的账号类型
  enum LoginType {
-    MOBILE_LOGIN = 0;//手机注册
-    QQ_LOGIN = 1;//QQ注册
-    WEIXIN_LOGIN = 2;//微信注册
+    MOBILE_LOGIN = 1;//手机注册
+    QQ_LOGIN = 2;//QQ注册
+    WEIXIN_LOGIN = 3;//微信注册
   }
 
 enum SexType{
-		Sex_male = 0;
-		Sex_female = 1;
+		Sex_male = 1;
+		Sex_female = 2;
 }
 // 登陆请求
 message ApplyLogin{
