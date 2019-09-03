@@ -5,6 +5,7 @@ import (
 	"time"
 	"tqgin/config"
 	"tqgin/models"
+	"tqgin/pkg/gredis"
 	"tqgin/pkg/tqlog"
 	"tqgin/routers"
 
@@ -21,8 +22,8 @@ func init() {
 }
 
 func main() {
-
 	models.ConfigDB()
+	gredis.Setup()
 
 	router = gin.Default()
 

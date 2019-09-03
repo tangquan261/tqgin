@@ -15,6 +15,8 @@ import (
 	"tqgin/pkg/errorcode"
 	"tqgin/pkg/util"
 
+	//"tqgin/IRedis"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -121,6 +123,7 @@ func (r *AuthController) login(con *gin.Context) {
 
 		accountstring := strconv.FormatInt(account.PlayerID, 10)
 
+		//IRedis.SetUserAccessTocken(account.PlayerID, 1, tokengen)
 		RTMtoken, _ := tokenbuilder.RTMBuildToken("1f836f0e094446d2858f156ca366313d", "08e1620922bf40ff9ac81517f4219f51", accountstring, 1000, 0)
 
 		tqgin.ResultOkMsg(con, gin.H{"token": tokengen, "user": data, "RTMToken": RTMtoken}, "登录成功")
@@ -207,6 +210,7 @@ func (r *AuthController) register(con *gin.Context) {
 
 			RTMtoken, _ := tokenbuilder.RTMBuildToken("1f836f0e094446d2858f156ca366313d", "08e1620922bf40ff9ac81517f4219f51", accountstring, 1000, 0)
 
+			//IRedis.SetUserAccessTocken(account.PlayerID, 1, Newtoken)
 			tqgin.ResultOkMsg(con, gin.H{"token": Newtoken, "user": user, "RTMToken": RTMtoken}, msg)
 
 		} else {

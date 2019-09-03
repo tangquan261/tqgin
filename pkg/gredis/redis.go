@@ -17,7 +17,10 @@ func Setup() error {
 		MaxActive:   config.GetConfigInt(config.Redis_MaxActive),
 		IdleTimeout: time.Second * 5,
 		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", config.Tqconfig.String(config.Redis_Host))
+
+			timeout := time.Duration(2) * time.Second
+
+			c, err := redis.DialTimeout("tcp", config.Tqconfig.String(config.Redis_Host), timeout, 0, 0)
 			if err != nil {
 				return nil, err
 			}
@@ -30,8 +33,19 @@ func Setup() error {
 					return nil, err
 				}
 			}
+
+			db := config.GetConfigInt(config.REdis_DBIndex)
+
+			if db > 0 && db < 16 {
+				if _, err := c.Do("SELECT", db); err != nil {
+					c.Close()
+					return nil, err
+				}
+			}
+
 			return c, err
 		},
+
 		TestOnBorrow: func(c redis.Conn, t time.Time) error {
 			_, err := c.Do("PING")
 			return err

@@ -10,6 +10,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"tqgin/IRedis"
 	"tqgin/common"
 	"tqgin/models"
 	"tqgin/pkg/Agora"
@@ -32,7 +33,20 @@ func (this *UserinfoController) RegisterRouter(router *gin.RouterGroup) {
 	temp.POST("get_user_detail", this.getUserDetailInfo) //获取用户详细信息
 	temp.POST("add_photos", this.addPhotos)              //添加图片
 	temp.POST("update_info", this.updateInfo)            //更新用户信息
+	temp.POST("apply_im_syn", this.applyIMSyn)           // 请求IM信息同步
 
+}
+
+func (c *UserinfoController) applyIMSyn(con *gin.Context) {
+
+	playerID := c.GetPlayerGUID(con)
+
+	account := models.LoginAccountByPlayerID(playerID)
+	if account != nil {
+		IRedis.SetUserAccessTocken(playerID, 1, account.Tocken)
+	}
+
+	tqgin.ResultOk(con, nil)
 }
 
 //获取自己我的信息

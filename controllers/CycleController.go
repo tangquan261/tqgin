@@ -62,9 +62,9 @@ func (r *CycleController) addFeed(c *gin.Context) {
 	dbFeed.Cid = feed.Cid
 	dbFeed.FType = feed.FType
 	dbFeed.SoundRUL = feed.SoundRUL
-	dbFeed.PhotoURLs = strings.Join(feed.PhotoURLs, "@@@")
+	dbFeed.PhotoURLs = strings.Join(feed.PhotoURLs, ";")
 	dbFeed.Content = util.UnicodeEmojiCode(feed.Content)
-	dbFeed.Ats = strings.Join(feed.Ats, "@@@")
+	dbFeed.Ats = strings.Join(feed.Ats, ";")
 	dbFeed.LocX = feed.LocX
 	dbFeed.LocY = feed.LocY
 	dbFeed.LocString = feed.LocString

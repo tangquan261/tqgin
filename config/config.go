@@ -32,6 +32,7 @@ const (
 	//redis
 	Redis_Host        = "redis_Host"
 	Redis_Password    = "redis_Password"
+	REdis_DBIndex     = "redis_DBIndex"
 	Redis_MaxIdle     = "redis_MaxIdle"
 	Redis_MaxActive   = "redis_MaxActive"
 	Redis_IdleTimeout = "redis_IdleTimeout"
