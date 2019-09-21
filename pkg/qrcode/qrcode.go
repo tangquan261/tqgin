@@ -3,7 +3,7 @@ package qrcode
 import (
 	"image/jpeg"
 
-	"tqgin/config"
+	"tqgin/conf"
 	"tqgin/pkg/file"
 	"tqgin/pkg/util"
 

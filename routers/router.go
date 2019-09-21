@@ -57,6 +57,8 @@ func userInfoModel(router *gin.RouterGroup) {
 	new(controllers.RelationController).RegisterRouter(router)
 	new(controllers.CycleController).RegisterRouter(router)
 	new(controllers.CycleCommetController).RegisterRouter(router)
+	new(controllers.TitleController).RegisterRouter(router)
+	new(controllers.CarController).RegisterRouter(router)
 }
 
 //房间信息模块

@@ -3,7 +3,7 @@ package main
 
 import (
 	"time"
-	"tqgin/config"
+	"tqgin/conf"
 	"tqgin/models"
 	"tqgin/pkg/gredis"
 	"tqgin/pkg/tqlog"

@@ -43,7 +43,7 @@ func ConfigDB() {
 		&MicUserModel{}, &Black{}, &GifInfo{}, &GifGiveRecord{}, &RankInfo{},
 		&RoomRankInfo{}, &RelationShip{}, &CycleModel{}, &CycleCommet{},
 		&CycleLike{}, &MoneyAccount{}, &ConsumeUserCount{}, &GfitUserCount{},
-		&MicQueue{}, &AuthCode{})
+		&MicQueue{}, &AuthCode{}, &UserTitle{}, &UserCar{})
 
 	loadConf()
 

@@ -68,17 +68,22 @@ func ModifyDinamondUser(playerid int64, exDianmond int64) error {
 	if playerid <= 0 {
 		return errors.New("playerGUID error")
 	}
-	err := DB.Model(UserInfo{}).Where("player_id=(?) and diamond >= (?)", playerid, -exDianmond).UpdateColumn("diamond",
-		gorm.Expr("diamond + ?", exDianmond)).Error
 
-	if err == nil {
-		if DB.RowsAffected != 0 {
-			return err
+	if exDianmond == 0 {
+		return nil
+	}
+
+	DBTemp := DB.Model(UserInfo{}).Where("player_id=(?) and diamond >= (?)", playerid, -exDianmond).UpdateColumn("diamond",
+		gorm.Expr("diamond + ?", exDianmond))
+
+	if DBTemp.Error == nil {
+		if DBTemp.RowsAffected != 0 {
+			return nil
 		} else {
 			return errors.New("无法满足执行条件")
 		}
 	} else {
-		return err
+		return nil
 	}
 }
 
@@ -87,17 +92,20 @@ func ModifyGoldUser(playerid int64, exGold int64) error {
 	if playerid <= 0 {
 		return errors.New("playerGUID error")
 	}
-	err := DB.Model(UserInfo{}).Where("player_id=(?) and gold >= (?)", playerid, -exGold).UpdateColumn("gold",
-		gorm.Expr("gold + ?", exGold)).Error
+	if exGold == 0 {
+		return nil
+	}
+	DBTemp := DB.Model(UserInfo{}).Where("player_id=(?) and gold >= (?)", playerid, -exGold).UpdateColumn("gold",
+		gorm.Expr("gold + ?", exGold))
 
-	if err == nil {
-		if DB.RowsAffected != 0 {
-			return err
+	if DBTemp.Error == nil {
+		if DBTemp.RowsAffected != 0 {
+			return nil
 		} else {
 			return errors.New("无法满足执行条件")
 		}
 	} else {
-		return err
+		return nil
 	}
 }
 
@@ -107,17 +115,21 @@ func ModifyCashUser(playerid int64, exCash int64) error {
 		return errors.New("playerGUID error")
 	}
 
-	err := DB.Model(UserInfo{}).Where("player_id=(?) and cash >= (?)", playerid, -exCash).UpdateColumn("cash",
-		gorm.Expr("cash + ?", exCash)).Error
+	if exCash == 0 {
+		return nil
+	}
 
-	if err == nil {
-		if DB.RowsAffected != 0 {
-			return err
+	DBTemp := DB.Model(UserInfo{}).Where("player_id=(?) and cash >= (?)", playerid, -exCash).UpdateColumn("cash",
+		gorm.Expr("cash + ?", exCash))
+
+	if DBTemp.Error == nil {
+		if DBTemp.RowsAffected != 0 {
+			return nil
 		} else {
 			return errors.New("无法满足执行条件")
 		}
 	} else {
-		return err
+		return nil
 	}
 }
 
@@ -127,17 +139,17 @@ func ModifyRichUser(playerid int64, exRich int64) error {
 		return errors.New("playerGUID error")
 	}
 
-	err := DB.Model(UserInfo{}).Where("player_id=(?) and rich >= (?)", playerid, -exRich).UpdateColumn("rich",
-		gorm.Expr("rich + ?", exRich)).Error
+	DBTemp := DB.Model(UserInfo{}).Where("player_id=(?) and rich >= (?)", playerid, -exRich).UpdateColumn("rich",
+		gorm.Expr("rich + ?", exRich))
 
-	if err == nil {
-		if DB.RowsAffected != 0 {
-			return err
+	if DBTemp.Error == nil {
+		if DBTemp.RowsAffected != 0 {
+			return nil
 		} else {
 			return errors.New("无法满足执行条件")
 		}
 	} else {
-		return err
+		return nil
 	}
 }
 

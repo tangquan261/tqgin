@@ -6,7 +6,7 @@ import (
 	"log"
 	"strconv"
 	"time"
-	"tqgin/config"
+	"tqgin/conf"
 	"tqgin/pkg/tqlog"
 
 	"github.com/satori/go.uuid"

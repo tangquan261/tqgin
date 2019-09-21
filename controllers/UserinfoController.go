@@ -125,7 +125,7 @@ func (c *UserinfoController) getUserDetailInfo(con *gin.Context) {
 		userinfoRet.Profession = userinfo.Profession
 		userinfoRet.School = userinfo.School
 		userinfoRet.MarryState = userinfo.MarryState
-		userinfoRet.Dynamic = models.CycleGetSingleFeeds(user.PlayerID, 0, 4)
+		//userinfoRet.Dynamic = models.CycleGetSingleFeeds(user.PlayerID, 0, 4)
 		userinfoRet.GiftS = models.GiftGetUserCount(user.PlayerID, 8)
 
 		tqgin.Result(con, errorcode.SUCCESS, userinfoRet, "成功")

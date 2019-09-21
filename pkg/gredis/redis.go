@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"time"
-	"tqgin/config"
+	"tqgin/conf"
 
 	"github.com/gomodule/redigo/redis"
 )

@@ -8,6 +8,8 @@ import (
 	"tqgin/common"
 	"tqgin/models"
 
+	"tqgin/pkg/tqlog"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,6 +22,44 @@ func (this *UserInfoMoneyController) RegisterRouter(router *gin.RouterGroup) {
 	temp.POST("add_diamond", this.add_diamond) //添加钻石
 	temp.POST("give_gift", this.giveGift)      //送礼物
 	temp.POST("all_gift", this.allGift)        //获取所有礼物配置
+	temp.POST("buy_car", this.buyCar)          //买车
+}
+
+func (r *UserInfoMoneyController) buyCar(c *gin.Context) {
+	playerID := r.GetPlayerGUID(c)
+
+	type paramCar struct {
+		CarID int32 `json:"carid"`
+	}
+
+	var param paramCar
+	err := c.ShouldBindJSON(&param)
+	if err != nil {
+		tqgin.ResultFail(c, "参数错误")
+		return
+	}
+
+	carConfig := models.GetCarmodel(param.CarID)
+	if carConfig == nil {
+		tqgin.ResultFail(c, "参数错误")
+		return
+	}
+
+	err = models.ModifyDinamondUser(playerID, -int64(carConfig.CashCount))
+	if err != nil {
+		tqlog.TQSysLog.Info("err :", err)
+		tqgin.ResultFail(c, "不够买")
+		return
+	}
+
+	success := models.AddCarinfo(playerID, carConfig)
+
+	if !success {
+		tqgin.ResultFail(c, "参数错误")
+		return
+	}
+
+	tqgin.ResultOkMsg(c, carConfig, "成功")
 }
 
 type MoneyJsonAdd struct {

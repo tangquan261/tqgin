@@ -7,7 +7,7 @@ import (
 	"os"
 	"path"
 	"strings"
-	"tqgin/config"
+	"tqgin/conf"
 	"tqgin/pkg/file"
 	"tqgin/pkg/util"
 )
