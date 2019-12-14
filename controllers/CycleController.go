@@ -8,9 +8,9 @@ import (
 	"strings"
 	"tqgin/common"
 	"tqgin/models"
-
 	"tqgin/pkg/define"
 	"tqgin/pkg/util"
+	"tqgin/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -106,6 +106,14 @@ func (r *CycleController) delFeed(c *gin.Context) {
 }
 
 //获取广场动态，声音
+
+type FeedCycleModel struct {
+	models.CycleModel
+	PlayerName string
+	Sex        define.SexType
+	Pic        string //头像
+}
+
 func (r *CycleController) getFeed(c *gin.Context) {
 
 	var getparam FeedGetParam
@@ -115,19 +123,32 @@ func (r *CycleController) getFeed(c *gin.Context) {
 		return
 	}
 
+	var ret []models.CycleModel
 	if getparam.FType == 2 {
 		//声音
-		ret := models.CycleGetSound(getparam.SnowID)
-		tqgin.ResultOk(c, ret)
+		ret = models.CycleGetSound(getparam.SnowID)
+
 	} else if getparam.FType == 3 {
 		//视频
-		ret := models.CycleGetAudio(getparam.SnowID)
-		tqgin.ResultOk(c, ret)
+		ret = models.CycleGetAudio(getparam.SnowID)
 	} else {
 		//all
-		ret := models.CycleGetFeeds(getparam.SnowID)
-		tqgin.ResultOk(c, ret)
+		ret = models.CycleGetFeeds(getparam.SnowID)
 	}
+
+	var Feeds []FeedCycleModel
+	for _, obj := range ret {
+		var feed FeedCycleModel
+		feed.CycleModel = obj
+		userInfo := service.GetUserInfo(obj.PlayerID)
+		if nil != userInfo {
+			feed.PlayerName = userInfo.PlayerName
+			feed.Pic = userInfo.Pic
+			feed.Sex = userInfo.Sex
+		}
+		Feeds = append(Feeds, feed)
+	}
+	tqgin.ResultOk(c, Feeds)
 }
 
 //我关注的人的动态
