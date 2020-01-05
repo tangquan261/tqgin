@@ -65,7 +65,6 @@ func userInfoModel(router *gin.RouterGroup) {
 func roomInfoModel(router *gin.RouterGroup) {
 	new(controllers.RoomManagerController).RegisterRouter(router)
 	new(controllers.SquartController).RegisterRouter(router)
-	new(controllers.MicoController).RegisterRouter(router)
 	new(controllers.AgoraController).RegisterRouter(router)
 }
 

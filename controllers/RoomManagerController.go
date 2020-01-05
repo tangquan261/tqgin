@@ -26,9 +26,7 @@ func (this *RoomManagerController) RegisterRouter(router *gin.RouterGroup) {
 	temp.POST("close_room", this.closeRoom)            //关闭房间
 	temp.POST("change_roominfo", this.ChangeRoomInfo)  //修改房间信息
 	temp.POST("apply_roominfo", this.applyRoomInfo)    //请求房间信息
-	temp.POST("apply_add_admin", this.applyAddAdmin)   //添加房间管理
-	temp.POST("apply_del_admin", this.applyDelAdmin)   //移除房间管理
-	temp.POST("apply_enter_Room", this.applyEnterRoom) //进入房间
+	temp.POST("apply_enter_room", this.applyEnterRoom) //进入房间
 	//添加或者移除房间管理员
 	//添加或者移除房间黑名单
 	//获取房间管理员和黑名单的列表
@@ -55,11 +53,8 @@ func (r *RoomManagerController) applyEnterRoom(con *gin.Context) {
 		tokenbuilder.RolePublisher, 0)
 
 	room := models.GetRoomById(enterRoom.RoomID)
-	micsqueue := models.MicQueueInfo(enterRoom.RoomID)
-	mics := models.MicGetAllIndex(enterRoom.RoomID)
 
-	tqgin.ResultOkMsg(con, gin.H{"token": token, "room": room,
-		"micqueue": micsqueue, "mics": mics}, "获取成功")
+	tqgin.ResultOkMsg(con, gin.H{"token": token, "room": room}, "获取成功")
 }
 
 func (r *RoomManagerController) applyConfigRoom(con *gin.Context) {
@@ -109,7 +104,16 @@ func (r *RoomManagerController) OpenRoom(con *gin.Context) {
 	if err != nil {
 		tqgin.ResultFail(con, "创建失败")
 	} else {
-		tqgin.ResultOkMsg(con, createRoominfo, "创建成功")
+
+		channel := "channel" + strconv.FormatInt(playerID, 10)
+
+		token, _ := tokenbuilder.BuildTokenWithUID("1f836f0e094446d2858f156ca366313d",
+			"08e1620922bf40ff9ac81517f4219f51", channel, uint32(playerID),
+			tokenbuilder.RolePublisher, 0)
+
+		room := models.GetRoomById(playerID)
+
+		tqgin.ResultOkMsg(con, gin.H{"token": token, "room": room}, "创建成功")
 	}
 }
 
@@ -194,37 +198,5 @@ func (r *RoomManagerController) ChangeRoomInfo(con *gin.Context) {
 		tqgin.ResultFail(con, "修改房间失败")
 	} else {
 		tqgin.ResultOkMsg(con, room, "成功")
-	}
-}
-
-func (r *RoomManagerController) applyAddAdmin(con *gin.Context) {
-
-	playerID := r.GetPlayerGUID(con)
-
-	type RoomInfoParam struct {
-		RoomID      int64 `json:"roomid"`
-		TarPlayerID int64 `json:"tarplayerid"`
-	}
-	var roomparam RoomInfoParam
-
-	err := con.ShouldBindJSON(&roomparam)
-	if err != nil || playerID != roomparam.RoomID {
-		tqgin.ResultFail(con, "参数错误")
-		return
-	}
-}
-func (r *RoomManagerController) applyDelAdmin(con *gin.Context) {
-	playerID := r.GetPlayerGUID(con)
-
-	type RoomInfoParam struct {
-		RoomID      int64 `json:"roomid"`
-		TarPlayerID int64 `json:"tarplayerid"`
-	}
-	var roomparam RoomInfoParam
-
-	err := con.ShouldBindJSON(&roomparam)
-	if err != nil || playerID != roomparam.RoomID {
-		tqgin.ResultFail(con, "参数错误")
-		return
 	}
 }

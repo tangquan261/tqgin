@@ -19,11 +19,11 @@ type RelationController struct {
 
 func (this *RelationController) RegisterRouter(router *gin.RouterGroup) {
 	temp := router.Group("/relation")
-	temp.POST("follow", this.follow)         //关注
-	temp.POST("del_follow", this.delfollow)  //取消关注
-	temp.POST("get_friend", this.getfriend)  //获取好友列表
-	temp.POST("get_follow", this.getfollows) //获取关注列表
-	temp.POST("get_fans", this.getFans)      //获取粉丝列表
+	temp.POST("add_attention", this.addAttention)   //关注
+	temp.POST("del_attention", this.delAttention)   //取消关注
+	temp.POST("get_friends", this.getfriends)       //获取好友列表
+	temp.POST("get_attentions", this.getAttentions) //获取关注列表
+	//temp.POST("get_fans", this.getFans)           //获取粉丝列表
 	temp.POST("add_black", this.addBlack)    //添加黑名单
 	temp.POST("del_black", this.removeBlack) //移除黑名单
 	temp.POST("get_blacks", this.getBlacks)  //获取黑名单
@@ -34,7 +34,7 @@ type RelationParam struct {
 }
 
 //关注
-func (r *RelationController) follow(c *gin.Context) {
+func (r *RelationController) addAttention(c *gin.Context) {
 
 	myPlayerID := r.GetPlayerGUID(c)
 
@@ -49,15 +49,16 @@ func (r *RelationController) follow(c *gin.Context) {
 	}
 
 	err = models.RelationAddFollow(myPlayerID, tarparam.PlayerID)
-	if err != nil {
-		tqgin.ResultFail(c, err.Error())
+	if err == nil {
+		isFriend := models.RelationIsFans(myPlayerID, tarparam.PlayerID)
+		tqgin.ResultOkMsg(c, gin.H{"isFriend": isFriend}, "成功")
 	} else {
-		tqgin.ResultOk(c, err)
+		tqgin.ResultFail(c, "失败")
 	}
 }
 
 //取消关注
-func (r *RelationController) delfollow(c *gin.Context) {
+func (r *RelationController) delAttention(c *gin.Context) {
 	myPlayerID := r.GetPlayerGUID(c)
 
 	var tarparam RelationParam
@@ -80,11 +81,15 @@ func (r *RelationController) delfollow(c *gin.Context) {
 }
 
 //获取关注列表
-func (r *RelationController) getfollows(c *gin.Context) {
+func (r *RelationController) getAttentions(c *gin.Context) {
 	myPlayerID := r.GetPlayerGUID(c)
 
 	user := models.GetFollow(myPlayerID)
-	tqgin.ResultOk(c, user)
+	var follows []int64
+	for _, obj := range user {
+		follows = append(follows, obj.TarplayerID)
+	}
+	tqgin.ResultOk(c, gin.H{"attentions": follows})
 }
 
 //获取粉丝列表
@@ -92,15 +97,23 @@ func (r *RelationController) getFans(c *gin.Context) {
 	myPlayerID := r.GetPlayerGUID(c)
 
 	user := models.GetFans(myPlayerID)
-	tqgin.ResultOk(c, user)
+	var fans []int64
+	for _, obj := range user {
+		fans = append(fans, obj.PlayerID)
+	}
+	tqgin.ResultOk(c, fans)
 }
 
 //获取好友列表
-func (r *RelationController) getfriend(c *gin.Context) {
+func (r *RelationController) getfriends(c *gin.Context) {
 	myPlayerID := r.GetPlayerGUID(c)
 
 	user := models.GetFirend(myPlayerID)
-	tqgin.ResultOk(c, user)
+	var friends []int64
+	for _, obj := range user {
+		friends = append(friends, obj.PlayerID)
+	}
+	tqgin.ResultOk(c, gin.H{"friends": friends})
 }
 
 //添加黑名单
@@ -155,5 +168,9 @@ func (r *RelationController) getBlacks(c *gin.Context) {
 
 	rets := models.GetBlacks(myPlayerID)
 
-	tqgin.ResultOk(c, rets)
+	var blacks []int64
+	for _, obj := range rets {
+		blacks = append(blacks, obj.BlackID)
+	}
+	tqgin.ResultOk(c, gin.H{"blacks": blacks})
 }

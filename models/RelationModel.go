@@ -20,6 +20,20 @@ type Black struct {
 	BlackID  int64 `gorm:"not null"`
 }
 
+func RelationIsFans(myID, tarID int64) bool {
+	if myID <= 0 || tarID <= 0 {
+		return false
+	}
+
+	var user RelationShip
+
+	notfind := DB.Where("player_id = (?) and tarplayer_id = (?)", tarID, myID).Find(&user).RecordNotFound()
+	if notfind {
+		return false
+	}
+	return true
+}
+
 func RelationAddFollow(fromID, tarID int64) error {
 	if fromID <= 0 || tarID <= 0 {
 		return errors.New("参数错误")

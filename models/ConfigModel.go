@@ -3,36 +3,73 @@
 */
 package models
 
+import (
+	"fmt"
+)
+
 //礼物配置表
-type GifInfo struct {
-	GiftID   int64 `gorm:"primary_key"`
+type GifInfoConfig struct {
+	ID       int32
+	GiftID   int32 `gorm:"primary_key"`
 	GiftName string
 	GiftIcon string
 	CashType GiftCashType //消费类型
 	CashNum  int32        //消费数量
 }
 
-var gifts []GifInfo
-var giftDic map[int64]GifInfo
+type GiftInfoBatchConfig struct {
+	GifInfoConfig
+	Num     int32 //礼物数量
+	World   int32 //礼物是否发世界
+	Quality int32 //礼物质量
+}
+
+var giftDicBatch map[int32]*GiftInfoBatchConfig
+var giftArray []*GifInfoConfig
 
 func init() {
-	giftDic = make(map[int64]GifInfo)
+	giftDicBatch = make(map[int32]*GiftInfoBatchConfig)
+}
+
+func GetGiftmodel(giftID, giftNum int32) *GiftInfoBatchConfig {
+
+	if obj, ok := giftDicBatch[giftID*10000+giftNum]; ok {
+		return obj
+	} else {
+		GetAllGift()
+		if obj, ok := giftDicBatch[giftID*10000+giftNum]; ok {
+			return obj
+		}
+	}
+
+	return nil
 }
 
 //礼物配置表
-func GetAllGift() []GifInfo {
+func GetAllGift() []*GifInfoConfig {
 
-	if len(gifts) > 0 {
-		return gifts
-	}
-	err := DB.Model(GifInfo{}).Find(&gifts).Error
-	if err != nil {
-		return nil
+	if len(giftArray) > 0 {
+		return giftArray
 	}
 
-	for _, gif := range gifts {
-		giftDic[gif.GiftID] = gif
-	}
+	rows, _ := DB.Raw("select * from config_gift;").Rows()
 
-	return gifts
+	defer rows.Close()
+
+	giftArray = giftArray[0:0]
+	for rows.Next() {
+		batch := new(GiftInfoBatchConfig)
+		err := rows.Scan(&batch.ID, &batch.GiftID, &batch.GiftName, &batch.GiftIcon, &batch.CashType,
+			&batch.CashNum, &batch.Num, &batch.World, &batch.Quality)
+		if err == nil {
+			giftDicBatch[batch.GiftID*10000+batch.Num] = batch
+			if batch.Num == 1 {
+				giftArray = append(giftArray, &batch.GifInfoConfig)
+			}
+
+		}
+	}
+	fmt.Println(giftArray)
+	fmt.Println(giftDicBatch)
+	return giftArray
 }

@@ -20,7 +20,7 @@ const (
 //送礼流水记录
 type GifGiveRecord struct {
 	gorm.Model
-	GiftID     int64
+	GiftID     int32
 	FromPlayer int64
 	ToPlayer   int64
 	Count      int32
@@ -32,7 +32,7 @@ type GifGiveRecord struct {
 type GfitUserCount struct {
 	gorm.Model
 	PlayerID int64
-	GiftID   int64
+	GiftID   int32
 	Count    int32
 }
 
@@ -40,17 +40,15 @@ type GfitUserCount struct {
 type ConsumeUserCount struct {
 	gorm.Model
 	PlayerID int64
-	GiftID   int64
+	GiftID   int32
 	Count    int32
 }
 
-func GetGiftByID(giftID int64) GifInfo {
-	return giftDic[giftID]
-}
+func AddGiveGiftLog(giftID int32, playerGUID int64, roomID int64, players []int64, nCount int32) error {
 
-func AddGiveGiftLog(giftID int64, playerGUID int64, roomID int64, players []int64, nCount int32) error {
+	giftBatch := GetGiftmodel(giftID, nCount)
 
-	if _, ok := giftDic[giftID]; !ok {
+	if giftBatch == nil {
 		return errors.New("not find gift")
 	}
 
@@ -72,7 +70,7 @@ func AddGiveGiftLog(giftID int64, playerGUID int64, roomID int64, players []int6
 	return nil
 }
 
-func AddConsumeUserCount(playerID, giftID int64, count int32) error {
+func AddConsumeUserCount(playerID int64, giftID int32, count int32) error {
 
 	var giftCount ConsumeUserCount
 	giftCount.PlayerID = playerID
@@ -97,7 +95,7 @@ func AddConsumeUserCount(playerID, giftID int64, count int32) error {
 	return nil
 }
 
-func AddGiftUserCount(playerID, giftID int64, count int32) error {
+func AddGiftUserCount(playerID int64, giftID int32, count int32) error {
 
 	var giftCount GfitUserCount
 	giftCount.PlayerID = playerID

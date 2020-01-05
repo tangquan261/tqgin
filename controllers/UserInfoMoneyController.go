@@ -92,7 +92,7 @@ func (r *UserInfoMoneyController) add_diamond(c *gin.Context) {
 }
 
 type giveGift struct {
-	GiftID  int64   `json:"giftid"`
+	GiftID  int32   `json:"giftid"`
 	RoomID  int64   `json:"roomid"`
 	NCount  int32   `json:"count"`
 	Players []int64 `json:"players"`
@@ -113,7 +113,7 @@ func (r *UserInfoMoneyController) giveGift(c *gin.Context) {
 		return
 	}
 
-	giftInfo := models.GetGiftByID(gG.GiftID)
+	giftInfo := models.GetGiftmodel(gG.GiftID, gG.NCount)
 	if giftInfo.GiftID == 0 {
 		tqgin.ResultFail(c, "礼物不存在")
 		return

@@ -40,10 +40,10 @@ func ConfigDB() {
 	DB.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 		&Account{}, &UserInfo{}, &RoomInfo{}, &RoomPowerMemberInfo{},
 		&RoomTags{}, &HotRoomInfo{}, &SupportRoom{}, &BannerInfo{},
-		&MicUserModel{}, &Black{}, &GifInfo{}, &GifGiveRecord{}, &RankInfo{},
-		&RoomRankInfo{}, &RelationShip{}, &CycleModel{}, &CycleCommet{},
-		&CycleLike{}, &MoneyAccount{}, &ConsumeUserCount{}, &GfitUserCount{},
-		&MicQueue{}, &AuthCode{}, &UserTitle{}, &UserCar{})
+		&Black{}, &GifGiveRecord{}, &RankInfo{}, &RoomRankInfo{},
+		&RelationShip{}, &CycleModel{}, &CycleCommet{}, &CycleLike{},
+		&MoneyAccount{}, &ConsumeUserCount{}, &GfitUserCount{},
+		&AuthCode{}, &UserTitle{}, &UserCar{})
 
 	loadConf()
 
@@ -53,6 +53,7 @@ func ConfigDB() {
 
 func loadConf() {
 	GetAllGift()
+	GetAllCarConfig()
 }
 
 func GetPlayerIDNext() int64 {
